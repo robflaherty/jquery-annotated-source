@@ -19,6 +19,7 @@ var document = window.document,
   navigator = window.navigator,
   location = window.location;
 
+//Hello, jQuery
 var jQuery = (function() {
 
   // Define a local copy of jQuery.
@@ -97,9 +98,12 @@ var jQuery = (function() {
   class2type = {};
 
 // jQuery prototype
-// -------------- 
+// ---------------- 
 jQuery.fn = jQuery.prototype = {
+  
   constructor: jQuery,
+  
+  // Main jQuery function
   init: function( selector, context, rootjQuery ) {
     var match, elem, ret, doc;
 
@@ -223,7 +227,8 @@ jQuery.fn = jQuery.prototype = {
   size: function() {
     return this.length;
   },
-
+  
+  // Retrieve all the DOM elements contained in the jQuery set, as an array
   toArray: function() {
     return slice.call( this, 0 );
   },
@@ -333,9 +338,6 @@ jQuery.fn.init.prototype = jQuery.fn;
 
 // Utilities
 // =========
-
-// Extend
-// ------
 
 // Merge the contents of two or more objects together into the first object
 jQuery.extend = jQuery.fn.extend = function() {
@@ -511,7 +513,8 @@ jQuery.extend({
   isFunction: function( obj ) {
     return jQuery.type(obj) === "function";
   },
-
+  
+  // Determine whether the argument is an array
   isArray: Array.isArray || function( obj ) {
     return jQuery.type(obj) === "array";
   },
@@ -524,13 +527,15 @@ jQuery.extend({
   isNaN: function( obj ) {
     return obj == null || !rdigit.test( obj ) || isNaN( obj );
   },
-
+  
+  // Determine the internal JavaScript [[Class]] of an object
   type: function( obj ) {
     return obj == null ?
       String( obj ) :
       class2type[ toString.call(obj) ] || "object";
   },
 
+  // Check to see if an object is a plain object (created using "{}" or "new Object")
   isPlainObject: function( obj ) {
     // Must be an Object.
     // Because of IE, we also have to check the presence of the constructor property.
@@ -555,6 +560,7 @@ jQuery.extend({
     return key === undefined || hasOwn.call( obj, key );
   },
 
+  // Check to see if an object is empty (contains no properties).
   isEmptyObject: function( obj ) {
     for ( var name in obj ) {
       return false;
@@ -565,7 +571,8 @@ jQuery.extend({
   error: function( msg ) {
     throw msg;
   },
-
+  
+  // Takes a well-formed JSON string and returns the resulting JavaScript object.
   parseJSON: function( data ) {
     if ( typeof data !== "string" || !data ) {
       return null;
@@ -613,6 +620,7 @@ jQuery.extend({
     return xml;
   },
 
+  // An empty function
   noop: function() {},
 
   // Evaluates a script in a global context
@@ -635,6 +643,7 @@ jQuery.extend({
     return string.replace( rdashAlpha, fcamelCase );
   },
 
+  // Returns the uppercase node name
   nodeName: function( elem, name ) {
     return elem.nodeName && elem.nodeName.toUpperCase() === name.toUpperCase();
   },
@@ -716,6 +725,7 @@ jQuery.extend({
     return ret;
   },
 
+  // Search for a specified value within an array and return its index (or -1 if not found).
   inArray: function( elem, array ) {
 
     if ( indexOf ) {
@@ -730,7 +740,8 @@ jQuery.extend({
 
     return -1;
   },
-
+  
+  // Merge the contents of two arrays together into the first array.
   merge: function( first, second ) {
     var i = first.length,
       j = 0;
@@ -751,6 +762,7 @@ jQuery.extend({
     return first;
   },
 
+  // Finds the elements of an array which satisfy a filter function. The original array is not affected
   grep: function( elems, callback, inv ) {
     var ret = [], retVal;
     inv = !!inv;
@@ -767,7 +779,7 @@ jQuery.extend({
     return ret;
   },
 
-  // arg is for internal usage only
+  // Translate all items in an array or object to new array of items.
   map: function( elems, callback, arg ) {
     var value, key, ret = [],
       i = 0,
@@ -858,7 +870,8 @@ jQuery.extend({
     // Getting an attribute
     return length ? fn( elems[0], key ) : undefined;
   },
-
+  
+  // Return a number representing the current time
   now: function() {
     return (new Date()).getTime();
   },
@@ -877,6 +890,7 @@ jQuery.extend({
     return { browser: match[1] || "", version: match[2] || "0" };
   },
 
+  // Creates a new copy of jQuery whose properties and methods can be modified without affecting the original jQuery object.
   sub: function() {
     function jQuerySub( selector, context ) {
       return new jQuerySub.fn.init( selector, context );
@@ -906,7 +920,12 @@ jQuery.each("Boolean Number String Function Array Date RegExp Object".split(" ")
   class2type[ "[object " + name + "]" ] = name.toLowerCase();
 });
 
+// Browser / DOM
+// =============
+
+// 
 browserMatch = jQuery.uaMatch( userAgent );
+
 if ( browserMatch.browser ) {
   jQuery.browser[ browserMatch.browser ] = true;
   jQuery.browser.version = browserMatch.version;
@@ -949,9 +968,9 @@ function doScrollCheck() {
     return;
   }
 
+  // If IE is used, use the trick by Diego Perini
+  // http://javascript.nwbox.com/IEContentLoaded/
   try {
-    // If IE is used, use the trick by Diego Perini
-    // http://javascript.nwbox.com/IEContentLoaded/
     document.documentElement.doScroll("left");
   } catch(e) {
     setTimeout( doScrollCheck, 1 );
@@ -966,9 +985,8 @@ return jQuery;
 
 })();
 
-
-var // Promise methods
-  promiseMethods = "done fail isResolved isRejected promise then always pipe".split( " " ),
+// Promise methods
+var promiseMethods = "done fail isResolved isRejected promise then always pipe".split( " " ),
   // Static reference to slice
   sliceDeferred = [].slice;
 
