@@ -1,3 +1,5 @@
+// jQuery Annotated Source. You can view the source and contribute on [Github](http://www.github.com).
+//
 //     jQuery JavaScript Library v1.6.2
 //     http://jquery.com
 //     Copyright 2011, John Resig
@@ -11,8 +13,7 @@
 
 (function( window, undefined ) {
   
-// Set-up
-// --------------  
+// ## Core / Set-up
 
 // Use the correct document accordingly with window argument (sandbox)
 var document = window.document,
@@ -97,8 +98,7 @@ var jQuery = (function() {
   // [[Class]] -> type pairs
   class2type = {};
 
-// jQuery prototype
-// ---------------- 
+// ### jQuery prototype
 jQuery.fn = jQuery.prototype = {
   
   constructor: jQuery,
@@ -336,8 +336,7 @@ jQuery.fn = jQuery.prototype = {
 // Give the init function the jQuery prototype for later instantiation
 jQuery.fn.init.prototype = jQuery.fn;
 
-// Utilities
-// =========
+// ### Utilities
 
 // Merge the contents of two or more objects together into the first object
 jQuery.extend = jQuery.fn.extend = function() {
@@ -920,12 +919,12 @@ jQuery.each("Boolean Number String Function Array Date RegExp Object".split(" ")
   class2type[ "[object " + name + "]" ] = name.toLowerCase();
 });
 
-// Browser / DOM
-// =============
+// ### Browser
 
-// 
+// Pass user agent to internal `uaMatch()` function
 browserMatch = jQuery.uaMatch( userAgent );
 
+// Set properties for jQuery.browser
 if ( browserMatch.browser ) {
   jQuery.browser[ browserMatch.browser ] = true;
   jQuery.browser.version = browserMatch.version;
@@ -984,6 +983,8 @@ function doScrollCheck() {
 return jQuery;
 
 })();
+
+// ### Deferred Object
 
 // Promise methods
 var promiseMethods = "done fail isResolved isRejected promise then always pipe".split( " " ),
@@ -1181,7 +1182,7 @@ jQuery.extend({
   }
 });
 
-
+// ### Utilities
 
 jQuery.support = (function() {
 
@@ -1437,7 +1438,7 @@ jQuery.support = (function() {
 jQuery.boxModel = jQuery.support.boxModel;
 
 
-
+// ### Data
 
 var rbrace = /^(?:\{.*\}|\[.*\])$/,
   rmultiDash = /([a-z])([A-Z])/g;
@@ -1936,8 +1937,7 @@ jQuery.fn.extend({
   }
 });
 
-
-
+// ### Attributes
 
 var rclass = /[\n\t\r]/g,
   rspace = /\s+/,
@@ -2566,8 +2566,7 @@ jQuery.each([ "radio", "checkbox" ], function() {
   });
 });
 
-
-
+// ### Events
 
 var rnamespaces = /\.(.*)$/,
   rformElems = /^(?:textarea|input|select)$/i,
@@ -3763,7 +3762,7 @@ jQuery.each( ("blur focus focusin focusout load resize scroll unload click dblcl
   }
 });
 
-
+// ### CSS
 
 /*!
  * Sizzle CSS Selector Engine
@@ -5185,6 +5184,7 @@ jQuery.contains = Sizzle.contains;
 
 })();
 
+// ### Selectors
 
 var runtil = /Until$/,
   rparentsprev = /^(?:parents|prevUntil|prevAll)/,
@@ -5518,7 +5518,7 @@ function winnow( elements, qualifier, keep ) {
 }
 
 
-
+// ### Manipulation
 
 var rinlinejQuery = / jQuery\d+="(?:\d+|null)"/g,
   rleadingWhitespace = /^\s+/,
@@ -6282,7 +6282,7 @@ function evalScript( i, elem ) {
   }
 }
 
-
+// ### CSS
 
 var ralpha = /alpha\([^)]*\)/i,
   ropacity = /opacity=([^)]*)/,
@@ -6653,8 +6653,7 @@ if ( jQuery.expr && jQuery.expr.filters ) {
   };
 }
 
-
-
+// ### AJAX
 
 var r20 = /%20/g,
   rbracket = /\[\]$/,
@@ -8015,8 +8014,7 @@ if ( jQuery.support.ajax ) {
   });
 }
 
-
-
+// ### Effects
 
 var elemdisplay = {},
   iframe, iframeDoc,
@@ -8634,8 +8632,7 @@ function defaultDisplay( nodeName ) {
   return elemdisplay[ nodeName ];
 }
 
-
-
+// ### Dimensions
 
 var rtable = /^t(?:able|d|h)$/i,
   rroot = /^(?:body|html)$/i;
@@ -8943,8 +8940,6 @@ function getWindow( elem ) {
 }
 
 
-
-
 // Create width, height, innerHeight, innerWidth, outerHeight and outerWidth methods
 jQuery.each([ "Height", "Width" ], function( i, name ) {
 
@@ -9010,7 +9005,6 @@ jQuery.each([ "Height", "Width" ], function( i, name ) {
   };
 
 });
-
 
 // Expose jQuery to the global object
 window.jQuery = window.$ = jQuery;
