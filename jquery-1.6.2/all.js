@@ -10,6 +10,15 @@
 //     Copyright 2011, The Dojo Foundation
 //     Released under the MIT, BSD, and GPL Licenses.
 //     Date: Thu Jun 30 14:16:56 2011 -0400
+//
+// ## Chapters
+// * [Core / Set-up](#section-2)
+// * [Deferred](#section-157)
+// * [Support](#section-179)
+//
+//
+//
+//
 
 (function( window, undefined ) {
   
@@ -919,8 +928,6 @@ jQuery.each("Boolean Number String Function Array Date RegExp Object".split(" ")
   class2type[ "[object " + name + "]" ] = name.toLowerCase();
 });
 
-// ### Browser
-
 // Pass user agent to internal `uaMatch()` function
 browserMatch = jQuery.uaMatch( userAgent );
 
@@ -984,7 +991,7 @@ return jQuery;
 
 })();
 
-// ### Deferred Object
+// ## Deferred
 
 // Promise methods
 var promiseMethods = "done fail isResolved isRejected promise then always pipe".split( " " ),
@@ -1182,7 +1189,7 @@ jQuery.extend({
   }
 });
 
-// ### Utilities
+// ## Support
 
 jQuery.support = (function() {
 
@@ -1438,7 +1445,7 @@ jQuery.support = (function() {
 jQuery.boxModel = jQuery.support.boxModel;
 
 
-// ### Data
+// ## Data
 
 var rbrace = /^(?:\{.*\}|\[.*\])$/,
   rmultiDash = /([a-z])([A-Z])/g;
@@ -1765,8 +1772,7 @@ function isEmptyDataObject( obj ) {
   return true;
 }
 
-
-
+## Queue
 
 function handleQueueMarkDefer( elem, type, src ) {
   var deferDataKey = type + "defer",
@@ -1937,7 +1943,7 @@ jQuery.fn.extend({
   }
 });
 
-// ### Attributes
+// ## Attributes
 
 var rclass = /[\n\t\r]/g,
   rspace = /\s+/,
@@ -2566,7 +2572,7 @@ jQuery.each([ "radio", "checkbox" ], function() {
   });
 });
 
-// ### Events
+// ## Events
 
 var rnamespaces = /\.(.*)$/,
   rformElems = /^(?:textarea|input|select)$/i,
@@ -3762,7 +3768,7 @@ jQuery.each( ("blur focus focusin focusout load resize scroll unload click dblcl
   }
 });
 
-// ### CSS
+// ## Selector
 
 /*!
  * Sizzle CSS Selector Engine
@@ -5184,7 +5190,7 @@ jQuery.contains = Sizzle.contains;
 
 })();
 
-// ### Selectors
+// ## Traversing
 
 var runtil = /Until$/,
   rparentsprev = /^(?:parents|prevUntil|prevAll)/,
@@ -5518,7 +5524,7 @@ function winnow( elements, qualifier, keep ) {
 }
 
 
-// ### Manipulation
+// ## Manipulation
 
 var rinlinejQuery = / jQuery\d+="(?:\d+|null)"/g,
   rleadingWhitespace = /^\s+/,
@@ -6282,7 +6288,7 @@ function evalScript( i, elem ) {
   }
 }
 
-// ### CSS
+// ## CSS
 
 var ralpha = /alpha\([^)]*\)/i,
   ropacity = /opacity=([^)]*)/,
@@ -6653,7 +6659,7 @@ if ( jQuery.expr && jQuery.expr.filters ) {
   };
 }
 
-// ### AJAX
+// ## AJAX
 
 var r20 = /%20/g,
   rbracket = /\[\]$/,
@@ -8014,7 +8020,7 @@ if ( jQuery.support.ajax ) {
   });
 }
 
-// ### Effects
+// ## Effects
 
 var elemdisplay = {},
   iframe, iframeDoc,
@@ -8632,7 +8638,7 @@ function defaultDisplay( nodeName ) {
   return elemdisplay[ nodeName ];
 }
 
-// ### Dimensions
+// ## Offset
 
 var rtable = /^t(?:able|d|h)$/i,
   rroot = /^(?:body|html)$/i;
@@ -8939,6 +8945,7 @@ function getWindow( elem ) {
       false;
 }
 
+// ## Dimensions
 
 // Create width, height, innerHeight, innerWidth, outerHeight and outerWidth methods
 jQuery.each([ "Height", "Width" ], function( i, name ) {
