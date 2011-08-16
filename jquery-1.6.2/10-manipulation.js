@@ -1,3 +1,7 @@
+// **jQuery Annotated Source**.
+//
+// [Home](/jquery-annotated-source/) | [Previous Chapter](09-traversing.html) | [Next Chapter](11-css.html)
+
 // ## Manipulation
 
 var rinlinejQuery = / jQuery\d+="(?:\d+|null)"/g,

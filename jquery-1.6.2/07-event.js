@@ -1,3 +1,7 @@
+// **jQuery Annotated Source**.
+//
+// [Home](/jquery-annotated-source/) | [Previous Chapter](06-attributes.html) | [Next Chapter](08-selector.html)
+
 // ## Events
 
 var rnamespaces = /\.(.*)$/,

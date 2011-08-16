@@ -1,3 +1,7 @@
+// **jQuery Annotated Source**.
+//
+// [Home](/jquery-annotated-source/) | [Previous Chapter](13-effects.html) | [Next Chapter](15-dimensions.html)
+
 // ## Offset
 
 var rtable = /^t(?:able|d|h)$/i,

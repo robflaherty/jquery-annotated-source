@@ -1,3 +1,7 @@
+// **jQuery Annotated Source**.
+//
+// [Home](/jquery-annotated-source/) | [Previous Chapter](08-selector.html) | [Next Chapter](10-manipulation.html)
+
 // ## Traversing
 
 var runtil = /Until$/,

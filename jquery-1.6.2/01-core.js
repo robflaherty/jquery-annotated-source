@@ -1,5 +1,7 @@
-// jQuery Annotated Source. You can view the source and contribute on [Github](http://www.github.com).
+// **jQuery Annotated Source**. You can view the source and contribute on [Github](https://github.com/robflaherty/jquery-annotated-source).
 //
+// [Home](/jquery-annotated-source/) | [Next Chapter](02-deferred.html)
+
 //     jQuery JavaScript Library v1.6.2
 //     http://jquery.com
 //     Copyright 2011, John Resig
@@ -10,11 +12,10 @@
 //     Copyright 2011, The Dojo Foundation
 //     Released under the MIT, BSD, and GPL Licenses.
 //     Date: Thu Jun 30 14:16:56 2011 -0400
-//
+
+// ## Chapter 1: Core
 
 (function( window, undefined ) {
-  
-// ## Core / Set-up
 
 // Use the correct document accordingly with window argument (sandbox)
 var document = window.document,

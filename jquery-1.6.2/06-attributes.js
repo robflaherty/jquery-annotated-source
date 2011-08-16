@@ -1,3 +1,7 @@
+// **jQuery Annotated Source**.
+//
+// [Home](/jquery-annotated-source/) | [Previous Chapter](05-queue.html) | [Next Chapter](07-event.html)
+
 // ## Attributes
 
 var rclass = /[\n\t\r]/g,

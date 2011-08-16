@@ -1,3 +1,7 @@
+// **jQuery Annotated Source**.
+//
+// [Home](/jquery-annotated-source/) | [Previous Chapter](12-ajax.html) | [Next Chapter](14-offset.html)
+
 // ## Effects
 
 var elemdisplay = {},

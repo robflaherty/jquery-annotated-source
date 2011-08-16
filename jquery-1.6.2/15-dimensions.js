@@ -1,3 +1,7 @@
+// **jQuery Annotated Source**.
+//
+// [Home](/jquery-annotated-source/) | [Previous Chapter](14-offset.html)
+
 // ## Dimensions
 
 // Create width, height, innerHeight, innerWidth, outerHeight and outerWidth methods

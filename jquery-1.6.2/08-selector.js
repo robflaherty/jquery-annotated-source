@@ -1,3 +1,7 @@
+// **jQuery Annotated Source**.
+//
+// [Home](/jquery-annotated-source/) | [Previous Chapter](07-event.html) | [Next Chapter](09-traversing.html)
+
 // ## Selector
 
 /*!

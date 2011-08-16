@@ -1,4 +1,8 @@
-// ## Data
+// **jQuery Annotated Source**.
+//
+// [Home](/jquery-annotated-source/) | [Previous Chapter](03-support.html) | [Next Chapter](05-queue.html)
+
+// ## Chapter 4: Data
 
 var rbrace = /^(?:\{.*\}|\[.*\])$/,
   rmultiDash = /([a-z])([A-Z])/g;

@@ -1,3 +1,7 @@
+// **jQuery Annotated Source**.
+//
+// [Home](/jquery-annotated-source/) | [Previous Chapter](10-manipulation.html) | [Next Chapter](12-ajax.html)
+
 // ## CSS
 
 var ralpha = /alpha\([^)]*\)/i,
