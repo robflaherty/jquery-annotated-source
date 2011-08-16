@@ -3,7 +3,7 @@ Jumping in to the source code of a popular library and seeing **how the sausage 
 
 One solution is an "annotated source" (seen in libraries like [Underscore.js](http://documentcloud.github.com/underscore/docs/underscore.html) and [Backbone.js](http://documentcloud.github.com/backbone/docs/backbone.html)), which makes source code much more accessible by making the accompanying comments easier to read. Thanks to @jashkenas's [Docco](http://jashkenas.github.com/docco/) tool, creating annotated source documentation is easy peasy lemon squeezy.
 
-Wouldn't it be nice if we had an annotated source for jQuery?
+Wouldn't it be nice if we had an annotated source for jQuery? [Check it out](http://robflaherty.github.com/jquery-annotated-source/)
 
 I've gotten things started. If you're a jQuery nerd that knows the jQuery internals well and would like to help out, please fork and submit pull requests with your edits. The goal is to add documentation where comments are missing and replace terse comments with more readable natural language.
 
