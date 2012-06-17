@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html>
+<head><title>15-offset.js</title>
+   <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+   <link rel="stylesheet" media="all" href="docco.css"/>
+</head>
+<body>
+<div id="container">
+<div id="background"></div>
+<table cellpadding="0" cellspacing="0">
+<thead>
+<tr>
+   <th class="docs"><h1> 15-offset.js </h1></th>
+   <th class="code"></th>
+</tr>
+</thead>
+<tbody>
+<tr id="section-1">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-1">&#182;</a></div>
+      <p><strong>jQuery Annotated Source</strong>.</p>
+
+      <p><a href="/jquery-annotated-source/">Home</a> | <a href="14-effects.html">Previous Chapter</a> |
+         <a href="16-dimensions.html">Next Chapter</a></p></td>
+   <td class="code">
+      <div class="highlight">
+         <pre></pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-2">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-2">&#182;</a></div>
+      <h2>Chapter 15: Offset</h2></td>
+   <td class="code">
+      <div class="highlight"><pre>
+
+<span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">jQuery</span><span class="p">)</span> <span class="p">{</span>
+
+   <span class="kd">var</span> <span class="nx">getOffset</span><span class="p">,</span>
+         <span class="nx">rtable</span> <span class="o">=</span> <span class="sr">/^t(?:able|d|h)$/i</span><span class="p">,</span>
+         <span class="nx">rroot</span> <span class="o">=</span> <span class="sr">/^(?:body|html)$/i</span><span class="p">;</span>
+
+   <span class="k">if</span> <span class="p">(</span><span class="s2">&quot;getBoundingClientRect&quot;</span> <span class="k">in</span> <span class="nb">document</span><span class="p">.</span><span class="nx">documentElement</span><span class="p">)</span> <span class="p">{</span>
+      <span class="nx">getOffset</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">elem</span><span class="p">,</span> <span class="nx">doc</span><span class="p">,</span> <span class="nx">docElem</span><span class="p">,</span> <span class="nx">box</span><span class="p">)</span> <span class="p">{</span>
+         <span class="k">try</span> <span class="p">{</span>
+            <span class="nx">box</span> <span class="o">=</span> <span class="nx">elem</span><span class="p">.</span><span class="nx">getBoundingClientRect</span><span class="p">();</span>
+         <span class="p">}</span> <span class="k">catch</span> <span class="p">(</span><span class="nx">e</span><span class="p">)</span> <span class="p">{</span>
+         <span class="p">}</span>
+
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-3">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-3">&#182;</a></div>
+      <p>Make sure we're not dealing with a disconnected DOM node</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+         <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">box</span> <span class="o">||</span> <span class="o">!</span><span class="nx">jQuery</span><span class="p">.</span><span class="nx">contains</span><span class="p">(</span><span class="nx">docElem</span><span class="p">,</span> <span class="nx">elem</span><span class="p">))</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="nx">box</span> <span class="o">?</span> <span class="p">{</span> <span class="nx">top</span><span class="o">:</span><span class="nx">box</span><span class="p">.</span><span class="nx">top</span><span class="p">,</span> <span class="nx">left</span><span class="o">:</span><span class="nx">box</span><span class="p">.</span><span class="nx">left</span> <span class="p">}</span> <span class="o">:</span> <span class="p">{</span> <span class="nx">top</span><span class="o">:</span><span class="mi">0</span><span class="p">,</span> <span class="nx">left</span><span class="o">:</span><span class="mi">0</span> <span class="p">};</span>
+         <span class="p">}</span>
+
+         <span class="kd">var</span> <span class="nx">body</span> <span class="o">=</span> <span class="nx">doc</span><span class="p">.</span><span class="nx">body</span><span class="p">,</span>
+               <span class="nx">win</span> <span class="o">=</span> <span class="nx">getWindow</span><span class="p">(</span><span class="nx">doc</span><span class="p">),</span>
+               <span class="nx">clientTop</span> <span class="o">=</span> <span class="nx">docElem</span><span class="p">.</span><span class="nx">clientTop</span> <span class="o">||</span> <span class="nx">body</span><span class="p">.</span><span class="nx">clientTop</span> <span class="o">||</span> <span class="mi">0</span><span class="p">,</span>
+               <span class="nx">clientLeft</span> <span class="o">=</span> <span class="nx">docElem</span><span class="p">.</span><span class="nx">clientLeft</span> <span class="o">||</span> <span class="nx">body</span><span class="p">.</span><span class="nx">clientLeft</span> <span class="o">||</span> <span class="mi">0</span><span class="p">,</span>
+               <span class="nx">scrollTop</span> <span class="o">=</span> <span class="nx">win</span><span class="p">.</span><span class="nx">pageYOffset</span> <span class="o">||</span> <span class="nx">jQuery</span><span class="p">.</span><span class="nx">support</span><span class="p">.</span><span class="nx">boxModel</span> <span class="o">&amp;&amp;</span> <span class="nx">docElem</span><span class="p">.</span><span class="nx">scrollTop</span> <span class="o">||</span> <span class="nx">body</span><span class="p">.</span><span class="nx">scrollTop</span><span class="p">,</span>
+               <span class="nx">scrollLeft</span> <span class="o">=</span> <span class="nx">win</span><span class="p">.</span><span class="nx">pageXOffset</span> <span class="o">||</span> <span class="nx">jQuery</span><span class="p">.</span><span class="nx">support</span><span class="p">.</span><span class="nx">boxModel</span> <span class="o">&amp;&amp;</span> <span class="nx">docElem</span><span class="p">.</span><span class="nx">scrollLeft</span> <span class="o">||</span> <span class="nx">body</span><span class="p">.</span><span class="nx">scrollLeft</span><span class="p">,</span>
+               <span class="nx">top</span> <span class="o">=</span> <span class="nx">box</span><span class="p">.</span><span class="nx">top</span> <span class="o">+</span> <span class="nx">scrollTop</span> <span class="o">-</span> <span class="nx">clientTop</span><span class="p">,</span>
+               <span class="nx">left</span> <span class="o">=</span> <span class="nx">box</span><span class="p">.</span><span class="nx">left</span> <span class="o">+</span> <span class="nx">scrollLeft</span> <span class="o">-</span> <span class="nx">clientLeft</span><span class="p">;</span>
+
+         <span class="k">return</span> <span class="p">{</span> <span class="nx">top</span><span class="o">:</span><span class="nx">top</span><span class="p">,</span> <span class="nx">left</span><span class="o">:</span><span class="nx">left</span> <span class="p">};</span>
+      <span class="p">};</span>
+
+   <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+      <span class="nx">getOffset</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">elem</span><span class="p">,</span> <span class="nx">doc</span><span class="p">,</span> <span class="nx">docElem</span><span class="p">)</span> <span class="p">{</span>
+         <span class="kd">var</span> <span class="nx">computedStyle</span><span class="p">,</span>
+               <span class="nx">offsetParent</span> <span class="o">=</span> <span class="nx">elem</span><span class="p">.</span><span class="nx">offsetParent</span><span class="p">,</span>
+               <span class="nx">prevOffsetParent</span> <span class="o">=</span> <span class="nx">elem</span><span class="p">,</span>
+               <span class="nx">body</span> <span class="o">=</span> <span class="nx">doc</span><span class="p">.</span><span class="nx">body</span><span class="p">,</span>
+               <span class="nx">defaultView</span> <span class="o">=</span> <span class="nx">doc</span><span class="p">.</span><span class="nx">defaultView</span><span class="p">,</span>
+               <span class="nx">prevComputedStyle</span> <span class="o">=</span> <span class="nx">defaultView</span> <span class="o">?</span> <span class="nx">defaultView</span><span class="p">.</span><span class="nx">getComputedStyle</span><span class="p">(</span><span class="nx">elem</span><span class="p">,</span> <span class="kc">null</span><span class="p">)</span> <span class="o">:</span> <span class="nx">elem</span><span class="p">.</span><span class="nx">currentStyle</span><span class="p">,</span>
+               <span class="nx">top</span> <span class="o">=</span> <span class="nx">elem</span><span class="p">.</span><span class="nx">offsetTop</span><span class="p">,</span>
+               <span class="nx">left</span> <span class="o">=</span> <span class="nx">elem</span><span class="p">.</span><span class="nx">offsetLeft</span><span class="p">;</span>
+
+         <span class="k">while</span> <span class="p">((</span><span class="nx">elem</span> <span class="o">=</span> <span class="nx">elem</span><span class="p">.</span><span class="nx">parentNode</span><span class="p">)</span> <span class="o">&amp;&amp;</span> <span class="nx">elem</span> <span class="o">!==</span> <span class="nx">body</span> <span class="o">&amp;&amp;</span> <span class="nx">elem</span> <span class="o">!==</span> <span class="nx">docElem</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nx">jQuery</span><span class="p">.</span><span class="nx">support</span><span class="p">.</span><span class="nx">fixedPosition</span> <span class="o">&amp;&amp;</span> <span class="nx">prevComputedStyle</span><span class="p">.</span><span class="nx">position</span> <span class="o">===</span> <span class="s2">&quot;fixed&quot;</span><span class="p">)</span> <span class="p">{</span>
+               <span class="k">break</span><span class="p">;</span>
+            <span class="p">}</span>
+
+            <span class="nx">computedStyle</span> <span class="o">=</span> <span class="nx">defaultView</span> <span class="o">?</span> <span class="nx">defaultView</span><span class="p">.</span><span class="nx">getComputedStyle</span><span class="p">(</span><span class="nx">elem</span><span class="p">,</span> <span class="kc">null</span><span class="p">)</span> <span class="o">:</span> <span class="nx">elem</span><span class="p">.</span><span class="nx">currentStyle</span><span class="p">;</span>
+            <span class="nx">top</span> <span class="o">-=</span> <span class="nx">elem</span><span class="p">.</span><span class="nx">scrollTop</span><span class="p">;</span>
+            <span class="nx">left</span> <span class="o">-=</span> <span class="nx">elem</span><span class="p">.</span><span class="nx">scrollLeft</span><span class="p">;</span>
+
+            <span class="k">if</span> <span class="p">(</span><span class="nx">elem</span> <span class="o">===</span> <span class="nx">offsetParent</span><span class="p">)</span> <span class="p">{</span>
+               <span class="nx">top</span> <span class="o">+=</span> <span class="nx">elem</span><span class="p">.</span><span class="nx">offsetTop</span><span class="p">;</span>
+               <span class="nx">left</span> <span class="o">+=</span> <span class="nx">elem</span><span class="p">.</span><span class="nx">offsetLeft</span><span class="p">;</span>
+
+               <span class="k">if</span> <span class="p">(</span><span class="nx">jQuery</span><span class="p">.</span><span class="nx">support</span><span class="p">.</span><span class="nx">doesNotAddBorder</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="p">(</span><span class="nx">jQuery</span><span class="p">.</span><span class="nx">support</span><span class="p">.</span><span class="nx">doesAddBorderForTableAndCells</span> <span class="o">&amp;&amp;</span> <span class="nx">rtable</span><span class="p">.</span><span class="nx">test</span><span class="p">(</span><span class="nx">elem</span><span class="p">.</span><span class="nx">nodeName</span><span class="p">)))</span> <span class="p">{</span>
+                  <span class="nx">top</span> <span class="o">+=</span> <span class="nb">parseFloat</span><span class="p">(</span><span class="nx">computedStyle</span><span class="p">.</span><span class="nx">borderTopWidth</span><span class="p">)</span> <span class="o">||</span> <span class="mi">0</span><span class="p">;</span>
+                  <span class="nx">left</span> <span class="o">+=</span> <span class="nb">parseFloat</span><span class="p">(</span><span class="nx">computedStyle</span><span class="p">.</span><span class="nx">borderLeftWidth</span><span class="p">)</span> <span class="o">||</span> <span class="mi">0</span><span class="p">;</span>
+               <span class="p">}</span>
+
+               <span class="nx">prevOffsetParent</span> <span class="o">=</span> <span class="nx">offsetParent</span><span class="p">;</span>
+               <span class="nx">offsetParent</span> <span class="o">=</span> <span class="nx">elem</span><span class="p">.</span><span class="nx">offsetParent</span><span class="p">;</span>
+            <span class="p">}</span>
+
+            <span class="k">if</span> <span class="p">(</span><span class="nx">jQuery</span><span class="p">.</span><span class="nx">support</span><span class="p">.</span><span class="nx">subtractsBorderForOverflowNotVisible</span> <span class="o">&amp;&amp;</span> <span class="nx">computedStyle</span><span class="p">.</span><span class="nx">overflow</span> <span class="o">!==</span> <span class="s2">&quot;visible&quot;</span><span class="p">)</span> <span class="p">{</span>
+               <span class="nx">top</span> <span class="o">+=</span> <span class="nb">parseFloat</span><span class="p">(</span><span class="nx">computedStyle</span><span class="p">.</span><span class="nx">borderTopWidth</span><span class="p">)</span> <span class="o">||</span> <span class="mi">0</span><span class="p">;</span>
+               <span class="nx">left</span> <span class="o">+=</span> <span class="nb">parseFloat</span><span class="p">(</span><span class="nx">computedStyle</span><span class="p">.</span><span class="nx">borderLeftWidth</span><span class="p">)</span> <span class="o">||</span> <span class="mi">0</span><span class="p">;</span>
+            <span class="p">}</span>
+
+            <span class="nx">prevComputedStyle</span> <span class="o">=</span> <span class="nx">computedStyle</span><span class="p">;</span>
+         <span class="p">}</span>
+
+         <span class="k">if</span> <span class="p">(</span><span class="nx">prevComputedStyle</span><span class="p">.</span><span class="nx">position</span> <span class="o">===</span> <span class="s2">&quot;relative&quot;</span> <span class="o">||</span> <span class="nx">prevComputedStyle</span><span class="p">.</span><span class="nx">position</span> <span class="o">===</span> <span class="s2">&quot;static&quot;</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nx">top</span> <span class="o">+=</span> <span class="nx">body</span><span class="p">.</span><span class="nx">offsetTop</span><span class="p">;</span>
+            <span class="nx">left</span> <span class="o">+=</span> <span class="nx">body</span><span class="p">.</span><span class="nx">offsetLeft</span><span class="p">;</span>
+         <span class="p">}</span>
+
+         <span class="k">if</span> <span class="p">(</span><span class="nx">jQuery</span><span class="p">.</span><span class="nx">support</span><span class="p">.</span><span class="nx">fixedPosition</span> <span class="o">&amp;&amp;</span> <span class="nx">prevComputedStyle</span><span class="p">.</span><span class="nx">position</span> <span class="o">===</span> <span class="s2">&quot;fixed&quot;</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nx">top</span> <span class="o">+=</span> <span class="nb">Math</span><span class="p">.</span><span class="nx">max</span><span class="p">(</span><span class="nx">docElem</span><span class="p">.</span><span class="nx">scrollTop</span><span class="p">,</span> <span class="nx">body</span><span class="p">.</span><span class="nx">scrollTop</span><span class="p">);</span>
+            <span class="nx">left</span> <span class="o">+=</span> <span class="nb">Math</span><span class="p">.</span><span class="nx">max</span><span class="p">(</span><span class="nx">docElem</span><span class="p">.</span><span class="nx">scrollLeft</span><span class="p">,</span> <span class="nx">body</span><span class="p">.</span><span class="nx">scrollLeft</span><span class="p">);</span>
+         <span class="p">}</span>
+
+         <span class="k">return</span> <span class="p">{</span> <span class="nx">top</span><span class="o">:</span><span class="nx">top</span><span class="p">,</span> <span class="nx">left</span><span class="o">:</span><span class="nx">left</span> <span class="p">};</span>
+      <span class="p">};</span>
+   <span class="p">}</span>
+
+   <span class="nx">jQuery</span><span class="p">.</span><span class="nx">fn</span><span class="p">.</span><span class="nx">offset</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">options</span><span class="p">)</span> <span class="p">{</span>
+      <span class="k">if</span> <span class="p">(</span><span class="nx">arguments</span><span class="p">.</span><span class="nx">length</span><span class="p">)</span> <span class="p">{</span>
+         <span class="k">return</span> <span class="nx">options</span> <span class="o">===</span> <span class="kc">undefined</span> <span class="o">?</span>
+               <span class="k">this</span> <span class="o">:</span>
+               <span class="k">this</span><span class="p">.</span><span class="nx">each</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">i</span><span class="p">)</span> <span class="p">{</span>
+                  <span class="nx">jQuery</span><span class="p">.</span><span class="nx">offset</span><span class="p">.</span><span class="nx">setOffset</span><span class="p">(</span><span class="k">this</span><span class="p">,</span> <span class="nx">options</span><span class="p">,</span> <span class="nx">i</span><span class="p">);</span>
+               <span class="p">});</span>
+      <span class="p">}</span>
+
+      <span class="kd">var</span> <span class="nx">elem</span> <span class="o">=</span> <span class="k">this</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+            <span class="nx">doc</span> <span class="o">=</span> <span class="nx">elem</span> <span class="o">&amp;&amp;</span> <span class="nx">elem</span><span class="p">.</span><span class="nx">ownerDocument</span><span class="p">;</span>
+
+      <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">doc</span><span class="p">)</span> <span class="p">{</span>
+         <span class="k">return</span> <span class="kc">null</span><span class="p">;</span>
+      <span class="p">}</span>
+
+      <span class="k">if</span> <span class="p">(</span><span class="nx">elem</span> <span class="o">===</span> <span class="nx">doc</span><span class="p">.</span><span class="nx">body</span><span class="p">)</span> <span class="p">{</span>
+         <span class="k">return</span> <span class="nx">jQuery</span><span class="p">.</span><span class="nx">offset</span><span class="p">.</span><span class="nx">bodyOffset</span><span class="p">(</span><span class="nx">elem</span><span class="p">);</span>
+      <span class="p">}</span>
+
+      <span class="k">return</span> <span class="nx">getOffset</span><span class="p">(</span><span class="nx">elem</span><span class="p">,</span> <span class="nx">doc</span><span class="p">,</span> <span class="nx">doc</span><span class="p">.</span><span class="nx">documentElement</span><span class="p">);</span>
+   <span class="p">};</span>
+
+   <span class="nx">jQuery</span><span class="p">.</span><span class="nx">offset</span> <span class="o">=</span> <span class="p">{</span>
+
+      <span class="nx">bodyOffset</span><span class="o">:</span><span class="kd">function</span><span class="p">(</span><span class="nx">body</span><span class="p">)</span> <span class="p">{</span>
+         <span class="kd">var</span> <span class="nx">top</span> <span class="o">=</span> <span class="nx">body</span><span class="p">.</span><span class="nx">offsetTop</span><span class="p">,</span>
+               <span class="nx">left</span> <span class="o">=</span> <span class="nx">body</span><span class="p">.</span><span class="nx">offsetLeft</span><span class="p">;</span>
+
+         <span class="k">if</span> <span class="p">(</span><span class="nx">jQuery</span><span class="p">.</span><span class="nx">support</span><span class="p">.</span><span class="nx">doesNotIncludeMarginInBodyOffset</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nx">top</span> <span class="o">+=</span> <span class="nb">parseFloat</span><span class="p">(</span><span class="nx">jQuery</span><span class="p">.</span><span class="nx">css</span><span class="p">(</span><span class="nx">body</span><span class="p">,</span> <span class="s2">&quot;marginTop&quot;</span><span class="p">))</span> <span class="o">||</span> <span class="mi">0</span><span class="p">;</span>
+            <span class="nx">left</span> <span class="o">+=</span> <span class="nb">parseFloat</span><span class="p">(</span><span class="nx">jQuery</span><span class="p">.</span><span class="nx">css</span><span class="p">(</span><span class="nx">body</span><span class="p">,</span> <span class="s2">&quot;marginLeft&quot;</span><span class="p">))</span> <span class="o">||</span> <span class="mi">0</span><span class="p">;</span>
+         <span class="p">}</span>
+
+         <span class="k">return</span> <span class="p">{</span> <span class="nx">top</span><span class="o">:</span><span class="nx">top</span><span class="p">,</span> <span class="nx">left</span><span class="o">:</span><span class="nx">left</span> <span class="p">};</span>
+      <span class="p">},</span>
+
+      <span class="nx">setOffset</span><span class="o">:</span><span class="kd">function</span><span class="p">(</span><span class="nx">elem</span><span class="p">,</span> <span class="nx">options</span><span class="p">,</span> <span class="nx">i</span><span class="p">)</span> <span class="p">{</span>
+         <span class="kd">var</span> <span class="nx">position</span> <span class="o">=</span> <span class="nx">jQuery</span><span class="p">.</span><span class="nx">css</span><span class="p">(</span><span class="nx">elem</span><span class="p">,</span> <span class="s2">&quot;position&quot;</span><span class="p">);</span>
+
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-4">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-4">&#182;</a></div>
+      <p>set position first, in-case top/left are set even on static elem</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+         <span class="k">if</span> <span class="p">(</span><span class="nx">position</span> <span class="o">===</span> <span class="s2">&quot;static&quot;</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nx">elem</span><span class="p">.</span><span class="nx">style</span><span class="p">.</span><span class="nx">position</span> <span class="o">=</span> <span class="s2">&quot;relative&quot;</span><span class="p">;</span>
+         <span class="p">}</span>
+
+         <span class="kd">var</span> <span class="nx">curElem</span> <span class="o">=</span> <span class="nx">jQuery</span><span class="p">(</span><span class="nx">elem</span><span class="p">),</span>
+               <span class="nx">curOffset</span> <span class="o">=</span> <span class="nx">curElem</span><span class="p">.</span><span class="nx">offset</span><span class="p">(),</span>
+               <span class="nx">curCSSTop</span> <span class="o">=</span> <span class="nx">jQuery</span><span class="p">.</span><span class="nx">css</span><span class="p">(</span><span class="nx">elem</span><span class="p">,</span> <span class="s2">&quot;top&quot;</span><span class="p">),</span>
+               <span class="nx">curCSSLeft</span> <span class="o">=</span> <span class="nx">jQuery</span><span class="p">.</span><span class="nx">css</span><span class="p">(</span><span class="nx">elem</span><span class="p">,</span> <span class="s2">&quot;left&quot;</span><span class="p">),</span>
+               <span class="nx">calculatePosition</span> <span class="o">=</span> <span class="p">(</span> <span class="nx">position</span> <span class="o">===</span> <span class="s2">&quot;absolute&quot;</span> <span class="o">||</span> <span class="nx">position</span> <span class="o">===</span> <span class="s2">&quot;fixed&quot;</span> <span class="p">)</span> <span class="o">&amp;&amp;</span> <span class="nx">jQuery</span><span class="p">.</span><span class="nx">inArray</span><span class="p">(</span><span class="s2">&quot;auto&quot;</span><span class="p">,</span> <span class="p">[</span><span class="nx">curCSSTop</span><span class="p">,</span> <span class="nx">curCSSLeft</span><span class="p">])</span> <span class="o">&gt;</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span>
+               <span class="nx">props</span> <span class="o">=</span> <span class="p">{},</span> <span class="nx">curPosition</span> <span class="o">=</span> <span class="p">{},</span> <span class="nx">curTop</span><span class="p">,</span> <span class="nx">curLeft</span><span class="p">;</span>
+
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-5">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-5">&#182;</a></div>
+      <p>need to be able to calculate position if either top or left is auto and position is either absolute or
+         fixed</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+         <span class="k">if</span> <span class="p">(</span><span class="nx">calculatePosition</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nx">curPosition</span> <span class="o">=</span> <span class="nx">curElem</span><span class="p">.</span><span class="nx">position</span><span class="p">();</span>
+            <span class="nx">curTop</span> <span class="o">=</span> <span class="nx">curPosition</span><span class="p">.</span><span class="nx">top</span><span class="p">;</span>
+            <span class="nx">curLeft</span> <span class="o">=</span> <span class="nx">curPosition</span><span class="p">.</span><span class="nx">left</span><span class="p">;</span>
+         <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+            <span class="nx">curTop</span> <span class="o">=</span> <span class="nb">parseFloat</span><span class="p">(</span><span class="nx">curCSSTop</span><span class="p">)</span> <span class="o">||</span> <span class="mi">0</span><span class="p">;</span>
+            <span class="nx">curLeft</span> <span class="o">=</span> <span class="nb">parseFloat</span><span class="p">(</span><span class="nx">curCSSLeft</span><span class="p">)</span> <span class="o">||</span> <span class="mi">0</span><span class="p">;</span>
+         <span class="p">}</span>
+
+         <span class="k">if</span> <span class="p">(</span><span class="nx">jQuery</span><span class="p">.</span><span class="nx">isFunction</span><span class="p">(</span><span class="nx">options</span><span class="p">))</span> <span class="p">{</span>
+            <span class="nx">options</span> <span class="o">=</span> <span class="nx">options</span><span class="p">.</span><span class="nx">call</span><span class="p">(</span><span class="nx">elem</span><span class="p">,</span> <span class="nx">i</span><span class="p">,</span> <span class="nx">curOffset</span><span class="p">);</span>
+         <span class="p">}</span>
+
+         <span class="k">if</span> <span class="p">(</span><span class="nx">options</span><span class="p">.</span><span class="nx">top</span> <span class="o">!=</span> <span class="kc">null</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nx">props</span><span class="p">.</span><span class="nx">top</span> <span class="o">=</span> <span class="p">(</span> <span class="nx">options</span><span class="p">.</span><span class="nx">top</span> <span class="o">-</span> <span class="nx">curOffset</span><span class="p">.</span><span class="nx">top</span> <span class="p">)</span> <span class="o">+</span> <span class="nx">curTop</span><span class="p">;</span>
+         <span class="p">}</span>
+         <span class="k">if</span> <span class="p">(</span><span class="nx">options</span><span class="p">.</span><span class="nx">left</span> <span class="o">!=</span> <span class="kc">null</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nx">props</span><span class="p">.</span><span class="nx">left</span> <span class="o">=</span> <span class="p">(</span> <span class="nx">options</span><span class="p">.</span><span class="nx">left</span> <span class="o">-</span> <span class="nx">curOffset</span><span class="p">.</span><span class="nx">left</span> <span class="p">)</span> <span class="o">+</span> <span class="nx">curLeft</span><span class="p">;</span>
+         <span class="p">}</span>
+
+         <span class="k">if</span> <span class="p">(</span><span class="s2">&quot;using&quot;</span> <span class="k">in</span> <span class="nx">options</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nx">options</span><span class="p">.</span><span class="nx">using</span><span class="p">.</span><span class="nx">call</span><span class="p">(</span><span class="nx">elem</span><span class="p">,</span> <span class="nx">props</span><span class="p">);</span>
+         <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+            <span class="nx">curElem</span><span class="p">.</span><span class="nx">css</span><span class="p">(</span><span class="nx">props</span><span class="p">);</span>
+         <span class="p">}</span>
+      <span class="p">}</span>
+   <span class="p">};</span>
+
+
+   <span class="nx">jQuery</span><span class="p">.</span><span class="nx">fn</span><span class="p">.</span><span class="nx">extend</span><span class="p">({</span>
+
+      <span class="nx">position</span><span class="o">:</span><span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+         <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="k">this</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="kc">null</span><span class="p">;</span>
+         <span class="p">}</span>
+
+         <span class="kd">var</span> <span class="nx">elem</span> <span class="o">=</span> <span class="k">this</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-6">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-6">&#182;</a></div>
+      <p>Get <em>real</em> offsetParent</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+               <span class="nx">offsetParent</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">offsetParent</span><span class="p">(),</span>
+
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-7">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-7">&#182;</a></div>
+      <p>Get correct offsets</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+               <span class="nx">offset</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">offset</span><span class="p">(),</span>
+               <span class="nx">parentOffset</span> <span class="o">=</span> <span class="nx">rroot</span><span class="p">.</span><span class="nx">test</span><span class="p">(</span><span class="nx">offsetParent</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="nx">nodeName</span><span class="p">)</span> <span class="o">?</span> <span class="p">{</span> <span class="nx">top</span><span class="o">:</span><span class="mi">0</span><span class="p">,</span> <span class="nx">left</span><span class="o">:</span><span class="mi">0</span> <span class="p">}</span> <span class="o">:</span> <span class="nx">offsetParent</span><span class="p">.</span><span class="nx">offset</span><span class="p">();</span>
+
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-8">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-8">&#182;</a></div>
+      <p>Subtract element margins
+         note: when an element has margin: auto the offsetLeft and marginLeft
+         are the same in Safari causing offset.left to incorrectly be 0</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+         <span class="nx">offset</span><span class="p">.</span><span class="nx">top</span> <span class="o">-=</span> <span class="nb">parseFloat</span><span class="p">(</span><span class="nx">jQuery</span><span class="p">.</span><span class="nx">css</span><span class="p">(</span><span class="nx">elem</span><span class="p">,</span> <span class="s2">&quot;marginTop&quot;</span><span class="p">))</span> <span class="o">||</span> <span class="mi">0</span><span class="p">;</span>
+         <span class="nx">offset</span><span class="p">.</span><span class="nx">left</span> <span class="o">-=</span> <span class="nb">parseFloat</span><span class="p">(</span><span class="nx">jQuery</span><span class="p">.</span><span class="nx">css</span><span class="p">(</span><span class="nx">elem</span><span class="p">,</span> <span class="s2">&quot;marginLeft&quot;</span><span class="p">))</span> <span class="o">||</span> <span class="mi">0</span><span class="p">;</span>
+
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-9">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-9">&#182;</a></div>
+      <p>Add offsetParent borders</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+         <span class="nx">parentOffset</span><span class="p">.</span><span class="nx">top</span> <span class="o">+=</span> <span class="nb">parseFloat</span><span class="p">(</span><span class="nx">jQuery</span><span class="p">.</span><span class="nx">css</span><span class="p">(</span><span class="nx">offsetParent</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="s2">&quot;borderTopWidth&quot;</span><span class="p">))</span> <span class="o">||</span> <span class="mi">0</span><span class="p">;</span>
+         <span class="nx">parentOffset</span><span class="p">.</span><span class="nx">left</span> <span class="o">+=</span> <span class="nb">parseFloat</span><span class="p">(</span><span class="nx">jQuery</span><span class="p">.</span><span class="nx">css</span><span class="p">(</span><span class="nx">offsetParent</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="s2">&quot;borderLeftWidth&quot;</span><span class="p">))</span> <span class="o">||</span> <span class="mi">0</span><span class="p">;</span>
+
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-10">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-10">&#182;</a></div>
+      <p>Subtract the two offsets</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+         <span class="k">return</span> <span class="p">{</span>
+            <span class="nx">top</span><span class="o">:</span> <span class="nx">offset</span><span class="p">.</span><span class="nx">top</span> <span class="o">-</span> <span class="nx">parentOffset</span><span class="p">.</span><span class="nx">top</span><span class="p">,</span>
+            <span class="nx">left</span><span class="o">:</span><span class="nx">offset</span><span class="p">.</span><span class="nx">left</span> <span class="o">-</span> <span class="nx">parentOffset</span><span class="p">.</span><span class="nx">left</span>
+         <span class="p">};</span>
+      <span class="p">},</span>
+
+      <span class="nx">offsetParent</span><span class="o">:</span><span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+         <span class="k">return</span> <span class="k">this</span><span class="p">.</span><span class="nx">map</span><span class="p">(</span><span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+            <span class="kd">var</span> <span class="nx">offsetParent</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">offsetParent</span> <span class="o">||</span> <span class="nb">document</span><span class="p">.</span><span class="nx">body</span><span class="p">;</span>
+            <span class="k">while</span> <span class="p">(</span><span class="nx">offsetParent</span> <span class="o">&amp;&amp;</span> <span class="p">(</span><span class="o">!</span><span class="nx">rroot</span><span class="p">.</span><span class="nx">test</span><span class="p">(</span><span class="nx">offsetParent</span><span class="p">.</span><span class="nx">nodeName</span><span class="p">)</span> <span class="o">&amp;&amp;</span> <span class="nx">jQuery</span><span class="p">.</span><span class="nx">css</span><span class="p">(</span><span class="nx">offsetParent</span><span class="p">,</span> <span class="s2">&quot;position&quot;</span><span class="p">)</span> <span class="o">===</span> <span class="s2">&quot;static&quot;</span><span class="p">))</span> <span class="p">{</span>
+               <span class="nx">offsetParent</span> <span class="o">=</span> <span class="nx">offsetParent</span><span class="p">.</span><span class="nx">offsetParent</span><span class="p">;</span>
+            <span class="p">}</span>
+            <span class="k">return</span> <span class="nx">offsetParent</span><span class="p">;</span>
+         <span class="p">});</span>
+      <span class="p">}</span>
+   <span class="p">});</span>
+
+
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-11">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-11">&#182;</a></div>
+      <p>Create scrollLeft and scrollTop methods</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+   <span class="nx">jQuery</span><span class="p">.</span><span class="nx">each</span><span class="p">({</span><span class="nx">scrollLeft</span><span class="o">:</span><span class="s2">&quot;pageXOffset&quot;</span><span class="p">,</span> <span class="nx">scrollTop</span><span class="o">:</span><span class="s2">&quot;pageYOffset&quot;</span><span class="p">},</span> <span class="kd">function</span><span class="p">(</span><span class="nx">method</span><span class="p">,</span> <span class="nx">prop</span><span class="p">)</span> <span class="p">{</span>
+      <span class="kd">var</span> <span class="nx">top</span> <span class="o">=</span> <span class="sr">/Y/</span><span class="p">.</span><span class="nx">test</span><span class="p">(</span><span class="nx">prop</span><span class="p">);</span>
+
+      <span class="nx">jQuery</span><span class="p">.</span><span class="nx">fn</span><span class="p">[</span> <span class="nx">method</span> <span class="p">]</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">val</span><span class="p">)</span> <span class="p">{</span>
+         <span class="k">return</span> <span class="nx">jQuery</span><span class="p">.</span><span class="nx">access</span><span class="p">(</span><span class="k">this</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">elem</span><span class="p">,</span> <span class="nx">method</span><span class="p">,</span> <span class="nx">val</span><span class="p">)</span> <span class="p">{</span>
+            <span class="kd">var</span> <span class="nx">win</span> <span class="o">=</span> <span class="nx">getWindow</span><span class="p">(</span><span class="nx">elem</span><span class="p">);</span>
+
+            <span class="k">if</span> <span class="p">(</span><span class="nx">val</span> <span class="o">===</span> <span class="kc">undefined</span><span class="p">)</span> <span class="p">{</span>
+               <span class="k">return</span> <span class="nx">win</span> <span class="o">?</span> <span class="p">(</span><span class="nx">prop</span> <span class="k">in</span> <span class="nx">win</span><span class="p">)</span> <span class="o">?</span> <span class="nx">win</span><span class="p">[</span> <span class="nx">prop</span> <span class="p">]</span> <span class="o">:</span>
+                     <span class="nx">jQuery</span><span class="p">.</span><span class="nx">support</span><span class="p">.</span><span class="nx">boxModel</span> <span class="o">&amp;&amp;</span> <span class="nx">win</span><span class="p">.</span><span class="nb">document</span><span class="p">.</span><span class="nx">documentElement</span><span class="p">[</span> <span class="nx">method</span> <span class="p">]</span> <span class="o">||</span>
+                           <span class="nx">win</span><span class="p">.</span><span class="nb">document</span><span class="p">.</span><span class="nx">body</span><span class="p">[</span> <span class="nx">method</span> <span class="p">]</span> <span class="o">:</span>
+                     <span class="nx">elem</span><span class="p">[</span> <span class="nx">method</span> <span class="p">];</span>
+            <span class="p">}</span>
+
+            <span class="k">if</span> <span class="p">(</span><span class="nx">win</span><span class="p">)</span> <span class="p">{</span>
+               <span class="nx">win</span><span class="p">.</span><span class="nx">scrollTo</span><span class="p">(</span>
+                     <span class="o">!</span><span class="nx">top</span> <span class="o">?</span> <span class="nx">val</span> <span class="o">:</span> <span class="nx">jQuery</span><span class="p">(</span><span class="nx">win</span><span class="p">).</span><span class="nx">scrollLeft</span><span class="p">(),</span>
+                     <span class="nx">top</span> <span class="o">?</span> <span class="nx">val</span> <span class="o">:</span> <span class="nx">jQuery</span><span class="p">(</span><span class="nx">win</span><span class="p">).</span><span class="nx">scrollTop</span><span class="p">()</span>
+               <span class="p">);</span>
+
+            <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+               <span class="nx">elem</span><span class="p">[</span> <span class="nx">method</span> <span class="p">]</span> <span class="o">=</span> <span class="nx">val</span><span class="p">;</span>
+            <span class="p">}</span>
+         <span class="p">},</span> <span class="nx">method</span><span class="p">,</span> <span class="nx">val</span><span class="p">,</span> <span class="nx">arguments</span><span class="p">.</span><span class="nx">length</span><span class="p">,</span> <span class="kc">null</span><span class="p">);</span>
+      <span class="p">};</span>
+   <span class="p">});</span>
+
+   <span class="kd">function</span> <span class="nx">getWindow</span><span class="p">(</span><span class="nx">elem</span><span class="p">)</span> <span class="p">{</span>
+      <span class="k">return</span> <span class="nx">jQuery</span><span class="p">.</span><span class="nx">isWindow</span><span class="p">(</span><span class="nx">elem</span><span class="p">)</span> <span class="o">?</span>
+            <span class="nx">elem</span> <span class="o">:</span>
+            <span class="nx">elem</span><span class="p">.</span><span class="nx">nodeType</span> <span class="o">===</span> <span class="mi">9</span> <span class="o">?</span>
+                  <span class="nx">elem</span><span class="p">.</span><span class="nx">defaultView</span> <span class="o">||</span> <span class="nx">elem</span><span class="p">.</span><span class="nx">parentWindow</span> <span class="o">:</span>
+                  <span class="kc">false</span><span class="p">;</span>
+   <span class="p">}</span>
+
+<span class="p">})(</span><span class="nx">jQuery</span><span class="p">);</span>
+
+</pre>
+      </div>
+   </td>
+</tr>
+</tbody>
+</table>
+</div>
+</body>
+</html>

@@ -1,0 +1,2310 @@
+<!DOCTYPE html>
+<html>
+<head><title>08-event.js</title>
+   <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+   <link rel="stylesheet" media="all" href="docco.css"/>
+</head>
+<body>
+<div id="container">
+<div id="background"></div>
+<table cellpadding="0" cellspacing="0">
+<thead>
+<tr>
+   <th class="docs"><h1> 08-event.js </h1></th>
+   <th class="code"></th>
+</tr>
+</thead>
+<tbody>
+<tr id="section-1">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-1">&#182;</a></div>
+      <p><strong>jQuery Annotated Source</strong>.</p>
+
+      <p><a href="/jquery-annotated-source/">Home</a> | <a href="07-attributes.html">Previous Chapter</a> |
+         <a href="09-sizzle-jquery.html">Next Chapter</a></p></td>
+   <td class="code">
+      <div class="highlight">
+         <pre></pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-2">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-2">&#182;</a></div>
+      <h2>Chapter 8: Event</h2></td>
+   <td class="code">
+      <div class="highlight"><pre>
+
+<span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">jQuery</span><span class="p">)</span> <span class="p">{</span>
+
+   <span class="kd">var</span> <span class="nx">rformElems</span> <span class="o">=</span> <span class="sr">/^(?:textarea|input|select)$/i</span><span class="p">,</span>
+         <span class="nx">rtypenamespace</span> <span class="o">=</span> <span class="sr">/^([^\.]*)?(?:\.(.+))?$/</span><span class="p">,</span>
+         <span class="nx">rhoverHack</span> <span class="o">=</span> <span class="sr">/(?:^|\s)hover(\.\S+)?\b/</span><span class="p">,</span>
+         <span class="nx">rkeyEvent</span> <span class="o">=</span> <span class="sr">/^key/</span><span class="p">,</span>
+         <span class="nx">rmouseEvent</span> <span class="o">=</span> <span class="sr">/^(?:mouse|contextmenu)|click/</span><span class="p">,</span>
+         <span class="nx">rfocusMorph</span> <span class="o">=</span> <span class="sr">/^(?:focusinfocus|focusoutblur)$/</span><span class="p">,</span>
+         <span class="nx">rquickIs</span> <span class="o">=</span> <span class="sr">/^(\w*)(?:#([\w\-]+))?(?:\.([\w\-]+))?$/</span><span class="p">,</span>
+         <span class="nx">quickParse</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">selector</span><span class="p">)</span> <span class="p">{</span>
+            <span class="kd">var</span> <span class="nx">quick</span> <span class="o">=</span> <span class="nx">rquickIs</span><span class="p">.</span><span class="nx">exec</span><span class="p">(</span><span class="nx">selector</span><span class="p">);</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nx">quick</span><span class="p">)</span> <span class="p">{</span>
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-3">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-3">&#182;</a></div>
+      <p>0 1 2 3
+         [ _, tag, id, class ]</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+               <span class="nx">quick</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span> <span class="nx">quick</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">||</span> <span class="s2">&quot;&quot;</span> <span class="p">).</span><span class="nx">toLowerCase</span><span class="p">();</span>
+               <span class="nx">quick</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="nx">quick</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">&amp;&amp;</span> <span class="k">new</span> <span class="nb">RegExp</span><span class="p">(</span><span class="s2">&quot;(?:^|\\s)&quot;</span> <span class="o">+</span> <span class="nx">quick</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot;(?:\\s|$)&quot;</span><span class="p">);</span>
+            <span class="p">}</span>
+            <span class="k">return</span> <span class="nx">quick</span><span class="p">;</span>
+         <span class="p">},</span>
+         <span class="nx">quickIs</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">elem</span><span class="p">,</span> <span class="nx">m</span><span class="p">)</span> <span class="p">{</span>
+            <span class="kd">var</span> <span class="nx">attrs</span> <span class="o">=</span> <span class="nx">elem</span><span class="p">.</span><span class="nx">attributes</span> <span class="o">||</span> <span class="p">{};</span>
+            <span class="k">return</span> <span class="p">(</span>
+                  <span class="p">(</span><span class="o">!</span><span class="nx">m</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">||</span> <span class="nx">elem</span><span class="p">.</span><span class="nx">nodeName</span><span class="p">.</span><span class="nx">toLowerCase</span><span class="p">()</span> <span class="o">===</span> <span class="nx">m</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">&amp;&amp;</span>
+                        <span class="p">(</span><span class="o">!</span><span class="nx">m</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">||</span> <span class="p">(</span><span class="nx">attrs</span><span class="p">.</span><span class="nx">id</span> <span class="o">||</span> <span class="p">{}).</span><span class="nx">value</span> <span class="o">===</span> <span class="nx">m</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span> <span class="o">&amp;&amp;</span>
+                        <span class="p">(</span><span class="o">!</span><span class="nx">m</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">||</span> <span class="nx">m</span><span class="p">[</span><span class="mi">3</span><span class="p">].</span><span class="nx">test</span><span class="p">((</span><span class="nx">attrs</span><span class="p">[</span> <span class="s2">&quot;class&quot;</span> <span class="p">]</span> <span class="o">||</span> <span class="p">{}).</span><span class="nx">value</span><span class="p">))</span>
+                  <span class="p">);</span>
+         <span class="p">},</span>
+         <span class="nx">hoverHack</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">events</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="nx">jQuery</span><span class="p">.</span><span class="nx">event</span><span class="p">.</span><span class="nx">special</span><span class="p">.</span><span class="nx">hover</span> <span class="o">?</span> <span class="nx">events</span> <span class="o">:</span> <span class="nx">events</span><span class="p">.</span><span class="nx">replace</span><span class="p">(</span><span class="nx">rhoverHack</span><span class="p">,</span> <span class="s2">&quot;mouseenter$1 mouseleave$1&quot;</span><span class="p">);</span>
+         <span class="p">};</span>
+
+   <span class="cm">/*</span>
+<span class="cm">    * Helper functions for managing events -- not part of the public interface.</span>
+<span class="cm">    * Props to Dean Edwards&#39; addEvent library for many of the ideas.</span>
+<span class="cm">    */</span>
+   <span class="nx">jQuery</span><span class="p">.</span><span class="nx">event</span> <span class="o">=</span> <span class="p">{</span>
+
+      <span class="nx">add</span><span class="o">:</span><span class="kd">function</span><span class="p">(</span><span class="nx">elem</span><span class="p">,</span> <span class="nx">types</span><span class="p">,</span> <span class="nx">handler</span><span class="p">,</span> <span class="nx">data</span><span class="p">,</span> <span class="nx">selector</span><span class="p">)</span> <span class="p">{</span>
+
+         <span class="kd">var</span> <span class="nx">elemData</span><span class="p">,</span> <span class="nx">eventHandle</span><span class="p">,</span> <span class="nx">events</span><span class="p">,</span>
+               <span class="nx">t</span><span class="p">,</span> <span class="nx">tns</span><span class="p">,</span> <span class="nx">type</span><span class="p">,</span> <span class="nx">namespaces</span><span class="p">,</span> <span class="nx">handleObj</span><span class="p">,</span>
+               <span class="nx">handleObjIn</span><span class="p">,</span> <span class="nx">quick</span><span class="p">,</span> <span class="nx">handlers</span><span class="p">,</span> <span class="nx">special</span><span class="p">;</span>
+
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-4">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-4">&#182;</a></div>
+      <p>Don't attach events to noData or text/comment nodes (allow plain objects tho)</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+         <span class="k">if</span> <span class="p">(</span><span class="nx">elem</span><span class="p">.</span><span class="nx">nodeType</span> <span class="o">===</span> <span class="mi">3</span> <span class="o">||</span> <span class="nx">elem</span><span class="p">.</span><span class="nx">nodeType</span> <span class="o">===</span> <span class="mi">8</span> <span class="o">||</span> <span class="o">!</span><span class="nx">types</span> <span class="o">||</span> <span class="o">!</span><span class="nx">handler</span> <span class="o">||</span> <span class="o">!</span><span class="p">(</span><span class="nx">elemData</span> <span class="o">=</span> <span class="nx">jQuery</span><span class="p">.</span><span class="nx">_data</span><span class="p">(</span><span class="nx">elem</span><span class="p">)))</span> <span class="p">{</span>
+            <span class="k">return</span><span class="p">;</span>
+         <span class="p">}</span>
+
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-5">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-5">&#182;</a></div>
+      <p>Caller can pass in an object of custom data in lieu of the handler</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+         <span class="k">if</span> <span class="p">(</span><span class="nx">handler</span><span class="p">.</span><span class="nx">handler</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nx">handleObjIn</span> <span class="o">=</span> <span class="nx">handler</span><span class="p">;</span>
+            <span class="nx">handler</span> <span class="o">=</span> <span class="nx">handleObjIn</span><span class="p">.</span><span class="nx">handler</span><span class="p">;</span>
+            <span class="nx">selector</span> <span class="o">=</span> <span class="nx">handleObjIn</span><span class="p">.</span><span class="nx">selector</span><span class="p">;</span>
+         <span class="p">}</span>
+
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-6">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-6">&#182;</a></div>
+      <p>Make sure that the handler has a unique ID, used to find/remove it later</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+         <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">handler</span><span class="p">.</span><span class="nx">guid</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nx">handler</span><span class="p">.</span><span class="nx">guid</span> <span class="o">=</span> <span class="nx">jQuery</span><span class="p">.</span><span class="nx">guid</span><span class="o">++</span><span class="p">;</span>
+         <span class="p">}</span>
+
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-7">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-7">&#182;</a></div>
+      <p>Init the element's event structure and main handler, if this is the first</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+         <span class="nx">events</span> <span class="o">=</span> <span class="nx">elemData</span><span class="p">.</span><span class="nx">events</span><span class="p">;</span>
+         <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">events</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nx">elemData</span><span class="p">.</span><span class="nx">events</span> <span class="o">=</span> <span class="nx">events</span> <span class="o">=</span> <span class="p">{};</span>
+         <span class="p">}</span>
+         <span class="nx">eventHandle</span> <span class="o">=</span> <span class="nx">elemData</span><span class="p">.</span><span class="nx">handle</span><span class="p">;</span>
+         <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">eventHandle</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nx">elemData</span><span class="p">.</span><span class="nx">handle</span> <span class="o">=</span> <span class="nx">eventHandle</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">e</span><span class="p">)</span> <span class="p">{</span>
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-8">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-8">&#182;</a></div>
+      <p>Discard the second event of a jQuery.event.trigger() and
+         when an event is called after a page has unloaded</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+               <span class="k">return</span> <span class="k">typeof</span> <span class="nx">jQuery</span> <span class="o">!==</span> <span class="s2">&quot;undefined&quot;</span> <span class="o">&amp;&amp;</span> <span class="p">(</span><span class="o">!</span><span class="nx">e</span> <span class="o">||</span> <span class="nx">jQuery</span><span class="p">.</span><span class="nx">event</span><span class="p">.</span><span class="nx">triggered</span> <span class="o">!==</span> <span class="nx">e</span><span class="p">.</span><span class="nx">type</span><span class="p">)</span> <span class="o">?</span>
+                     <span class="nx">jQuery</span><span class="p">.</span><span class="nx">event</span><span class="p">.</span><span class="nx">dispatch</span><span class="p">.</span><span class="nx">apply</span><span class="p">(</span><span class="nx">eventHandle</span><span class="p">.</span><span class="nx">elem</span><span class="p">,</span> <span class="nx">arguments</span><span class="p">)</span> <span class="o">:</span>
+                     <span class="kc">undefined</span><span class="p">;</span>
+            <span class="p">};</span>
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-9">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-9">&#182;</a></div>
+      <p>Add elem as a property of the handle fn to prevent a memory leak with IE non-native events</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+            <span class="nx">eventHandle</span><span class="p">.</span><span class="nx">elem</span> <span class="o">=</span> <span class="nx">elem</span><span class="p">;</span>
+         <span class="p">}</span>
+
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-10">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-10">&#182;</a></div>
+      <p>Handle multiple events separated by a space
+         jQuery(...).bind("mouseover mouseout", fn);</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+         <span class="nx">types</span> <span class="o">=</span> <span class="nx">jQuery</span><span class="p">.</span><span class="nx">trim</span><span class="p">(</span><span class="nx">hoverHack</span><span class="p">(</span><span class="nx">types</span><span class="p">)).</span><span class="nx">split</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">);</span>
+         <span class="k">for</span> <span class="p">(</span><span class="nx">t</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">t</span> <span class="o">&lt;</span> <span class="nx">types</span><span class="p">.</span><span class="nx">length</span><span class="p">;</span> <span class="nx">t</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+
+            <span class="nx">tns</span> <span class="o">=</span> <span class="nx">rtypenamespace</span><span class="p">.</span><span class="nx">exec</span><span class="p">(</span><span class="nx">types</span><span class="p">[</span><span class="nx">t</span><span class="p">])</span> <span class="o">||</span> <span class="p">[];</span>
+            <span class="nx">type</span> <span class="o">=</span> <span class="nx">tns</span><span class="p">[</span><span class="mi">1</span><span class="p">];</span>
+            <span class="nx">namespaces</span> <span class="o">=</span> <span class="p">(</span> <span class="nx">tns</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">||</span> <span class="s2">&quot;&quot;</span> <span class="p">).</span><span class="nx">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">).</span><span class="nx">sort</span><span class="p">();</span>
+
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-11">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-11">&#182;</a></div>
+      <p>If event changes its type, use the special event handlers for the changed type</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+            <span class="nx">special</span> <span class="o">=</span> <span class="nx">jQuery</span><span class="p">.</span><span class="nx">event</span><span class="p">.</span><span class="nx">special</span><span class="p">[</span> <span class="nx">type</span> <span class="p">]</span> <span class="o">||</span> <span class="p">{};</span>
+
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-12">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-12">&#182;</a></div>
+      <p>If selector defined, determine special event api type, otherwise given type</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+            <span class="nx">type</span> <span class="o">=</span> <span class="p">(</span> <span class="nx">selector</span> <span class="o">?</span> <span class="nx">special</span><span class="p">.</span><span class="nx">delegateType</span> <span class="o">:</span> <span class="nx">special</span><span class="p">.</span><span class="nx">bindType</span> <span class="p">)</span> <span class="o">||</span> <span class="nx">type</span><span class="p">;</span>
+
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-13">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-13">&#182;</a></div>
+      <p>Update special based on newly reset type</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+            <span class="nx">special</span> <span class="o">=</span> <span class="nx">jQuery</span><span class="p">.</span><span class="nx">event</span><span class="p">.</span><span class="nx">special</span><span class="p">[</span> <span class="nx">type</span> <span class="p">]</span> <span class="o">||</span> <span class="p">{};</span>
+
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-14">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-14">&#182;</a></div>
+      <p>handleObj is passed to all event handlers</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+            <span class="nx">handleObj</span> <span class="o">=</span> <span class="nx">jQuery</span><span class="p">.</span><span class="nx">extend</span><span class="p">({</span>
+               <span class="nx">type</span><span class="o">:</span>     <span class="nx">type</span><span class="p">,</span>
+               <span class="nx">origType</span><span class="o">:</span> <span class="nx">tns</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+               <span class="nx">data</span><span class="o">:</span>     <span class="nx">data</span><span class="p">,</span>
+               <span class="nx">handler</span><span class="o">:</span>  <span class="nx">handler</span><span class="p">,</span>
+               <span class="nx">guid</span><span class="o">:</span>     <span class="nx">handler</span><span class="p">.</span><span class="nx">guid</span><span class="p">,</span>
+               <span class="nx">selector</span><span class="o">:</span> <span class="nx">selector</span><span class="p">,</span>
+               <span class="nx">quick</span><span class="o">:</span>    <span class="nx">selector</span> <span class="o">&amp;&amp;</span> <span class="nx">quickParse</span><span class="p">(</span><span class="nx">selector</span><span class="p">),</span>
+               <span class="nx">namespace</span><span class="o">:</span><span class="nx">namespaces</span><span class="p">.</span><span class="nx">join</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)</span>
+            <span class="p">},</span> <span class="nx">handleObjIn</span><span class="p">);</span>
+
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-15">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-15">&#182;</a></div>
+      <p>Init the event handler queue if we're the first</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+            <span class="nx">handlers</span> <span class="o">=</span> <span class="nx">events</span><span class="p">[</span> <span class="nx">type</span> <span class="p">];</span>
+            <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">handlers</span><span class="p">)</span> <span class="p">{</span>
+               <span class="nx">handlers</span> <span class="o">=</span> <span class="nx">events</span><span class="p">[</span> <span class="nx">type</span> <span class="p">]</span> <span class="o">=</span> <span class="p">[];</span>
+               <span class="nx">handlers</span><span class="p">.</span><span class="nx">delegateCount</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-16">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-16">&#182;</a></div>
+      <p>Only use addEventListener/attachEvent if the special events handler returns false</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+               <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">special</span><span class="p">.</span><span class="nx">setup</span> <span class="o">||</span> <span class="nx">special</span><span class="p">.</span><span class="nx">setup</span><span class="p">.</span><span class="nx">call</span><span class="p">(</span><span class="nx">elem</span><span class="p">,</span> <span class="nx">data</span><span class="p">,</span> <span class="nx">namespaces</span><span class="p">,</span> <span class="nx">eventHandle</span><span class="p">)</span> <span class="o">===</span> <span class="kc">false</span><span class="p">)</span> <span class="p">{</span>
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-17">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-17">&#182;</a></div>
+      <p>Bind the global event handler to the element</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+                  <span class="k">if</span> <span class="p">(</span><span class="nx">elem</span><span class="p">.</span><span class="nx">addEventListener</span><span class="p">)</span> <span class="p">{</span>
+                     <span class="nx">elem</span><span class="p">.</span><span class="nx">addEventListener</span><span class="p">(</span><span class="nx">type</span><span class="p">,</span> <span class="nx">eventHandle</span><span class="p">,</span> <span class="kc">false</span><span class="p">);</span>
+
+                  <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="nx">elem</span><span class="p">.</span><span class="nx">attachEvent</span><span class="p">)</span> <span class="p">{</span>
+                     <span class="nx">elem</span><span class="p">.</span><span class="nx">attachEvent</span><span class="p">(</span><span class="s2">&quot;on&quot;</span> <span class="o">+</span> <span class="nx">type</span><span class="p">,</span> <span class="nx">eventHandle</span><span class="p">);</span>
+                  <span class="p">}</span>
+               <span class="p">}</span>
+            <span class="p">}</span>
+
+            <span class="k">if</span> <span class="p">(</span><span class="nx">special</span><span class="p">.</span><span class="nx">add</span><span class="p">)</span> <span class="p">{</span>
+               <span class="nx">special</span><span class="p">.</span><span class="nx">add</span><span class="p">.</span><span class="nx">call</span><span class="p">(</span><span class="nx">elem</span><span class="p">,</span> <span class="nx">handleObj</span><span class="p">);</span>
+
+               <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">handleObj</span><span class="p">.</span><span class="nx">handler</span><span class="p">.</span><span class="nx">guid</span><span class="p">)</span> <span class="p">{</span>
+                  <span class="nx">handleObj</span><span class="p">.</span><span class="nx">handler</span><span class="p">.</span><span class="nx">guid</span> <span class="o">=</span> <span class="nx">handler</span><span class="p">.</span><span class="nx">guid</span><span class="p">;</span>
+               <span class="p">}</span>
+            <span class="p">}</span>
+
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-18">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-18">&#182;</a></div>
+      <p>Add to the element's handler list, delegates in front</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+            <span class="k">if</span> <span class="p">(</span><span class="nx">selector</span><span class="p">)</span> <span class="p">{</span>
+               <span class="nx">handlers</span><span class="p">.</span><span class="nx">splice</span><span class="p">(</span><span class="nx">handlers</span><span class="p">.</span><span class="nx">delegateCount</span><span class="o">++</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="nx">handleObj</span><span class="p">);</span>
+            <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+               <span class="nx">handlers</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="nx">handleObj</span><span class="p">);</span>
+            <span class="p">}</span>
+
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-19">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-19">&#182;</a></div>
+      <p>Keep track of which events have ever been used, for event optimization</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+            <span class="nx">jQuery</span><span class="p">.</span><span class="nx">event</span><span class="p">.</span><span class="nx">global</span><span class="p">[</span> <span class="nx">type</span> <span class="p">]</span> <span class="o">=</span> <span class="kc">true</span><span class="p">;</span>
+         <span class="p">}</span>
+
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-20">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-20">&#182;</a></div>
+      <p>Nullify elem to prevent memory leaks in IE</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+         <span class="nx">elem</span> <span class="o">=</span> <span class="kc">null</span><span class="p">;</span>
+      <span class="p">},</span>
+
+      <span class="nx">global</span><span class="o">:</span>     <span class="p">{},</span>
+
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-21">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-21">&#182;</a></div>
+      <p>Detach an event or set of events from an element</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+      <span class="nx">remove</span><span class="o">:</span>     <span class="kd">function</span><span class="p">(</span><span class="nx">elem</span><span class="p">,</span> <span class="nx">types</span><span class="p">,</span> <span class="nx">handler</span><span class="p">,</span> <span class="nx">selector</span><span class="p">,</span> <span class="nx">mappedTypes</span><span class="p">)</span> <span class="p">{</span>
+
+         <span class="kd">var</span> <span class="nx">elemData</span> <span class="o">=</span> <span class="nx">jQuery</span><span class="p">.</span><span class="nx">hasData</span><span class="p">(</span><span class="nx">elem</span><span class="p">)</span> <span class="o">&amp;&amp;</span> <span class="nx">jQuery</span><span class="p">.</span><span class="nx">_data</span><span class="p">(</span><span class="nx">elem</span><span class="p">),</span>
+               <span class="nx">t</span><span class="p">,</span> <span class="nx">tns</span><span class="p">,</span> <span class="nx">type</span><span class="p">,</span> <span class="nx">origType</span><span class="p">,</span> <span class="nx">namespaces</span><span class="p">,</span> <span class="nx">origCount</span><span class="p">,</span>
+               <span class="nx">j</span><span class="p">,</span> <span class="nx">events</span><span class="p">,</span> <span class="nx">special</span><span class="p">,</span> <span class="nx">handle</span><span class="p">,</span> <span class="nx">eventType</span><span class="p">,</span> <span class="nx">handleObj</span><span class="p">;</span>
+
+         <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">elemData</span> <span class="o">||</span> <span class="o">!</span><span class="p">(</span><span class="nx">events</span> <span class="o">=</span> <span class="nx">elemData</span><span class="p">.</span><span class="nx">events</span><span class="p">))</span> <span class="p">{</span>
+            <span class="k">return</span><span class="p">;</span>
+         <span class="p">}</span>
+
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-22">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-22">&#182;</a></div>
+      <p>Once for each type.namespace in types; type may be omitted</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+         <span class="nx">types</span> <span class="o">=</span> <span class="nx">jQuery</span><span class="p">.</span><span class="nx">trim</span><span class="p">(</span><span class="nx">hoverHack</span><span class="p">(</span><span class="nx">types</span> <span class="o">||</span> <span class="s2">&quot;&quot;</span><span class="p">)).</span><span class="nx">split</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">);</span>
+         <span class="k">for</span> <span class="p">(</span><span class="nx">t</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">t</span> <span class="o">&lt;</span> <span class="nx">types</span><span class="p">.</span><span class="nx">length</span><span class="p">;</span> <span class="nx">t</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nx">tns</span> <span class="o">=</span> <span class="nx">rtypenamespace</span><span class="p">.</span><span class="nx">exec</span><span class="p">(</span><span class="nx">types</span><span class="p">[</span><span class="nx">t</span><span class="p">])</span> <span class="o">||</span> <span class="p">[];</span>
+            <span class="nx">type</span> <span class="o">=</span> <span class="nx">origType</span> <span class="o">=</span> <span class="nx">tns</span><span class="p">[</span><span class="mi">1</span><span class="p">];</span>
+            <span class="nx">namespaces</span> <span class="o">=</span> <span class="nx">tns</span><span class="p">[</span><span class="mi">2</span><span class="p">];</span>
+
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-23">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-23">&#182;</a></div>
+      <p>Unbind all events (on this namespace, if provided) for the element</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+            <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">type</span><span class="p">)</span> <span class="p">{</span>
+               <span class="k">for</span> <span class="p">(</span><span class="nx">type</span> <span class="k">in</span> <span class="nx">events</span><span class="p">)</span> <span class="p">{</span>
+                  <span class="nx">jQuery</span><span class="p">.</span><span class="nx">event</span><span class="p">.</span><span class="nx">remove</span><span class="p">(</span><span class="nx">elem</span><span class="p">,</span> <span class="nx">type</span> <span class="o">+</span> <span class="nx">types</span><span class="p">[</span> <span class="nx">t</span> <span class="p">],</span> <span class="nx">handler</span><span class="p">,</span> <span class="nx">selector</span><span class="p">,</span> <span class="kc">true</span><span class="p">);</span>
+               <span class="p">}</span>
+               <span class="k">continue</span><span class="p">;</span>
+            <span class="p">}</span>
+
+            <span class="nx">special</span> <span class="o">=</span> <span class="nx">jQuery</span><span class="p">.</span><span class="nx">event</span><span class="p">.</span><span class="nx">special</span><span class="p">[</span> <span class="nx">type</span> <span class="p">]</span> <span class="o">||</span> <span class="p">{};</span>
+            <span class="nx">type</span> <span class="o">=</span> <span class="p">(</span> <span class="nx">selector</span> <span class="o">?</span> <span class="nx">special</span><span class="p">.</span><span class="nx">delegateType</span> <span class="o">:</span> <span class="nx">special</span><span class="p">.</span><span class="nx">bindType</span> <span class="p">)</span> <span class="o">||</span> <span class="nx">type</span><span class="p">;</span>
+            <span class="nx">eventType</span> <span class="o">=</span> <span class="nx">events</span><span class="p">[</span> <span class="nx">type</span> <span class="p">]</span> <span class="o">||</span> <span class="p">[];</span>
+            <span class="nx">origCount</span> <span class="o">=</span> <span class="nx">eventType</span><span class="p">.</span><span class="nx">length</span><span class="p">;</span>
+            <span class="nx">namespaces</span> <span class="o">=</span> <span class="nx">namespaces</span> <span class="o">?</span> <span class="k">new</span> <span class="nb">RegExp</span><span class="p">(</span><span class="s2">&quot;(^|\\.)&quot;</span> <span class="o">+</span> <span class="nx">namespaces</span><span class="p">.</span><span class="nx">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">).</span><span class="nx">sort</span><span class="p">().</span><span class="nx">join</span><span class="p">(</span><span class="s2">&quot;\\.(?:.*\\.)?&quot;</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;(\\.|$)&quot;</span><span class="p">)</span> <span class="o">:</span> <span class="kc">null</span><span class="p">;</span>
+
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-24">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-24">&#182;</a></div>
+      <p>Remove matching events</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+            <span class="k">for</span> <span class="p">(</span><span class="nx">j</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">j</span> <span class="o">&lt;</span> <span class="nx">eventType</span><span class="p">.</span><span class="nx">length</span><span class="p">;</span> <span class="nx">j</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+               <span class="nx">handleObj</span> <span class="o">=</span> <span class="nx">eventType</span><span class="p">[</span> <span class="nx">j</span> <span class="p">];</span>
+
+               <span class="k">if</span> <span class="p">((</span> <span class="nx">mappedTypes</span> <span class="o">||</span> <span class="nx">origType</span> <span class="o">===</span> <span class="nx">handleObj</span><span class="p">.</span><span class="nx">origType</span> <span class="p">)</span> <span class="o">&amp;&amp;</span>
+                     <span class="p">(</span> <span class="o">!</span><span class="nx">handler</span> <span class="o">||</span> <span class="nx">handler</span><span class="p">.</span><span class="nx">guid</span> <span class="o">===</span> <span class="nx">handleObj</span><span class="p">.</span><span class="nx">guid</span> <span class="p">)</span> <span class="o">&amp;&amp;</span>
+                     <span class="p">(</span> <span class="o">!</span><span class="nx">namespaces</span> <span class="o">||</span> <span class="nx">namespaces</span><span class="p">.</span><span class="nx">test</span><span class="p">(</span><span class="nx">handleObj</span><span class="p">.</span><span class="nx">namespace</span><span class="p">)</span> <span class="p">)</span> <span class="o">&amp;&amp;</span>
+                     <span class="p">(</span> <span class="o">!</span><span class="nx">selector</span> <span class="o">||</span> <span class="nx">selector</span> <span class="o">===</span> <span class="nx">handleObj</span><span class="p">.</span><span class="nx">selector</span> <span class="o">||</span> <span class="nx">selector</span> <span class="o">===</span> <span class="s2">&quot;**&quot;</span> <span class="o">&amp;&amp;</span> <span class="nx">handleObj</span><span class="p">.</span><span class="nx">selector</span> <span class="p">))</span> <span class="p">{</span>
+                  <span class="nx">eventType</span><span class="p">.</span><span class="nx">splice</span><span class="p">(</span><span class="nx">j</span><span class="o">--</span><span class="p">,</span> <span class="mi">1</span><span class="p">);</span>
+
+                  <span class="k">if</span> <span class="p">(</span><span class="nx">handleObj</span><span class="p">.</span><span class="nx">selector</span><span class="p">)</span> <span class="p">{</span>
+                     <span class="nx">eventType</span><span class="p">.</span><span class="nx">delegateCount</span><span class="o">--</span><span class="p">;</span>
+                  <span class="p">}</span>
+                  <span class="k">if</span> <span class="p">(</span><span class="nx">special</span><span class="p">.</span><span class="nx">remove</span><span class="p">)</span> <span class="p">{</span>
+                     <span class="nx">special</span><span class="p">.</span><span class="nx">remove</span><span class="p">.</span><span class="nx">call</span><span class="p">(</span><span class="nx">elem</span><span class="p">,</span> <span class="nx">handleObj</span><span class="p">);</span>
+                  <span class="p">}</span>
+               <span class="p">}</span>
+            <span class="p">}</span>
+
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-25">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-25">&#182;</a></div>
+      <p>Remove generic event handler if we removed something and no more handlers exist
+         (avoids potential for endless recursion during removal of special event handlers)</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+            <span class="k">if</span> <span class="p">(</span><span class="nx">eventType</span><span class="p">.</span><span class="nx">length</span> <span class="o">===</span> <span class="mi">0</span> <span class="o">&amp;&amp;</span> <span class="nx">origCount</span> <span class="o">!==</span> <span class="nx">eventType</span><span class="p">.</span><span class="nx">length</span><span class="p">)</span> <span class="p">{</span>
+               <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">special</span><span class="p">.</span><span class="nx">teardown</span> <span class="o">||</span> <span class="nx">special</span><span class="p">.</span><span class="nx">teardown</span><span class="p">.</span><span class="nx">call</span><span class="p">(</span><span class="nx">elem</span><span class="p">,</span> <span class="nx">namespaces</span><span class="p">)</span> <span class="o">===</span> <span class="kc">false</span><span class="p">)</span> <span class="p">{</span>
+                  <span class="nx">jQuery</span><span class="p">.</span><span class="nx">removeEvent</span><span class="p">(</span><span class="nx">elem</span><span class="p">,</span> <span class="nx">type</span><span class="p">,</span> <span class="nx">elemData</span><span class="p">.</span><span class="nx">handle</span><span class="p">);</span>
+               <span class="p">}</span>
+
+               <span class="k">delete</span> <span class="nx">events</span><span class="p">[</span> <span class="nx">type</span> <span class="p">];</span>
+            <span class="p">}</span>
+         <span class="p">}</span>
+
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-26">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-26">&#182;</a></div>
+      <p>Remove the expando if it's no longer used</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+         <span class="k">if</span> <span class="p">(</span><span class="nx">jQuery</span><span class="p">.</span><span class="nx">isEmptyObject</span><span class="p">(</span><span class="nx">events</span><span class="p">))</span> <span class="p">{</span>
+            <span class="nx">handle</span> <span class="o">=</span> <span class="nx">elemData</span><span class="p">.</span><span class="nx">handle</span><span class="p">;</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nx">handle</span><span class="p">)</span> <span class="p">{</span>
+               <span class="nx">handle</span><span class="p">.</span><span class="nx">elem</span> <span class="o">=</span> <span class="kc">null</span><span class="p">;</span>
+            <span class="p">}</span>
+
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-27">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-27">&#182;</a></div>
+      <p>removeData also checks for emptiness and clears the expando if empty
+         so use it instead of delete</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+            <span class="nx">jQuery</span><span class="p">.</span><span class="nx">removeData</span><span class="p">(</span><span class="nx">elem</span><span class="p">,</span> <span class="p">[</span> <span class="s2">&quot;events&quot;</span><span class="p">,</span> <span class="s2">&quot;handle&quot;</span> <span class="p">],</span> <span class="kc">true</span><span class="p">);</span>
+         <span class="p">}</span>
+      <span class="p">},</span>
+
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-28">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-28">&#182;</a></div>
+      <p>Events that are safe to short-circuit if no handlers are attached.
+         Native DOM events should not be added, they may have inline handlers.</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+      <span class="nx">customEvent</span><span class="o">:</span><span class="p">{</span>
+         <span class="s2">&quot;getData&quot;</span><span class="o">:</span>   <span class="kc">true</span><span class="p">,</span>
+         <span class="s2">&quot;setData&quot;</span><span class="o">:</span>   <span class="kc">true</span><span class="p">,</span>
+         <span class="s2">&quot;changeData&quot;</span><span class="o">:</span><span class="kc">true</span>
+      <span class="p">},</span>
+
+      <span class="nx">trigger</span><span class="o">:</span><span class="kd">function</span><span class="p">(</span><span class="nx">event</span><span class="p">,</span> <span class="nx">data</span><span class="p">,</span> <span class="nx">elem</span><span class="p">,</span> <span class="nx">onlyHandlers</span><span class="p">)</span> <span class="p">{</span>
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-29">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-29">&#182;</a></div>
+      <p>Don't do events on text and comment nodes</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+         <span class="k">if</span> <span class="p">(</span><span class="nx">elem</span> <span class="o">&amp;&amp;</span> <span class="p">(</span><span class="nx">elem</span><span class="p">.</span><span class="nx">nodeType</span> <span class="o">===</span> <span class="mi">3</span> <span class="o">||</span> <span class="nx">elem</span><span class="p">.</span><span class="nx">nodeType</span> <span class="o">===</span> <span class="mi">8</span><span class="p">))</span> <span class="p">{</span>
+            <span class="k">return</span><span class="p">;</span>
+         <span class="p">}</span>
+
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-30">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-30">&#182;</a></div>
+      <p>Event object or event type</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+         <span class="kd">var</span> <span class="nx">type</span> <span class="o">=</span> <span class="nx">event</span><span class="p">.</span><span class="nx">type</span> <span class="o">||</span> <span class="nx">event</span><span class="p">,</span>
+               <span class="nx">namespaces</span> <span class="o">=</span> <span class="p">[],</span>
+               <span class="nx">cache</span><span class="p">,</span> <span class="nx">exclusive</span><span class="p">,</span> <span class="nx">i</span><span class="p">,</span> <span class="nx">cur</span><span class="p">,</span> <span class="nx">old</span><span class="p">,</span> <span class="nx">ontype</span><span class="p">,</span> <span class="nx">special</span><span class="p">,</span> <span class="nx">handle</span><span class="p">,</span> <span class="nx">eventPath</span><span class="p">,</span> <span class="nx">bubbleType</span><span class="p">;</span>
+
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-31">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-31">&#182;</a></div>
+      <p>focus/blur morphs to focusin/out; ensure we're not firing them right now</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+         <span class="k">if</span> <span class="p">(</span><span class="nx">rfocusMorph</span><span class="p">.</span><span class="nx">test</span><span class="p">(</span><span class="nx">type</span> <span class="o">+</span> <span class="nx">jQuery</span><span class="p">.</span><span class="nx">event</span><span class="p">.</span><span class="nx">triggered</span><span class="p">))</span> <span class="p">{</span>
+            <span class="k">return</span><span class="p">;</span>
+         <span class="p">}</span>
+
+         <span class="k">if</span> <span class="p">(</span><span class="nx">type</span><span class="p">.</span><span class="nx">indexOf</span><span class="p">(</span><span class="s2">&quot;!&quot;</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-32">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-32">&#182;</a></div>
+      <p>Exclusive events trigger only for the exact event (no namespaces)</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+            <span class="nx">type</span> <span class="o">=</span> <span class="nx">type</span><span class="p">.</span><span class="nx">slice</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">);</span>
+            <span class="nx">exclusive</span> <span class="o">=</span> <span class="kc">true</span><span class="p">;</span>
+         <span class="p">}</span>
+
+         <span class="k">if</span> <span class="p">(</span><span class="nx">type</span><span class="p">.</span><span class="nx">indexOf</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-33">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-33">&#182;</a></div>
+      <p>Namespaced trigger; create a regexp to match event type in handle()</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+            <span class="nx">namespaces</span> <span class="o">=</span> <span class="nx">type</span><span class="p">.</span><span class="nx">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">);</span>
+            <span class="nx">type</span> <span class="o">=</span> <span class="nx">namespaces</span><span class="p">.</span><span class="nx">shift</span><span class="p">();</span>
+            <span class="nx">namespaces</span><span class="p">.</span><span class="nx">sort</span><span class="p">();</span>
+         <span class="p">}</span>
+
+         <span class="k">if</span> <span class="p">((</span><span class="o">!</span><span class="nx">elem</span> <span class="o">||</span> <span class="nx">jQuery</span><span class="p">.</span><span class="nx">event</span><span class="p">.</span><span class="nx">customEvent</span><span class="p">[</span> <span class="nx">type</span> <span class="p">])</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="nx">jQuery</span><span class="p">.</span><span class="nx">event</span><span class="p">.</span><span class="nx">global</span><span class="p">[</span> <span class="nx">type</span> <span class="p">])</span> <span class="p">{</span>
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-34">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-34">&#182;</a></div>
+      <p>No jQuery handlers for this event type, and it can't have inline handlers</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+            <span class="k">return</span><span class="p">;</span>
+         <span class="p">}</span>
+
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-35">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-35">&#182;</a></div>
+      <p>Caller can pass in an Event, Object, or just an event type string</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+         <span class="nx">event</span> <span class="o">=</span> <span class="k">typeof</span> <span class="nx">event</span> <span class="o">===</span> <span class="s2">&quot;object&quot;</span> <span class="o">?</span>
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-36">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-36">&#182;</a></div>
+      <p>jQuery.Event object</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+               <span class="nx">event</span><span class="p">[</span> <span class="nx">jQuery</span><span class="p">.</span><span class="nx">expando</span> <span class="p">]</span> <span class="o">?</span> <span class="nx">event</span> <span class="o">:</span>
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-37">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-37">&#182;</a></div>
+      <p>Object literal</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+                     <span class="k">new</span> <span class="nx">jQuery</span><span class="p">.</span><span class="nx">Event</span><span class="p">(</span><span class="nx">type</span><span class="p">,</span> <span class="nx">event</span><span class="p">)</span> <span class="o">:</span>
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-38">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-38">&#182;</a></div>
+      <p>Just the event type (string)</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+               <span class="k">new</span> <span class="nx">jQuery</span><span class="p">.</span><span class="nx">Event</span><span class="p">(</span><span class="nx">type</span><span class="p">);</span>
+
+         <span class="nx">event</span><span class="p">.</span><span class="nx">type</span> <span class="o">=</span> <span class="nx">type</span><span class="p">;</span>
+         <span class="nx">event</span><span class="p">.</span><span class="nx">isTrigger</span> <span class="o">=</span> <span class="kc">true</span><span class="p">;</span>
+         <span class="nx">event</span><span class="p">.</span><span class="nx">exclusive</span> <span class="o">=</span> <span class="nx">exclusive</span><span class="p">;</span>
+         <span class="nx">event</span><span class="p">.</span><span class="nx">namespace</span> <span class="o">=</span> <span class="nx">namespaces</span><span class="p">.</span><span class="nx">join</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">);</span>
+         <span class="nx">event</span><span class="p">.</span><span class="nx">namespace_re</span> <span class="o">=</span> <span class="nx">event</span><span class="p">.</span><span class="nx">namespace</span> <span class="o">?</span> <span class="k">new</span> <span class="nb">RegExp</span><span class="p">(</span><span class="s2">&quot;(^|\\.)&quot;</span> <span class="o">+</span> <span class="nx">namespaces</span><span class="p">.</span><span class="nx">join</span><span class="p">(</span><span class="s2">&quot;\\.(?:.*\\.)?&quot;</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;(\\.|$)&quot;</span><span class="p">)</span> <span class="o">:</span> <span class="kc">null</span><span class="p">;</span>
+         <span class="nx">ontype</span> <span class="o">=</span> <span class="nx">type</span><span class="p">.</span><span class="nx">indexOf</span><span class="p">(</span><span class="s2">&quot;:&quot;</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="o">?</span> <span class="s2">&quot;on&quot;</span> <span class="o">+</span> <span class="nx">type</span> <span class="o">:</span> <span class="s2">&quot;&quot;</span><span class="p">;</span>
+
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-39">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-39">&#182;</a></div>
+      <p>Handle a global trigger</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+         <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">elem</span><span class="p">)</span> <span class="p">{</span>
+
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-40">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-40">&#182;</a></div>
+      <p>TODO: Stop taunting the data cache; remove global events and always attach to document</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+            <span class="nx">cache</span> <span class="o">=</span> <span class="nx">jQuery</span><span class="p">.</span><span class="nx">cache</span><span class="p">;</span>
+            <span class="k">for</span> <span class="p">(</span><span class="nx">i</span> <span class="k">in</span> <span class="nx">cache</span><span class="p">)</span> <span class="p">{</span>
+               <span class="k">if</span> <span class="p">(</span><span class="nx">cache</span><span class="p">[</span> <span class="nx">i</span> <span class="p">].</span><span class="nx">events</span> <span class="o">&amp;&amp;</span> <span class="nx">cache</span><span class="p">[</span> <span class="nx">i</span> <span class="p">].</span><span class="nx">events</span><span class="p">[</span> <span class="nx">type</span> <span class="p">])</span> <span class="p">{</span>
+                  <span class="nx">jQuery</span><span class="p">.</span><span class="nx">event</span><span class="p">.</span><span class="nx">trigger</span><span class="p">(</span><span class="nx">event</span><span class="p">,</span> <span class="nx">data</span><span class="p">,</span> <span class="nx">cache</span><span class="p">[</span> <span class="nx">i</span> <span class="p">].</span><span class="nx">handle</span><span class="p">.</span><span class="nx">elem</span><span class="p">,</span> <span class="kc">true</span><span class="p">);</span>
+               <span class="p">}</span>
+            <span class="p">}</span>
+            <span class="k">return</span><span class="p">;</span>
+         <span class="p">}</span>
+
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-41">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-41">&#182;</a></div>
+      <p>Clean up the event in case it is being reused</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+         <span class="nx">event</span><span class="p">.</span><span class="nx">result</span> <span class="o">=</span> <span class="kc">undefined</span><span class="p">;</span>
+         <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">event</span><span class="p">.</span><span class="nx">target</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nx">event</span><span class="p">.</span><span class="nx">target</span> <span class="o">=</span> <span class="nx">elem</span><span class="p">;</span>
+         <span class="p">}</span>
+
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-42">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-42">&#182;</a></div>
+      <p>Clone any incoming data and prepend the event, creating the handler arg list</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+         <span class="nx">data</span> <span class="o">=</span> <span class="nx">data</span> <span class="o">!=</span> <span class="kc">null</span> <span class="o">?</span> <span class="nx">jQuery</span><span class="p">.</span><span class="nx">makeArray</span><span class="p">(</span><span class="nx">data</span><span class="p">)</span> <span class="o">:</span> <span class="p">[];</span>
+         <span class="nx">data</span><span class="p">.</span><span class="nx">unshift</span><span class="p">(</span><span class="nx">event</span><span class="p">);</span>
+
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-43">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-43">&#182;</a></div>
+      <p>Allow special events to draw outside the lines</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+         <span class="nx">special</span> <span class="o">=</span> <span class="nx">jQuery</span><span class="p">.</span><span class="nx">event</span><span class="p">.</span><span class="nx">special</span><span class="p">[</span> <span class="nx">type</span> <span class="p">]</span> <span class="o">||</span> <span class="p">{};</span>
+         <span class="k">if</span> <span class="p">(</span><span class="nx">special</span><span class="p">.</span><span class="nx">trigger</span> <span class="o">&amp;&amp;</span> <span class="nx">special</span><span class="p">.</span><span class="nx">trigger</span><span class="p">.</span><span class="nx">apply</span><span class="p">(</span><span class="nx">elem</span><span class="p">,</span> <span class="nx">data</span><span class="p">)</span> <span class="o">===</span> <span class="kc">false</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">return</span><span class="p">;</span>
+         <span class="p">}</span>
+
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-44">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-44">&#182;</a></div>
+      <p>Determine event propagation path in advance, per W3C events spec (#9951)
+         Bubble up to document, then to window; watch for a global ownerDocument var (#9724)</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+         <span class="nx">eventPath</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="p">[</span> <span class="nx">elem</span><span class="p">,</span> <span class="nx">special</span><span class="p">.</span><span class="nx">bindType</span> <span class="o">||</span> <span class="nx">type</span> <span class="p">]</span>
+         <span class="p">];</span>
+         <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">onlyHandlers</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="nx">special</span><span class="p">.</span><span class="nx">noBubble</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="nx">jQuery</span><span class="p">.</span><span class="nx">isWindow</span><span class="p">(</span><span class="nx">elem</span><span class="p">))</span> <span class="p">{</span>
+
+            <span class="nx">bubbleType</span> <span class="o">=</span> <span class="nx">special</span><span class="p">.</span><span class="nx">delegateType</span> <span class="o">||</span> <span class="nx">type</span><span class="p">;</span>
+            <span class="nx">cur</span> <span class="o">=</span> <span class="nx">rfocusMorph</span><span class="p">.</span><span class="nx">test</span><span class="p">(</span><span class="nx">bubbleType</span> <span class="o">+</span> <span class="nx">type</span><span class="p">)</span> <span class="o">?</span> <span class="nx">elem</span> <span class="o">:</span> <span class="nx">elem</span><span class="p">.</span><span class="nx">parentNode</span><span class="p">;</span>
+            <span class="nx">old</span> <span class="o">=</span> <span class="kc">null</span><span class="p">;</span>
+            <span class="k">for</span> <span class="p">(;</span> <span class="nx">cur</span><span class="p">;</span> <span class="nx">cur</span> <span class="o">=</span> <span class="nx">cur</span><span class="p">.</span><span class="nx">parentNode</span><span class="p">)</span> <span class="p">{</span>
+               <span class="nx">eventPath</span><span class="p">.</span><span class="nx">push</span><span class="p">([</span> <span class="nx">cur</span><span class="p">,</span> <span class="nx">bubbleType</span> <span class="p">]);</span>
+               <span class="nx">old</span> <span class="o">=</span> <span class="nx">cur</span><span class="p">;</span>
+            <span class="p">}</span>
+
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-45">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-45">&#182;</a></div>
+      <p>Only add window if we got to document (e.g., not plain obj or detached DOM)</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+            <span class="k">if</span> <span class="p">(</span><span class="nx">old</span> <span class="o">&amp;&amp;</span> <span class="nx">old</span> <span class="o">===</span> <span class="nx">elem</span><span class="p">.</span><span class="nx">ownerDocument</span><span class="p">)</span> <span class="p">{</span>
+               <span class="nx">eventPath</span><span class="p">.</span><span class="nx">push</span><span class="p">([</span> <span class="nx">old</span><span class="p">.</span><span class="nx">defaultView</span> <span class="o">||</span> <span class="nx">old</span><span class="p">.</span><span class="nx">parentWindow</span> <span class="o">||</span> <span class="nb">window</span><span class="p">,</span> <span class="nx">bubbleType</span> <span class="p">]);</span>
+            <span class="p">}</span>
+         <span class="p">}</span>
+
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-46">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-46">&#182;</a></div>
+      <p>Fire handlers on the event path</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+         <span class="k">for</span> <span class="p">(</span><span class="nx">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">i</span> <span class="o">&lt;</span> <span class="nx">eventPath</span><span class="p">.</span><span class="nx">length</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="nx">event</span><span class="p">.</span><span class="nx">isPropagationStopped</span><span class="p">();</span> <span class="nx">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+
+            <span class="nx">cur</span> <span class="o">=</span> <span class="nx">eventPath</span><span class="p">[</span><span class="nx">i</span><span class="p">][</span><span class="mi">0</span><span class="p">];</span>
+            <span class="nx">event</span><span class="p">.</span><span class="nx">type</span> <span class="o">=</span> <span class="nx">eventPath</span><span class="p">[</span><span class="nx">i</span><span class="p">][</span><span class="mi">1</span><span class="p">];</span>
+
+            <span class="nx">handle</span> <span class="o">=</span> <span class="p">(</span> <span class="nx">jQuery</span><span class="p">.</span><span class="nx">_data</span><span class="p">(</span><span class="nx">cur</span><span class="p">,</span> <span class="s2">&quot;events&quot;</span><span class="p">)</span> <span class="o">||</span> <span class="p">{}</span> <span class="p">)[</span> <span class="nx">event</span><span class="p">.</span><span class="nx">type</span> <span class="p">]</span> <span class="o">&amp;&amp;</span> <span class="nx">jQuery</span><span class="p">.</span><span class="nx">_data</span><span class="p">(</span><span class="nx">cur</span><span class="p">,</span> <span class="s2">&quot;handle&quot;</span><span class="p">);</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nx">handle</span><span class="p">)</span> <span class="p">{</span>
+               <span class="nx">handle</span><span class="p">.</span><span class="nx">apply</span><span class="p">(</span><span class="nx">cur</span><span class="p">,</span> <span class="nx">data</span><span class="p">);</span>
+            <span class="p">}</span>
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-47">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-47">&#182;</a></div>
+      <p>Note that this is a bare JS function and not a jQuery handler</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+            <span class="nx">handle</span> <span class="o">=</span> <span class="nx">ontype</span> <span class="o">&amp;&amp;</span> <span class="nx">cur</span><span class="p">[</span> <span class="nx">ontype</span> <span class="p">];</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nx">handle</span> <span class="o">&amp;&amp;</span> <span class="nx">jQuery</span><span class="p">.</span><span class="nx">acceptData</span><span class="p">(</span><span class="nx">cur</span><span class="p">)</span> <span class="o">&amp;&amp;</span> <span class="nx">handle</span><span class="p">.</span><span class="nx">apply</span><span class="p">(</span><span class="nx">cur</span><span class="p">,</span> <span class="nx">data</span><span class="p">)</span> <span class="o">===</span> <span class="kc">false</span><span class="p">)</span> <span class="p">{</span>
+               <span class="nx">event</span><span class="p">.</span><span class="nx">preventDefault</span><span class="p">();</span>
+            <span class="p">}</span>
+         <span class="p">}</span>
+         <span class="nx">event</span><span class="p">.</span><span class="nx">type</span> <span class="o">=</span> <span class="nx">type</span><span class="p">;</span>
+
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-48">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-48">&#182;</a></div>
+      <p>If nobody prevented the default action, do it now</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+         <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">onlyHandlers</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="nx">event</span><span class="p">.</span><span class="nx">isDefaultPrevented</span><span class="p">())</span> <span class="p">{</span>
+
+            <span class="k">if</span> <span class="p">((</span><span class="o">!</span><span class="nx">special</span><span class="p">.</span><span class="nx">_default</span> <span class="o">||</span> <span class="nx">special</span><span class="p">.</span><span class="nx">_default</span><span class="p">.</span><span class="nx">apply</span><span class="p">(</span><span class="nx">elem</span><span class="p">.</span><span class="nx">ownerDocument</span><span class="p">,</span> <span class="nx">data</span><span class="p">)</span> <span class="o">===</span> <span class="kc">false</span><span class="p">)</span> <span class="o">&amp;&amp;</span>
+                  <span class="o">!</span><span class="p">(</span><span class="nx">type</span> <span class="o">===</span> <span class="s2">&quot;click&quot;</span> <span class="o">&amp;&amp;</span> <span class="nx">jQuery</span><span class="p">.</span><span class="nx">nodeName</span><span class="p">(</span><span class="nx">elem</span><span class="p">,</span> <span class="s2">&quot;a&quot;</span><span class="p">))</span> <span class="o">&amp;&amp;</span> <span class="nx">jQuery</span><span class="p">.</span><span class="nx">acceptData</span><span class="p">(</span><span class="nx">elem</span><span class="p">))</span> <span class="p">{</span>
+
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-49">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-49">&#182;</a></div>
+      <p>Call a native DOM method on the target with the same name name as the event.
+         Can't use an .isFunction() check here because IE6/7 fails that test.
+         Don't do default actions on window, that's where global variables be (#6170)
+         IE&lt;9 dies on focus/blur to hidden element (#1486)</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+               <span class="k">if</span> <span class="p">(</span><span class="nx">ontype</span> <span class="o">&amp;&amp;</span> <span class="nx">elem</span><span class="p">[</span> <span class="nx">type</span> <span class="p">]</span> <span class="o">&amp;&amp;</span> <span class="p">((</span><span class="nx">type</span> <span class="o">!==</span> <span class="s2">&quot;focus&quot;</span> <span class="o">&amp;&amp;</span> <span class="nx">type</span> <span class="o">!==</span> <span class="s2">&quot;blur&quot;</span><span class="p">)</span> <span class="o">||</span> <span class="nx">event</span><span class="p">.</span><span class="nx">target</span><span class="p">.</span><span class="nx">offsetWidth</span> <span class="o">!==</span> <span class="mi">0</span><span class="p">)</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="nx">jQuery</span><span class="p">.</span><span class="nx">isWindow</span><span class="p">(</span><span class="nx">elem</span><span class="p">))</span> <span class="p">{</span>
+
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-50">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-50">&#182;</a></div>
+      <p>Don't re-trigger an onFOO event when we call its FOO() method</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+                  <span class="nx">old</span> <span class="o">=</span> <span class="nx">elem</span><span class="p">[</span> <span class="nx">ontype</span> <span class="p">];</span>
+
+                  <span class="k">if</span> <span class="p">(</span><span class="nx">old</span><span class="p">)</span> <span class="p">{</span>
+                     <span class="nx">elem</span><span class="p">[</span> <span class="nx">ontype</span> <span class="p">]</span> <span class="o">=</span> <span class="kc">null</span><span class="p">;</span>
+                  <span class="p">}</span>
+
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-51">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-51">&#182;</a></div>
+      <p>Prevent re-triggering of the same event, since we already bubbled it above</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+                  <span class="nx">jQuery</span><span class="p">.</span><span class="nx">event</span><span class="p">.</span><span class="nx">triggered</span> <span class="o">=</span> <span class="nx">type</span><span class="p">;</span>
+                  <span class="nx">elem</span><span class="p">[</span> <span class="nx">type</span> <span class="p">]();</span>
+                  <span class="nx">jQuery</span><span class="p">.</span><span class="nx">event</span><span class="p">.</span><span class="nx">triggered</span> <span class="o">=</span> <span class="kc">undefined</span><span class="p">;</span>
+
+                  <span class="k">if</span> <span class="p">(</span><span class="nx">old</span><span class="p">)</span> <span class="p">{</span>
+                     <span class="nx">elem</span><span class="p">[</span> <span class="nx">ontype</span> <span class="p">]</span> <span class="o">=</span> <span class="nx">old</span><span class="p">;</span>
+                  <span class="p">}</span>
+               <span class="p">}</span>
+            <span class="p">}</span>
+         <span class="p">}</span>
+
+         <span class="k">return</span> <span class="nx">event</span><span class="p">.</span><span class="nx">result</span><span class="p">;</span>
+      <span class="p">},</span>
+
+      <span class="nx">dispatch</span><span class="o">:</span><span class="kd">function</span><span class="p">(</span><span class="nx">event</span><span class="p">)</span> <span class="p">{</span>
+
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-52">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-52">&#182;</a></div>
+      <p>Make a writable jQuery.Event from the native event object</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+         <span class="nx">event</span> <span class="o">=</span> <span class="nx">jQuery</span><span class="p">.</span><span class="nx">event</span><span class="p">.</span><span class="nx">fix</span><span class="p">(</span><span class="nx">event</span> <span class="o">||</span> <span class="nb">window</span><span class="p">.</span><span class="nx">event</span><span class="p">);</span>
+
+         <span class="kd">var</span> <span class="nx">handlers</span> <span class="o">=</span> <span class="p">(</span> <span class="p">(</span><span class="nx">jQuery</span><span class="p">.</span><span class="nx">_data</span><span class="p">(</span><span class="k">this</span><span class="p">,</span> <span class="s2">&quot;events&quot;</span><span class="p">)</span> <span class="o">||</span> <span class="p">{}</span> <span class="p">)[</span> <span class="nx">event</span><span class="p">.</span><span class="nx">type</span> <span class="p">]</span> <span class="o">||</span> <span class="p">[]),</span>
+               <span class="nx">delegateCount</span> <span class="o">=</span> <span class="nx">handlers</span><span class="p">.</span><span class="nx">delegateCount</span><span class="p">,</span>
+               <span class="nx">args</span> <span class="o">=</span> <span class="p">[].</span><span class="nx">slice</span><span class="p">.</span><span class="nx">call</span><span class="p">(</span><span class="nx">arguments</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
+               <span class="nx">run_all</span> <span class="o">=</span> <span class="o">!</span><span class="nx">event</span><span class="p">.</span><span class="nx">exclusive</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="nx">event</span><span class="p">.</span><span class="nx">namespace</span><span class="p">,</span>
+               <span class="nx">special</span> <span class="o">=</span> <span class="nx">jQuery</span><span class="p">.</span><span class="nx">event</span><span class="p">.</span><span class="nx">special</span><span class="p">[</span> <span class="nx">event</span><span class="p">.</span><span class="nx">type</span> <span class="p">]</span> <span class="o">||</span> <span class="p">{},</span>
+               <span class="nx">handlerQueue</span> <span class="o">=</span> <span class="p">[],</span>
+               <span class="nx">i</span><span class="p">,</span> <span class="nx">j</span><span class="p">,</span> <span class="nx">cur</span><span class="p">,</span> <span class="nx">jqcur</span><span class="p">,</span> <span class="nx">ret</span><span class="p">,</span> <span class="nx">selMatch</span><span class="p">,</span> <span class="nx">matched</span><span class="p">,</span> <span class="nx">matches</span><span class="p">,</span> <span class="nx">handleObj</span><span class="p">,</span> <span class="nx">sel</span><span class="p">,</span> <span class="nx">related</span><span class="p">;</span>
+
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-53">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-53">&#182;</a></div>
+      <p>Use the fix-ed jQuery.Event rather than the (read-only) native event</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+         <span class="nx">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="nx">event</span><span class="p">;</span>
+         <span class="nx">event</span><span class="p">.</span><span class="nx">delegateTarget</span> <span class="o">=</span> <span class="k">this</span><span class="p">;</span>
+
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-54">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-54">&#182;</a></div>
+      <p>Call the preDispatch hook for the mapped type, and let it bail if desired</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+         <span class="k">if</span> <span class="p">(</span><span class="nx">special</span><span class="p">.</span><span class="nx">preDispatch</span> <span class="o">&amp;&amp;</span> <span class="nx">special</span><span class="p">.</span><span class="nx">preDispatch</span><span class="p">.</span><span class="nx">call</span><span class="p">(</span><span class="k">this</span><span class="p">,</span> <span class="nx">event</span><span class="p">)</span> <span class="o">===</span> <span class="kc">false</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">return</span><span class="p">;</span>
+         <span class="p">}</span>
+
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-55">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-55">&#182;</a></div>
+      <p>Determine handlers that should run if there are delegated events
+         Avoid non-left-click bubbling in Firefox (#3861)</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+         <span class="k">if</span> <span class="p">(</span><span class="nx">delegateCount</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="p">(</span><span class="nx">event</span><span class="p">.</span><span class="nx">button</span> <span class="o">&amp;&amp;</span> <span class="nx">event</span><span class="p">.</span><span class="nx">type</span> <span class="o">===</span> <span class="s2">&quot;click&quot;</span><span class="p">))</span> <span class="p">{</span>
+
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-56">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-56">&#182;</a></div>
+      <p>Pregenerate a single jQuery object for reuse with .is()</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+            <span class="nx">jqcur</span> <span class="o">=</span> <span class="nx">jQuery</span><span class="p">(</span><span class="k">this</span><span class="p">);</span>
+            <span class="nx">jqcur</span><span class="p">.</span><span class="nx">context</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">ownerDocument</span> <span class="o">||</span> <span class="k">this</span><span class="p">;</span>
+
+            <span class="k">for</span> <span class="p">(</span><span class="nx">cur</span> <span class="o">=</span> <span class="nx">event</span><span class="p">.</span><span class="nx">target</span><span class="p">;</span> <span class="nx">cur</span> <span class="o">!=</span> <span class="k">this</span><span class="p">;</span> <span class="nx">cur</span> <span class="o">=</span> <span class="nx">cur</span><span class="p">.</span><span class="nx">parentNode</span> <span class="o">||</span> <span class="k">this</span><span class="p">)</span> <span class="p">{</span>
+
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-57">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-57">&#182;</a></div>
+      <p>Don't process events on disabled elements (#6911, #8165)</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+               <span class="k">if</span> <span class="p">(</span><span class="nx">cur</span><span class="p">.</span><span class="nx">disabled</span> <span class="o">!==</span> <span class="kc">true</span><span class="p">)</span> <span class="p">{</span>
+                  <span class="nx">selMatch</span> <span class="o">=</span> <span class="p">{};</span>
+                  <span class="nx">matches</span> <span class="o">=</span> <span class="p">[];</span>
+                  <span class="nx">jqcur</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="nx">cur</span><span class="p">;</span>
+                  <span class="k">for</span> <span class="p">(</span><span class="nx">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">i</span> <span class="o">&lt;</span> <span class="nx">delegateCount</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+                     <span class="nx">handleObj</span> <span class="o">=</span> <span class="nx">handlers</span><span class="p">[</span> <span class="nx">i</span> <span class="p">];</span>
+                     <span class="nx">sel</span> <span class="o">=</span> <span class="nx">handleObj</span><span class="p">.</span><span class="nx">selector</span><span class="p">;</span>
+
+                     <span class="k">if</span> <span class="p">(</span><span class="nx">selMatch</span><span class="p">[</span> <span class="nx">sel</span> <span class="p">]</span> <span class="o">===</span> <span class="kc">undefined</span><span class="p">)</span> <span class="p">{</span>
+                        <span class="nx">selMatch</span><span class="p">[</span> <span class="nx">sel</span> <span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+                              <span class="nx">handleObj</span><span class="p">.</span><span class="nx">quick</span> <span class="o">?</span> <span class="nx">quickIs</span><span class="p">(</span><span class="nx">cur</span><span class="p">,</span> <span class="nx">handleObj</span><span class="p">.</span><span class="nx">quick</span><span class="p">)</span> <span class="o">:</span> <span class="nx">jqcur</span><span class="p">.</span><span class="nx">is</span><span class="p">(</span><span class="nx">sel</span><span class="p">)</span>
+                              <span class="p">);</span>
+                     <span class="p">}</span>
+                     <span class="k">if</span> <span class="p">(</span><span class="nx">selMatch</span><span class="p">[</span> <span class="nx">sel</span> <span class="p">])</span> <span class="p">{</span>
+                        <span class="nx">matches</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="nx">handleObj</span><span class="p">);</span>
+                     <span class="p">}</span>
+                  <span class="p">}</span>
+                  <span class="k">if</span> <span class="p">(</span><span class="nx">matches</span><span class="p">.</span><span class="nx">length</span><span class="p">)</span> <span class="p">{</span>
+                     <span class="nx">handlerQueue</span><span class="p">.</span><span class="nx">push</span><span class="p">({</span> <span class="nx">elem</span><span class="o">:</span><span class="nx">cur</span><span class="p">,</span> <span class="nx">matches</span><span class="o">:</span><span class="nx">matches</span> <span class="p">});</span>
+                  <span class="p">}</span>
+               <span class="p">}</span>
+            <span class="p">}</span>
+         <span class="p">}</span>
+
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-58">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-58">&#182;</a></div>
+      <p>Add the remaining (directly-bound) handlers</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+         <span class="k">if</span> <span class="p">(</span><span class="nx">handlers</span><span class="p">.</span><span class="nx">length</span> <span class="o">&gt;</span> <span class="nx">delegateCount</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nx">handlerQueue</span><span class="p">.</span><span class="nx">push</span><span class="p">({</span> <span class="nx">elem</span><span class="o">:</span><span class="k">this</span><span class="p">,</span> <span class="nx">matches</span><span class="o">:</span><span class="nx">handlers</span><span class="p">.</span><span class="nx">slice</span><span class="p">(</span><span class="nx">delegateCount</span><span class="p">)</span> <span class="p">});</span>
+         <span class="p">}</span>
+
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-59">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-59">&#182;</a></div>
+      <p>Run delegates first; they may want to stop propagation beneath us</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+         <span class="k">for</span> <span class="p">(</span><span class="nx">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">i</span> <span class="o">&lt;</span> <span class="nx">handlerQueue</span><span class="p">.</span><span class="nx">length</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="nx">event</span><span class="p">.</span><span class="nx">isPropagationStopped</span><span class="p">();</span> <span class="nx">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nx">matched</span> <span class="o">=</span> <span class="nx">handlerQueue</span><span class="p">[</span> <span class="nx">i</span> <span class="p">];</span>
+            <span class="nx">event</span><span class="p">.</span><span class="nx">currentTarget</span> <span class="o">=</span> <span class="nx">matched</span><span class="p">.</span><span class="nx">elem</span><span class="p">;</span>
+
+            <span class="k">for</span> <span class="p">(</span><span class="nx">j</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">j</span> <span class="o">&lt;</span> <span class="nx">matched</span><span class="p">.</span><span class="nx">matches</span><span class="p">.</span><span class="nx">length</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="nx">event</span><span class="p">.</span><span class="nx">isImmediatePropagationStopped</span><span class="p">();</span> <span class="nx">j</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+               <span class="nx">handleObj</span> <span class="o">=</span> <span class="nx">matched</span><span class="p">.</span><span class="nx">matches</span><span class="p">[</span> <span class="nx">j</span> <span class="p">];</span>
+
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-60">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-60">&#182;</a></div>
+      <p>Triggered event must either 1) be non-exclusive and have no namespace, or
+         2) have namespace(s) a subset or equal to those in the bound event (both can have no namespace).</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+               <span class="k">if</span> <span class="p">(</span><span class="nx">run_all</span> <span class="o">||</span> <span class="p">(</span><span class="o">!</span><span class="nx">event</span><span class="p">.</span><span class="nx">namespace</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="nx">handleObj</span><span class="p">.</span><span class="nx">namespace</span><span class="p">)</span> <span class="o">||</span> <span class="nx">event</span><span class="p">.</span><span class="nx">namespace_re</span> <span class="o">&amp;&amp;</span> <span class="nx">event</span><span class="p">.</span><span class="nx">namespace_re</span><span class="p">.</span><span class="nx">test</span><span class="p">(</span><span class="nx">handleObj</span><span class="p">.</span><span class="nx">namespace</span><span class="p">))</span> <span class="p">{</span>
+
+                  <span class="nx">event</span><span class="p">.</span><span class="nx">data</span> <span class="o">=</span> <span class="nx">handleObj</span><span class="p">.</span><span class="nx">data</span><span class="p">;</span>
+                  <span class="nx">event</span><span class="p">.</span><span class="nx">handleObj</span> <span class="o">=</span> <span class="nx">handleObj</span><span class="p">;</span>
+
+                  <span class="nx">ret</span> <span class="o">=</span> <span class="p">(</span> <span class="p">(</span><span class="nx">jQuery</span><span class="p">.</span><span class="nx">event</span><span class="p">.</span><span class="nx">special</span><span class="p">[</span> <span class="nx">handleObj</span><span class="p">.</span><span class="nx">origType</span> <span class="p">]</span> <span class="o">||</span> <span class="p">{}).</span><span class="nx">handle</span> <span class="o">||</span> <span class="nx">handleObj</span><span class="p">.</span><span class="nx">handler</span> <span class="p">)</span>
+                        <span class="p">.</span><span class="nx">apply</span><span class="p">(</span><span class="nx">matched</span><span class="p">.</span><span class="nx">elem</span><span class="p">,</span> <span class="nx">args</span><span class="p">);</span>
+
+                  <span class="k">if</span> <span class="p">(</span><span class="nx">ret</span> <span class="o">!==</span> <span class="kc">undefined</span><span class="p">)</span> <span class="p">{</span>
+                     <span class="nx">event</span><span class="p">.</span><span class="nx">result</span> <span class="o">=</span> <span class="nx">ret</span><span class="p">;</span>
+                     <span class="k">if</span> <span class="p">(</span><span class="nx">ret</span> <span class="o">===</span> <span class="kc">false</span><span class="p">)</span> <span class="p">{</span>
+                        <span class="nx">event</span><span class="p">.</span><span class="nx">preventDefault</span><span class="p">();</span>
+                        <span class="nx">event</span><span class="p">.</span><span class="nx">stopPropagation</span><span class="p">();</span>
+                     <span class="p">}</span>
+                  <span class="p">}</span>
+               <span class="p">}</span>
+            <span class="p">}</span>
+         <span class="p">}</span>
+
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-61">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-61">&#182;</a></div>
+      <p>Call the postDispatch hook for the mapped type</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+         <span class="k">if</span> <span class="p">(</span><span class="nx">special</span><span class="p">.</span><span class="nx">postDispatch</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nx">special</span><span class="p">.</span><span class="nx">postDispatch</span><span class="p">.</span><span class="nx">call</span><span class="p">(</span><span class="k">this</span><span class="p">,</span> <span class="nx">event</span><span class="p">);</span>
+         <span class="p">}</span>
+
+         <span class="k">return</span> <span class="nx">event</span><span class="p">.</span><span class="nx">result</span><span class="p">;</span>
+      <span class="p">},</span>
+
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-62">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-62">&#182;</a></div>
+      <p>Includes some event props shared by KeyEvent and MouseEvent
+         <strong>* attrChange attrName relatedNode srcElement are not normalized, non-W3C, deprecated, will be removed
+            in 1.8 *</strong></p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+      <span class="nx">props</span><span class="o">:</span>   <span class="s2">&quot;attrChange attrName relatedNode srcElement altKey bubbles cancelable ctrlKey currentTarget eventPhase metaKey relatedTarget shiftKey target timeStamp view which&quot;</span><span class="p">.</span><span class="nx">split</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">),</span>
+
+      <span class="nx">fixHooks</span><span class="o">:</span><span class="p">{},</span>
+
+      <span class="nx">keyHooks</span><span class="o">:</span><span class="p">{</span>
+         <span class="nx">props</span><span class="o">:</span> <span class="s2">&quot;char charCode key keyCode&quot;</span><span class="p">.</span><span class="nx">split</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">),</span>
+         <span class="nx">filter</span><span class="o">:</span><span class="kd">function</span><span class="p">(</span><span class="nx">event</span><span class="p">,</span> <span class="nx">original</span><span class="p">)</span> <span class="p">{</span>
+
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-63">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-63">&#182;</a></div>
+      <p>Add which for key events</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+            <span class="k">if</span> <span class="p">(</span><span class="nx">event</span><span class="p">.</span><span class="nx">which</span> <span class="o">==</span> <span class="kc">null</span><span class="p">)</span> <span class="p">{</span>
+               <span class="nx">event</span><span class="p">.</span><span class="nx">which</span> <span class="o">=</span> <span class="nx">original</span><span class="p">.</span><span class="nx">charCode</span> <span class="o">!=</span> <span class="kc">null</span> <span class="o">?</span> <span class="nx">original</span><span class="p">.</span><span class="nx">charCode</span> <span class="o">:</span> <span class="nx">original</span><span class="p">.</span><span class="nx">keyCode</span><span class="p">;</span>
+            <span class="p">}</span>
+
+            <span class="k">return</span> <span class="nx">event</span><span class="p">;</span>
+         <span class="p">}</span>
+      <span class="p">},</span>
+
+      <span class="nx">mouseHooks</span><span class="o">:</span><span class="p">{</span>
+         <span class="nx">props</span><span class="o">:</span> <span class="s2">&quot;button buttons clientX clientY fromElement offsetX offsetY pageX pageY screenX screenY toElement&quot;</span><span class="p">.</span><span class="nx">split</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">),</span>
+         <span class="nx">filter</span><span class="o">:</span><span class="kd">function</span><span class="p">(</span><span class="nx">event</span><span class="p">,</span> <span class="nx">original</span><span class="p">)</span> <span class="p">{</span>
+            <span class="kd">var</span> <span class="nx">eventDoc</span><span class="p">,</span> <span class="nx">doc</span><span class="p">,</span> <span class="nx">body</span><span class="p">,</span>
+                  <span class="nx">button</span> <span class="o">=</span> <span class="nx">original</span><span class="p">.</span><span class="nx">button</span><span class="p">,</span>
+                  <span class="nx">fromElement</span> <span class="o">=</span> <span class="nx">original</span><span class="p">.</span><span class="nx">fromElement</span><span class="p">;</span>
+
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-64">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-64">&#182;</a></div>
+      <p>Calculate pageX/Y if missing and clientX/Y available</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+            <span class="k">if</span> <span class="p">(</span><span class="nx">event</span><span class="p">.</span><span class="nx">pageX</span> <span class="o">==</span> <span class="kc">null</span> <span class="o">&amp;&amp;</span> <span class="nx">original</span><span class="p">.</span><span class="nx">clientX</span> <span class="o">!=</span> <span class="kc">null</span><span class="p">)</span> <span class="p">{</span>
+               <span class="nx">eventDoc</span> <span class="o">=</span> <span class="nx">event</span><span class="p">.</span><span class="nx">target</span><span class="p">.</span><span class="nx">ownerDocument</span> <span class="o">||</span> <span class="nb">document</span><span class="p">;</span>
+               <span class="nx">doc</span> <span class="o">=</span> <span class="nx">eventDoc</span><span class="p">.</span><span class="nx">documentElement</span><span class="p">;</span>
+               <span class="nx">body</span> <span class="o">=</span> <span class="nx">eventDoc</span><span class="p">.</span><span class="nx">body</span><span class="p">;</span>
+
+               <span class="nx">event</span><span class="p">.</span><span class="nx">pageX</span> <span class="o">=</span> <span class="nx">original</span><span class="p">.</span><span class="nx">clientX</span> <span class="o">+</span> <span class="p">(</span> <span class="nx">doc</span> <span class="o">&amp;&amp;</span> <span class="nx">doc</span><span class="p">.</span><span class="nx">scrollLeft</span> <span class="o">||</span> <span class="nx">body</span> <span class="o">&amp;&amp;</span> <span class="nx">body</span><span class="p">.</span><span class="nx">scrollLeft</span> <span class="o">||</span> <span class="mi">0</span> <span class="p">)</span> <span class="o">-</span> <span class="p">(</span> <span class="nx">doc</span> <span class="o">&amp;&amp;</span> <span class="nx">doc</span><span class="p">.</span><span class="nx">clientLeft</span> <span class="o">||</span> <span class="nx">body</span> <span class="o">&amp;&amp;</span> <span class="nx">body</span><span class="p">.</span><span class="nx">clientLeft</span> <span class="o">||</span> <span class="mi">0</span> <span class="p">);</span>
+               <span class="nx">event</span><span class="p">.</span><span class="nx">pageY</span> <span class="o">=</span> <span class="nx">original</span><span class="p">.</span><span class="nx">clientY</span> <span class="o">+</span> <span class="p">(</span> <span class="nx">doc</span> <span class="o">&amp;&amp;</span> <span class="nx">doc</span><span class="p">.</span><span class="nx">scrollTop</span> <span class="o">||</span> <span class="nx">body</span> <span class="o">&amp;&amp;</span> <span class="nx">body</span><span class="p">.</span><span class="nx">scrollTop</span> <span class="o">||</span> <span class="mi">0</span> <span class="p">)</span> <span class="o">-</span> <span class="p">(</span> <span class="nx">doc</span> <span class="o">&amp;&amp;</span> <span class="nx">doc</span><span class="p">.</span><span class="nx">clientTop</span> <span class="o">||</span> <span class="nx">body</span> <span class="o">&amp;&amp;</span> <span class="nx">body</span><span class="p">.</span><span class="nx">clientTop</span> <span class="o">||</span> <span class="mi">0</span> <span class="p">);</span>
+            <span class="p">}</span>
+
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-65">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-65">&#182;</a></div>
+      <p>Add relatedTarget, if necessary</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+            <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">event</span><span class="p">.</span><span class="nx">relatedTarget</span> <span class="o">&amp;&amp;</span> <span class="nx">fromElement</span><span class="p">)</span> <span class="p">{</span>
+               <span class="nx">event</span><span class="p">.</span><span class="nx">relatedTarget</span> <span class="o">=</span> <span class="nx">fromElement</span> <span class="o">===</span> <span class="nx">event</span><span class="p">.</span><span class="nx">target</span> <span class="o">?</span> <span class="nx">original</span><span class="p">.</span><span class="nx">toElement</span> <span class="o">:</span> <span class="nx">fromElement</span><span class="p">;</span>
+            <span class="p">}</span>
+
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-66">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-66">&#182;</a></div>
+      <p>Add which for click: 1 === left; 2 === middle; 3 === right
+         Note: button is not normalized, so don't use it</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+            <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">event</span><span class="p">.</span><span class="nx">which</span> <span class="o">&amp;&amp;</span> <span class="nx">button</span> <span class="o">!==</span> <span class="kc">undefined</span><span class="p">)</span> <span class="p">{</span>
+               <span class="nx">event</span><span class="p">.</span><span class="nx">which</span> <span class="o">=</span> <span class="p">(</span> <span class="nx">button</span> <span class="o">&amp;</span> <span class="mi">1</span> <span class="o">?</span> <span class="mi">1</span> <span class="o">:</span> <span class="p">(</span> <span class="nx">button</span> <span class="o">&amp;</span> <span class="mi">2</span> <span class="o">?</span> <span class="mi">3</span> <span class="o">:</span> <span class="p">(</span> <span class="nx">button</span> <span class="o">&amp;</span> <span class="mi">4</span> <span class="o">?</span> <span class="mi">2</span> <span class="o">:</span> <span class="mi">0</span> <span class="p">)</span> <span class="p">)</span> <span class="p">);</span>
+            <span class="p">}</span>
+
+            <span class="k">return</span> <span class="nx">event</span><span class="p">;</span>
+         <span class="p">}</span>
+      <span class="p">},</span>
+
+      <span class="nx">fix</span><span class="o">:</span><span class="kd">function</span><span class="p">(</span><span class="nx">event</span><span class="p">)</span> <span class="p">{</span>
+         <span class="k">if</span> <span class="p">(</span><span class="nx">event</span><span class="p">[</span> <span class="nx">jQuery</span><span class="p">.</span><span class="nx">expando</span> <span class="p">])</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="nx">event</span><span class="p">;</span>
+         <span class="p">}</span>
+
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-67">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-67">&#182;</a></div>
+      <p>Create a writable copy of the event object and normalize some properties</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+         <span class="kd">var</span> <span class="nx">i</span><span class="p">,</span> <span class="nx">prop</span><span class="p">,</span>
+               <span class="nx">originalEvent</span> <span class="o">=</span> <span class="nx">event</span><span class="p">,</span>
+               <span class="nx">fixHook</span> <span class="o">=</span> <span class="nx">jQuery</span><span class="p">.</span><span class="nx">event</span><span class="p">.</span><span class="nx">fixHooks</span><span class="p">[</span> <span class="nx">event</span><span class="p">.</span><span class="nx">type</span> <span class="p">]</span> <span class="o">||</span> <span class="p">{},</span>
+               <span class="nx">copy</span> <span class="o">=</span> <span class="nx">fixHook</span><span class="p">.</span><span class="nx">props</span> <span class="o">?</span> <span class="k">this</span><span class="p">.</span><span class="nx">props</span><span class="p">.</span><span class="nx">concat</span><span class="p">(</span><span class="nx">fixHook</span><span class="p">.</span><span class="nx">props</span><span class="p">)</span> <span class="o">:</span> <span class="k">this</span><span class="p">.</span><span class="nx">props</span><span class="p">;</span>
+
+         <span class="nx">event</span> <span class="o">=</span> <span class="nx">jQuery</span><span class="p">.</span><span class="nx">Event</span><span class="p">(</span><span class="nx">originalEvent</span><span class="p">);</span>
+
+         <span class="k">for</span> <span class="p">(</span><span class="nx">i</span> <span class="o">=</span> <span class="nx">copy</span><span class="p">.</span><span class="nx">length</span><span class="p">;</span> <span class="nx">i</span><span class="p">;)</span> <span class="p">{</span>
+            <span class="nx">prop</span> <span class="o">=</span> <span class="nx">copy</span><span class="p">[</span> <span class="o">--</span><span class="nx">i</span> <span class="p">];</span>
+            <span class="nx">event</span><span class="p">[</span> <span class="nx">prop</span> <span class="p">]</span> <span class="o">=</span> <span class="nx">originalEvent</span><span class="p">[</span> <span class="nx">prop</span> <span class="p">];</span>
+         <span class="p">}</span>
+
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-68">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-68">&#182;</a></div>
+      <p>Fix target property, if necessary (#1925, IE 6/7/8 &amp; Safari2)</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+         <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">event</span><span class="p">.</span><span class="nx">target</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nx">event</span><span class="p">.</span><span class="nx">target</span> <span class="o">=</span> <span class="nx">originalEvent</span><span class="p">.</span><span class="nx">srcElement</span> <span class="o">||</span> <span class="nb">document</span><span class="p">;</span>
+         <span class="p">}</span>
+
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-69">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-69">&#182;</a></div>
+      <p>Target should not be a text node (#504, Safari)</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+         <span class="k">if</span> <span class="p">(</span><span class="nx">event</span><span class="p">.</span><span class="nx">target</span><span class="p">.</span><span class="nx">nodeType</span> <span class="o">===</span> <span class="mi">3</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nx">event</span><span class="p">.</span><span class="nx">target</span> <span class="o">=</span> <span class="nx">event</span><span class="p">.</span><span class="nx">target</span><span class="p">.</span><span class="nx">parentNode</span><span class="p">;</span>
+         <span class="p">}</span>
+
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-70">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-70">&#182;</a></div>
+      <p>For mouse/key events; add metaKey if it's not there (#3368, IE6/7/8)</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+         <span class="k">if</span> <span class="p">(</span><span class="nx">event</span><span class="p">.</span><span class="nx">metaKey</span> <span class="o">===</span> <span class="kc">undefined</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nx">event</span><span class="p">.</span><span class="nx">metaKey</span> <span class="o">=</span> <span class="nx">event</span><span class="p">.</span><span class="nx">ctrlKey</span><span class="p">;</span>
+         <span class="p">}</span>
+
+         <span class="k">return</span> <span class="nx">fixHook</span><span class="p">.</span><span class="nx">filter</span> <span class="o">?</span> <span class="nx">fixHook</span><span class="p">.</span><span class="nx">filter</span><span class="p">(</span><span class="nx">event</span><span class="p">,</span> <span class="nx">originalEvent</span><span class="p">)</span> <span class="o">:</span> <span class="nx">event</span><span class="p">;</span>
+      <span class="p">},</span>
+
+      <span class="nx">special</span><span class="o">:</span><span class="p">{</span>
+         <span class="nx">ready</span><span class="o">:</span><span class="p">{</span>
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-71">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-71">&#182;</a></div>
+      <p>Make sure the ready event is setup</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+            <span class="nx">setup</span><span class="o">:</span><span class="nx">jQuery</span><span class="p">.</span><span class="nx">bindReady</span>
+         <span class="p">},</span>
+
+         <span class="nx">load</span><span class="o">:</span><span class="p">{</span>
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-72">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-72">&#182;</a></div>
+      <p>Prevent triggered image.load events from bubbling to window.load</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+            <span class="nx">noBubble</span><span class="o">:</span><span class="kc">true</span>
+         <span class="p">},</span>
+
+         <span class="nx">focus</span><span class="o">:</span><span class="p">{</span>
+            <span class="nx">delegateType</span><span class="o">:</span><span class="s2">&quot;focusin&quot;</span>
+         <span class="p">},</span>
+         <span class="nx">blur</span><span class="o">:</span> <span class="p">{</span>
+            <span class="nx">delegateType</span><span class="o">:</span><span class="s2">&quot;focusout&quot;</span>
+         <span class="p">},</span>
+
+         <span class="nx">beforeunload</span><span class="o">:</span><span class="p">{</span>
+            <span class="nx">setup</span><span class="o">:</span><span class="kd">function</span><span class="p">(</span><span class="nx">data</span><span class="p">,</span> <span class="nx">namespaces</span><span class="p">,</span> <span class="nx">eventHandle</span><span class="p">)</span> <span class="p">{</span>
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-73">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-73">&#182;</a></div>
+      <p>We only want to do this special case on windows</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+               <span class="k">if</span> <span class="p">(</span><span class="nx">jQuery</span><span class="p">.</span><span class="nx">isWindow</span><span class="p">(</span><span class="k">this</span><span class="p">))</span> <span class="p">{</span>
+                  <span class="k">this</span><span class="p">.</span><span class="nx">onbeforeunload</span> <span class="o">=</span> <span class="nx">eventHandle</span><span class="p">;</span>
+               <span class="p">}</span>
+            <span class="p">},</span>
+
+            <span class="nx">teardown</span><span class="o">:</span><span class="kd">function</span><span class="p">(</span><span class="nx">namespaces</span><span class="p">,</span> <span class="nx">eventHandle</span><span class="p">)</span> <span class="p">{</span>
+               <span class="k">if</span> <span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">onbeforeunload</span> <span class="o">===</span> <span class="nx">eventHandle</span><span class="p">)</span> <span class="p">{</span>
+                  <span class="k">this</span><span class="p">.</span><span class="nx">onbeforeunload</span> <span class="o">=</span> <span class="kc">null</span><span class="p">;</span>
+               <span class="p">}</span>
+            <span class="p">}</span>
+         <span class="p">}</span>
+      <span class="p">},</span>
+
+      <span class="nx">simulate</span><span class="o">:</span><span class="kd">function</span><span class="p">(</span><span class="nx">type</span><span class="p">,</span> <span class="nx">elem</span><span class="p">,</span> <span class="nx">event</span><span class="p">,</span> <span class="nx">bubble</span><span class="p">)</span> <span class="p">{</span>
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-74">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-74">&#182;</a></div>
+      <p>Piggyback on a donor event to simulate a different one.
+         Fake originalEvent to avoid donor's stopPropagation, but if the
+         simulated event prevents default then we do the same on the donor.</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+         <span class="kd">var</span> <span class="nx">e</span> <span class="o">=</span> <span class="nx">jQuery</span><span class="p">.</span><span class="nx">extend</span><span class="p">(</span>
+               <span class="k">new</span> <span class="nx">jQuery</span><span class="p">.</span><span class="nx">Event</span><span class="p">(),</span>
+               <span class="nx">event</span><span class="p">,</span>
+               <span class="p">{</span> <span class="nx">type</span><span class="o">:</span>          <span class="nx">type</span><span class="p">,</span>
+                  <span class="nx">isSimulated</span><span class="o">:</span>  <span class="kc">true</span><span class="p">,</span>
+                  <span class="nx">originalEvent</span><span class="o">:</span><span class="p">{}</span>
+               <span class="p">}</span>
+         <span class="p">);</span>
+         <span class="k">if</span> <span class="p">(</span><span class="nx">bubble</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nx">jQuery</span><span class="p">.</span><span class="nx">event</span><span class="p">.</span><span class="nx">trigger</span><span class="p">(</span><span class="nx">e</span><span class="p">,</span> <span class="kc">null</span><span class="p">,</span> <span class="nx">elem</span><span class="p">);</span>
+         <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+            <span class="nx">jQuery</span><span class="p">.</span><span class="nx">event</span><span class="p">.</span><span class="nx">dispatch</span><span class="p">.</span><span class="nx">call</span><span class="p">(</span><span class="nx">elem</span><span class="p">,</span> <span class="nx">e</span><span class="p">);</span>
+         <span class="p">}</span>
+         <span class="k">if</span> <span class="p">(</span><span class="nx">e</span><span class="p">.</span><span class="nx">isDefaultPrevented</span><span class="p">())</span> <span class="p">{</span>
+            <span class="nx">event</span><span class="p">.</span><span class="nx">preventDefault</span><span class="p">();</span>
+         <span class="p">}</span>
+      <span class="p">}</span>
+   <span class="p">};</span>
+
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-75">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-75">&#182;</a></div>
+      <p>Some plugins are using, but it's undocumented/deprecated and will be removed.
+         The 1.7 special event interface should provide all the hooks needed now.</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+   <span class="nx">jQuery</span><span class="p">.</span><span class="nx">event</span><span class="p">.</span><span class="nx">handle</span> <span class="o">=</span> <span class="nx">jQuery</span><span class="p">.</span><span class="nx">event</span><span class="p">.</span><span class="nx">dispatch</span><span class="p">;</span>
+
+   <span class="nx">jQuery</span><span class="p">.</span><span class="nx">removeEvent</span> <span class="o">=</span> <span class="nb">document</span><span class="p">.</span><span class="nx">removeEventListener</span> <span class="o">?</span>
+         <span class="kd">function</span><span class="p">(</span><span class="nx">elem</span><span class="p">,</span> <span class="nx">type</span><span class="p">,</span> <span class="nx">handle</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nx">elem</span><span class="p">.</span><span class="nx">removeEventListener</span><span class="p">)</span> <span class="p">{</span>
+               <span class="nx">elem</span><span class="p">.</span><span class="nx">removeEventListener</span><span class="p">(</span><span class="nx">type</span><span class="p">,</span> <span class="nx">handle</span><span class="p">,</span> <span class="kc">false</span><span class="p">);</span>
+            <span class="p">}</span>
+         <span class="p">}</span> <span class="o">:</span>
+         <span class="kd">function</span><span class="p">(</span><span class="nx">elem</span><span class="p">,</span> <span class="nx">type</span><span class="p">,</span> <span class="nx">handle</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nx">elem</span><span class="p">.</span><span class="nx">detachEvent</span><span class="p">)</span> <span class="p">{</span>
+               <span class="nx">elem</span><span class="p">.</span><span class="nx">detachEvent</span><span class="p">(</span><span class="s2">&quot;on&quot;</span> <span class="o">+</span> <span class="nx">type</span><span class="p">,</span> <span class="nx">handle</span><span class="p">);</span>
+            <span class="p">}</span>
+         <span class="p">};</span>
+
+   <span class="nx">jQuery</span><span class="p">.</span><span class="nx">Event</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">src</span><span class="p">,</span> <span class="nx">props</span><span class="p">)</span> <span class="p">{</span>
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-76">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-76">&#182;</a></div>
+      <p>Allow instantiation without the 'new' keyword</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+      <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="p">(</span><span class="k">this</span> <span class="k">instanceof</span> <span class="nx">jQuery</span><span class="p">.</span><span class="nx">Event</span><span class="p">))</span> <span class="p">{</span>
+         <span class="k">return</span> <span class="k">new</span> <span class="nx">jQuery</span><span class="p">.</span><span class="nx">Event</span><span class="p">(</span><span class="nx">src</span><span class="p">,</span> <span class="nx">props</span><span class="p">);</span>
+      <span class="p">}</span>
+
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-77">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-77">&#182;</a></div>
+      <p>Event object</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+      <span class="k">if</span> <span class="p">(</span><span class="nx">src</span> <span class="o">&amp;&amp;</span> <span class="nx">src</span><span class="p">.</span><span class="nx">type</span><span class="p">)</span> <span class="p">{</span>
+         <span class="k">this</span><span class="p">.</span><span class="nx">originalEvent</span> <span class="o">=</span> <span class="nx">src</span><span class="p">;</span>
+         <span class="k">this</span><span class="p">.</span><span class="nx">type</span> <span class="o">=</span> <span class="nx">src</span><span class="p">.</span><span class="nx">type</span><span class="p">;</span>
+
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-78">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-78">&#182;</a></div>
+      <p>Events bubbling up the document may have been marked as prevented
+         by a handler lower down the tree; reflect the correct value.</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+         <span class="k">this</span><span class="p">.</span><span class="nx">isDefaultPrevented</span> <span class="o">=</span> <span class="p">(</span> <span class="nx">src</span><span class="p">.</span><span class="nx">defaultPrevented</span> <span class="o">||</span> <span class="nx">src</span><span class="p">.</span><span class="nx">returnValue</span> <span class="o">===</span> <span class="kc">false</span> <span class="o">||</span>
+               <span class="nx">src</span><span class="p">.</span><span class="nx">getPreventDefault</span> <span class="o">&amp;&amp;</span> <span class="nx">src</span><span class="p">.</span><span class="nx">getPreventDefault</span><span class="p">()</span> <span class="p">)</span> <span class="o">?</span> <span class="nx">returnTrue</span> <span class="o">:</span> <span class="nx">returnFalse</span><span class="p">;</span>
+
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-79">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-79">&#182;</a></div>
+      <p>Event type</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+      <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+         <span class="k">this</span><span class="p">.</span><span class="nx">type</span> <span class="o">=</span> <span class="nx">src</span><span class="p">;</span>
+      <span class="p">}</span>
+
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-80">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-80">&#182;</a></div>
+      <p>Put explicitly provided properties onto the event object</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+      <span class="k">if</span> <span class="p">(</span><span class="nx">props</span><span class="p">)</span> <span class="p">{</span>
+         <span class="nx">jQuery</span><span class="p">.</span><span class="nx">extend</span><span class="p">(</span><span class="k">this</span><span class="p">,</span> <span class="nx">props</span><span class="p">);</span>
+      <span class="p">}</span>
+
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-81">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-81">&#182;</a></div>
+      <p>Create a timestamp if incoming event doesn't have one</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+      <span class="k">this</span><span class="p">.</span><span class="nx">timeStamp</span> <span class="o">=</span> <span class="nx">src</span> <span class="o">&amp;&amp;</span> <span class="nx">src</span><span class="p">.</span><span class="nx">timeStamp</span> <span class="o">||</span> <span class="nx">jQuery</span><span class="p">.</span><span class="nx">now</span><span class="p">();</span>
+
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-82">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-82">&#182;</a></div>
+      <p>Mark it as fixed</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+      <span class="k">this</span><span class="p">[</span> <span class="nx">jQuery</span><span class="p">.</span><span class="nx">expando</span> <span class="p">]</span> <span class="o">=</span> <span class="kc">true</span><span class="p">;</span>
+   <span class="p">};</span>
+
+   <span class="kd">function</span> <span class="nx">returnFalse</span><span class="p">()</span> <span class="p">{</span>
+      <span class="k">return</span> <span class="kc">false</span><span class="p">;</span>
+   <span class="p">}</span>
+
+   <span class="kd">function</span> <span class="nx">returnTrue</span><span class="p">()</span> <span class="p">{</span>
+      <span class="k">return</span> <span class="kc">true</span><span class="p">;</span>
+   <span class="p">}</span>
+
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-83">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-83">&#182;</a></div>
+      <p>jQuery.Event is based on DOM3 Events as specified by the ECMAScript Language Binding
+         http://www.w3.org/TR/2003/WD-DOM-Level-3-Events-20030331/ecma-script-binding.html</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+   <span class="nx">jQuery</span><span class="p">.</span><span class="nx">Event</span><span class="p">.</span><span class="nx">prototype</span> <span class="o">=</span> <span class="p">{</span>
+      <span class="nx">preventDefault</span><span class="o">:</span>               <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+         <span class="k">this</span><span class="p">.</span><span class="nx">isDefaultPrevented</span> <span class="o">=</span> <span class="nx">returnTrue</span><span class="p">;</span>
+
+         <span class="kd">var</span> <span class="nx">e</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">originalEvent</span><span class="p">;</span>
+         <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">e</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">return</span><span class="p">;</span>
+         <span class="p">}</span>
+
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-84">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-84">&#182;</a></div>
+      <p>if preventDefault exists run it on the original event</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+         <span class="k">if</span> <span class="p">(</span><span class="nx">e</span><span class="p">.</span><span class="nx">preventDefault</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nx">e</span><span class="p">.</span><span class="nx">preventDefault</span><span class="p">();</span>
+
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-85">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-85">&#182;</a></div>
+      <p>otherwise set the returnValue property of the original event to false (IE)</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+         <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+            <span class="nx">e</span><span class="p">.</span><span class="nx">returnValue</span> <span class="o">=</span> <span class="kc">false</span><span class="p">;</span>
+         <span class="p">}</span>
+      <span class="p">},</span>
+      <span class="nx">stopPropagation</span><span class="o">:</span>              <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+         <span class="k">this</span><span class="p">.</span><span class="nx">isPropagationStopped</span> <span class="o">=</span> <span class="nx">returnTrue</span><span class="p">;</span>
+
+         <span class="kd">var</span> <span class="nx">e</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">originalEvent</span><span class="p">;</span>
+         <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">e</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">return</span><span class="p">;</span>
+         <span class="p">}</span>
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-86">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-86">&#182;</a></div>
+      <p>if stopPropagation exists run it on the original event</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+         <span class="k">if</span> <span class="p">(</span><span class="nx">e</span><span class="p">.</span><span class="nx">stopPropagation</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nx">e</span><span class="p">.</span><span class="nx">stopPropagation</span><span class="p">();</span>
+         <span class="p">}</span>
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-87">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-87">&#182;</a></div>
+      <p>otherwise set the cancelBubble property of the original event to true (IE)</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+         <span class="nx">e</span><span class="p">.</span><span class="nx">cancelBubble</span> <span class="o">=</span> <span class="kc">true</span><span class="p">;</span>
+      <span class="p">},</span>
+      <span class="nx">stopImmediatePropagation</span><span class="o">:</span>     <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+         <span class="k">this</span><span class="p">.</span><span class="nx">isImmediatePropagationStopped</span> <span class="o">=</span> <span class="nx">returnTrue</span><span class="p">;</span>
+         <span class="k">this</span><span class="p">.</span><span class="nx">stopPropagation</span><span class="p">();</span>
+      <span class="p">},</span>
+      <span class="nx">isDefaultPrevented</span><span class="o">:</span>           <span class="nx">returnFalse</span><span class="p">,</span>
+      <span class="nx">isPropagationStopped</span><span class="o">:</span>         <span class="nx">returnFalse</span><span class="p">,</span>
+      <span class="nx">isImmediatePropagationStopped</span><span class="o">:</span><span class="nx">returnFalse</span>
+   <span class="p">};</span>
+
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-88">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-88">&#182;</a></div>
+      <p>Create mouseenter/leave events using mouseover/out and event-time checks</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+   <span class="nx">jQuery</span><span class="p">.</span><span class="nx">each</span><span class="p">({</span>
+      <span class="nx">mouseenter</span><span class="o">:</span><span class="s2">&quot;mouseover&quot;</span><span class="p">,</span>
+      <span class="nx">mouseleave</span><span class="o">:</span><span class="s2">&quot;mouseout&quot;</span>
+   <span class="p">},</span> <span class="kd">function</span><span class="p">(</span><span class="nx">orig</span><span class="p">,</span> <span class="nx">fix</span><span class="p">)</span> <span class="p">{</span>
+      <span class="nx">jQuery</span><span class="p">.</span><span class="nx">event</span><span class="p">.</span><span class="nx">special</span><span class="p">[</span> <span class="nx">orig</span> <span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+         <span class="nx">delegateType</span><span class="o">:</span><span class="nx">fix</span><span class="p">,</span>
+         <span class="nx">bindType</span><span class="o">:</span>    <span class="nx">fix</span><span class="p">,</span>
+
+         <span class="nx">handle</span><span class="o">:</span><span class="kd">function</span><span class="p">(</span><span class="nx">event</span><span class="p">)</span> <span class="p">{</span>
+            <span class="kd">var</span> <span class="nx">target</span> <span class="o">=</span> <span class="k">this</span><span class="p">,</span>
+                  <span class="nx">related</span> <span class="o">=</span> <span class="nx">event</span><span class="p">.</span><span class="nx">relatedTarget</span><span class="p">,</span>
+                  <span class="nx">handleObj</span> <span class="o">=</span> <span class="nx">event</span><span class="p">.</span><span class="nx">handleObj</span><span class="p">,</span>
+                  <span class="nx">selector</span> <span class="o">=</span> <span class="nx">handleObj</span><span class="p">.</span><span class="nx">selector</span><span class="p">,</span>
+                  <span class="nx">ret</span><span class="p">;</span>
+
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-89">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-89">&#182;</a></div>
+      <p>For mousenter/leave call the handler if related is outside the target.
+         NB: No relatedTarget if the mouse left/entered the browser window</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+            <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">related</span> <span class="o">||</span> <span class="p">(</span><span class="nx">related</span> <span class="o">!==</span> <span class="nx">target</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="nx">jQuery</span><span class="p">.</span><span class="nx">contains</span><span class="p">(</span><span class="nx">target</span><span class="p">,</span> <span class="nx">related</span><span class="p">)))</span> <span class="p">{</span>
+               <span class="nx">event</span><span class="p">.</span><span class="nx">type</span> <span class="o">=</span> <span class="nx">handleObj</span><span class="p">.</span><span class="nx">origType</span><span class="p">;</span>
+               <span class="nx">ret</span> <span class="o">=</span> <span class="nx">handleObj</span><span class="p">.</span><span class="nx">handler</span><span class="p">.</span><span class="nx">apply</span><span class="p">(</span><span class="k">this</span><span class="p">,</span> <span class="nx">arguments</span><span class="p">);</span>
+               <span class="nx">event</span><span class="p">.</span><span class="nx">type</span> <span class="o">=</span> <span class="nx">fix</span><span class="p">;</span>
+            <span class="p">}</span>
+            <span class="k">return</span> <span class="nx">ret</span><span class="p">;</span>
+         <span class="p">}</span>
+      <span class="p">};</span>
+   <span class="p">});</span>
+
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-90">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-90">&#182;</a></div>
+      <p>IE submit delegation</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+   <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">jQuery</span><span class="p">.</span><span class="nx">support</span><span class="p">.</span><span class="nx">submitBubbles</span><span class="p">)</span> <span class="p">{</span>
+
+      <span class="nx">jQuery</span><span class="p">.</span><span class="nx">event</span><span class="p">.</span><span class="nx">special</span><span class="p">.</span><span class="nx">submit</span> <span class="o">=</span> <span class="p">{</span>
+         <span class="nx">setup</span><span class="o">:</span><span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-91">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-91">&#182;</a></div>
+      <p>Only need this for delegated form submit events</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+            <span class="k">if</span> <span class="p">(</span><span class="nx">jQuery</span><span class="p">.</span><span class="nx">nodeName</span><span class="p">(</span><span class="k">this</span><span class="p">,</span> <span class="s2">&quot;form&quot;</span><span class="p">))</span> <span class="p">{</span>
+               <span class="k">return</span> <span class="kc">false</span><span class="p">;</span>
+            <span class="p">}</span>
+
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-92">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-92">&#182;</a></div>
+      <p>Lazy-add a submit handler when a descendant form may potentially be submitted</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+            <span class="nx">jQuery</span><span class="p">.</span><span class="nx">event</span><span class="p">.</span><span class="nx">add</span><span class="p">(</span><span class="k">this</span><span class="p">,</span> <span class="s2">&quot;click._submit keypress._submit&quot;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">e</span><span class="p">)</span> <span class="p">{</span>
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-93">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-93">&#182;</a></div>
+      <p>Node name check avoids a VML-related crash in IE (#9807)</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+               <span class="kd">var</span> <span class="nx">elem</span> <span class="o">=</span> <span class="nx">e</span><span class="p">.</span><span class="nx">target</span><span class="p">,</span>
+                     <span class="nx">form</span> <span class="o">=</span> <span class="nx">jQuery</span><span class="p">.</span><span class="nx">nodeName</span><span class="p">(</span><span class="nx">elem</span><span class="p">,</span> <span class="s2">&quot;input&quot;</span><span class="p">)</span> <span class="o">||</span> <span class="nx">jQuery</span><span class="p">.</span><span class="nx">nodeName</span><span class="p">(</span><span class="nx">elem</span><span class="p">,</span> <span class="s2">&quot;button&quot;</span><span class="p">)</span> <span class="o">?</span> <span class="nx">elem</span><span class="p">.</span><span class="nx">form</span> <span class="o">:</span> <span class="kc">undefined</span><span class="p">;</span>
+               <span class="k">if</span> <span class="p">(</span><span class="nx">form</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="nx">form</span><span class="p">.</span><span class="nx">_submit_attached</span><span class="p">)</span> <span class="p">{</span>
+                  <span class="nx">jQuery</span><span class="p">.</span><span class="nx">event</span><span class="p">.</span><span class="nx">add</span><span class="p">(</span><span class="nx">form</span><span class="p">,</span> <span class="s2">&quot;submit._submit&quot;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">event</span><span class="p">)</span> <span class="p">{</span>
+                     <span class="nx">event</span><span class="p">.</span><span class="nx">_submit_bubble</span> <span class="o">=</span> <span class="kc">true</span><span class="p">;</span>
+                  <span class="p">});</span>
+                  <span class="nx">form</span><span class="p">.</span><span class="nx">_submit_attached</span> <span class="o">=</span> <span class="kc">true</span><span class="p">;</span>
+               <span class="p">}</span>
+            <span class="p">});</span>
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-94">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-94">&#182;</a></div>
+      <p>return undefined since we don't need an event listener</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+         <span class="p">},</span>
+
+         <span class="nx">postDispatch</span><span class="o">:</span><span class="kd">function</span><span class="p">(</span><span class="nx">event</span><span class="p">)</span> <span class="p">{</span>
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-95">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-95">&#182;</a></div>
+      <p>If form was submitted by the user, bubble the event up the tree</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+            <span class="k">if</span> <span class="p">(</span><span class="nx">event</span><span class="p">.</span><span class="nx">_submit_bubble</span><span class="p">)</span> <span class="p">{</span>
+               <span class="k">delete</span> <span class="nx">event</span><span class="p">.</span><span class="nx">_submit_bubble</span><span class="p">;</span>
+               <span class="k">if</span> <span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">parentNode</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="nx">event</span><span class="p">.</span><span class="nx">isTrigger</span><span class="p">)</span> <span class="p">{</span>
+                  <span class="nx">jQuery</span><span class="p">.</span><span class="nx">event</span><span class="p">.</span><span class="nx">simulate</span><span class="p">(</span><span class="s2">&quot;submit&quot;</span><span class="p">,</span> <span class="k">this</span><span class="p">.</span><span class="nx">parentNode</span><span class="p">,</span> <span class="nx">event</span><span class="p">,</span> <span class="kc">true</span><span class="p">);</span>
+               <span class="p">}</span>
+            <span class="p">}</span>
+         <span class="p">},</span>
+
+         <span class="nx">teardown</span><span class="o">:</span><span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-96">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-96">&#182;</a></div>
+      <p>Only need this for delegated form submit events</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+            <span class="k">if</span> <span class="p">(</span><span class="nx">jQuery</span><span class="p">.</span><span class="nx">nodeName</span><span class="p">(</span><span class="k">this</span><span class="p">,</span> <span class="s2">&quot;form&quot;</span><span class="p">))</span> <span class="p">{</span>
+               <span class="k">return</span> <span class="kc">false</span><span class="p">;</span>
+            <span class="p">}</span>
+
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-97">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-97">&#182;</a></div>
+      <p>Remove delegated handlers; cleanData eventually reaps submit handlers attached above</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+            <span class="nx">jQuery</span><span class="p">.</span><span class="nx">event</span><span class="p">.</span><span class="nx">remove</span><span class="p">(</span><span class="k">this</span><span class="p">,</span> <span class="s2">&quot;._submit&quot;</span><span class="p">);</span>
+         <span class="p">}</span>
+      <span class="p">};</span>
+   <span class="p">}</span>
+
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-98">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-98">&#182;</a></div>
+      <p>IE change delegation and checkbox/radio fix</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+   <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">jQuery</span><span class="p">.</span><span class="nx">support</span><span class="p">.</span><span class="nx">changeBubbles</span><span class="p">)</span> <span class="p">{</span>
+
+      <span class="nx">jQuery</span><span class="p">.</span><span class="nx">event</span><span class="p">.</span><span class="nx">special</span><span class="p">.</span><span class="nx">change</span> <span class="o">=</span> <span class="p">{</span>
+
+         <span class="nx">setup</span><span class="o">:</span><span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+
+            <span class="k">if</span> <span class="p">(</span><span class="nx">rformElems</span><span class="p">.</span><span class="nx">test</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">nodeName</span><span class="p">))</span> <span class="p">{</span>
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-99">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-99">&#182;</a></div>
+      <p>IE doesn't fire change on a check/radio until blur; trigger it on click
+         after a propertychange. Eat the blur-change in special.change.handle.
+         This still fires onchange a second time for check/radio after blur.</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+               <span class="k">if</span> <span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">type</span> <span class="o">===</span> <span class="s2">&quot;checkbox&quot;</span> <span class="o">||</span> <span class="k">this</span><span class="p">.</span><span class="nx">type</span> <span class="o">===</span> <span class="s2">&quot;radio&quot;</span><span class="p">)</span> <span class="p">{</span>
+                  <span class="nx">jQuery</span><span class="p">.</span><span class="nx">event</span><span class="p">.</span><span class="nx">add</span><span class="p">(</span><span class="k">this</span><span class="p">,</span> <span class="s2">&quot;propertychange._change&quot;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">event</span><span class="p">)</span> <span class="p">{</span>
+                     <span class="k">if</span> <span class="p">(</span><span class="nx">event</span><span class="p">.</span><span class="nx">originalEvent</span><span class="p">.</span><span class="nx">propertyName</span> <span class="o">===</span> <span class="s2">&quot;checked&quot;</span><span class="p">)</span> <span class="p">{</span>
+                        <span class="k">this</span><span class="p">.</span><span class="nx">_just_changed</span> <span class="o">=</span> <span class="kc">true</span><span class="p">;</span>
+                     <span class="p">}</span>
+                  <span class="p">});</span>
+                  <span class="nx">jQuery</span><span class="p">.</span><span class="nx">event</span><span class="p">.</span><span class="nx">add</span><span class="p">(</span><span class="k">this</span><span class="p">,</span> <span class="s2">&quot;click._change&quot;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">event</span><span class="p">)</span> <span class="p">{</span>
+                     <span class="k">if</span> <span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">_just_changed</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="nx">event</span><span class="p">.</span><span class="nx">isTrigger</span><span class="p">)</span> <span class="p">{</span>
+                        <span class="k">this</span><span class="p">.</span><span class="nx">_just_changed</span> <span class="o">=</span> <span class="kc">false</span><span class="p">;</span>
+                        <span class="nx">jQuery</span><span class="p">.</span><span class="nx">event</span><span class="p">.</span><span class="nx">simulate</span><span class="p">(</span><span class="s2">&quot;change&quot;</span><span class="p">,</span> <span class="k">this</span><span class="p">,</span> <span class="nx">event</span><span class="p">,</span> <span class="kc">true</span><span class="p">);</span>
+                     <span class="p">}</span>
+                  <span class="p">});</span>
+               <span class="p">}</span>
+               <span class="k">return</span> <span class="kc">false</span><span class="p">;</span>
+            <span class="p">}</span>
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-100">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-100">&#182;</a></div>
+      <p>Delegated event; lazy-add a change handler on descendant inputs</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+            <span class="nx">jQuery</span><span class="p">.</span><span class="nx">event</span><span class="p">.</span><span class="nx">add</span><span class="p">(</span><span class="k">this</span><span class="p">,</span> <span class="s2">&quot;beforeactivate._change&quot;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">e</span><span class="p">)</span> <span class="p">{</span>
+               <span class="kd">var</span> <span class="nx">elem</span> <span class="o">=</span> <span class="nx">e</span><span class="p">.</span><span class="nx">target</span><span class="p">;</span>
+
+               <span class="k">if</span> <span class="p">(</span><span class="nx">rformElems</span><span class="p">.</span><span class="nx">test</span><span class="p">(</span><span class="nx">elem</span><span class="p">.</span><span class="nx">nodeName</span><span class="p">)</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="nx">elem</span><span class="p">.</span><span class="nx">_change_attached</span><span class="p">)</span> <span class="p">{</span>
+                  <span class="nx">jQuery</span><span class="p">.</span><span class="nx">event</span><span class="p">.</span><span class="nx">add</span><span class="p">(</span><span class="nx">elem</span><span class="p">,</span> <span class="s2">&quot;change._change&quot;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">event</span><span class="p">)</span> <span class="p">{</span>
+                     <span class="k">if</span> <span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">parentNode</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="nx">event</span><span class="p">.</span><span class="nx">isSimulated</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="nx">event</span><span class="p">.</span><span class="nx">isTrigger</span><span class="p">)</span> <span class="p">{</span>
+                        <span class="nx">jQuery</span><span class="p">.</span><span class="nx">event</span><span class="p">.</span><span class="nx">simulate</span><span class="p">(</span><span class="s2">&quot;change&quot;</span><span class="p">,</span> <span class="k">this</span><span class="p">.</span><span class="nx">parentNode</span><span class="p">,</span> <span class="nx">event</span><span class="p">,</span> <span class="kc">true</span><span class="p">);</span>
+                     <span class="p">}</span>
+                  <span class="p">});</span>
+                  <span class="nx">elem</span><span class="p">.</span><span class="nx">_change_attached</span> <span class="o">=</span> <span class="kc">true</span><span class="p">;</span>
+               <span class="p">}</span>
+            <span class="p">});</span>
+         <span class="p">},</span>
+
+         <span class="nx">handle</span><span class="o">:</span><span class="kd">function</span><span class="p">(</span><span class="nx">event</span><span class="p">)</span> <span class="p">{</span>
+            <span class="kd">var</span> <span class="nx">elem</span> <span class="o">=</span> <span class="nx">event</span><span class="p">.</span><span class="nx">target</span><span class="p">;</span>
+
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-101">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-101">&#182;</a></div>
+      <p>Swallow native change events from checkbox/radio, we already triggered them above</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+            <span class="k">if</span> <span class="p">(</span><span class="k">this</span> <span class="o">!==</span> <span class="nx">elem</span> <span class="o">||</span> <span class="nx">event</span><span class="p">.</span><span class="nx">isSimulated</span> <span class="o">||</span> <span class="nx">event</span><span class="p">.</span><span class="nx">isTrigger</span> <span class="o">||</span> <span class="p">(</span><span class="nx">elem</span><span class="p">.</span><span class="nx">type</span> <span class="o">!==</span> <span class="s2">&quot;radio&quot;</span> <span class="o">&amp;&amp;</span> <span class="nx">elem</span><span class="p">.</span><span class="nx">type</span> <span class="o">!==</span> <span class="s2">&quot;checkbox&quot;</span><span class="p">))</span> <span class="p">{</span>
+               <span class="k">return</span> <span class="nx">event</span><span class="p">.</span><span class="nx">handleObj</span><span class="p">.</span><span class="nx">handler</span><span class="p">.</span><span class="nx">apply</span><span class="p">(</span><span class="k">this</span><span class="p">,</span> <span class="nx">arguments</span><span class="p">);</span>
+            <span class="p">}</span>
+         <span class="p">},</span>
+
+         <span class="nx">teardown</span><span class="o">:</span><span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+            <span class="nx">jQuery</span><span class="p">.</span><span class="nx">event</span><span class="p">.</span><span class="nx">remove</span><span class="p">(</span><span class="k">this</span><span class="p">,</span> <span class="s2">&quot;._change&quot;</span><span class="p">);</span>
+
+            <span class="k">return</span> <span class="nx">rformElems</span><span class="p">.</span><span class="nx">test</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">nodeName</span><span class="p">);</span>
+         <span class="p">}</span>
+      <span class="p">};</span>
+   <span class="p">}</span>
+
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-102">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-102">&#182;</a></div>
+      <p>Create "bubbling" focus and blur events</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+   <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">jQuery</span><span class="p">.</span><span class="nx">support</span><span class="p">.</span><span class="nx">focusinBubbles</span><span class="p">)</span> <span class="p">{</span>
+      <span class="nx">jQuery</span><span class="p">.</span><span class="nx">each</span><span class="p">({</span> <span class="nx">focus</span><span class="o">:</span><span class="s2">&quot;focusin&quot;</span><span class="p">,</span> <span class="nx">blur</span><span class="o">:</span><span class="s2">&quot;focusout&quot;</span> <span class="p">},</span> <span class="kd">function</span><span class="p">(</span><span class="nx">orig</span><span class="p">,</span> <span class="nx">fix</span><span class="p">)</span> <span class="p">{</span>
+
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-103">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-103">&#182;</a></div>
+      <p>Attach a single capturing handler while someone wants focusin/focusout</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+         <span class="kd">var</span> <span class="nx">attaches</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+               <span class="nx">handler</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">event</span><span class="p">)</span> <span class="p">{</span>
+                  <span class="nx">jQuery</span><span class="p">.</span><span class="nx">event</span><span class="p">.</span><span class="nx">simulate</span><span class="p">(</span><span class="nx">fix</span><span class="p">,</span> <span class="nx">event</span><span class="p">.</span><span class="nx">target</span><span class="p">,</span> <span class="nx">jQuery</span><span class="p">.</span><span class="nx">event</span><span class="p">.</span><span class="nx">fix</span><span class="p">(</span><span class="nx">event</span><span class="p">),</span> <span class="kc">true</span><span class="p">);</span>
+               <span class="p">};</span>
+
+         <span class="nx">jQuery</span><span class="p">.</span><span class="nx">event</span><span class="p">.</span><span class="nx">special</span><span class="p">[</span> <span class="nx">fix</span> <span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="nx">setup</span><span class="o">:</span>   <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+               <span class="k">if</span> <span class="p">(</span><span class="nx">attaches</span><span class="o">++</span> <span class="o">===</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+                  <span class="nb">document</span><span class="p">.</span><span class="nx">addEventListener</span><span class="p">(</span><span class="nx">orig</span><span class="p">,</span> <span class="nx">handler</span><span class="p">,</span> <span class="kc">true</span><span class="p">);</span>
+               <span class="p">}</span>
+            <span class="p">},</span>
+            <span class="nx">teardown</span><span class="o">:</span><span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+               <span class="k">if</span> <span class="p">(</span><span class="o">--</span><span class="nx">attaches</span> <span class="o">===</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+                  <span class="nb">document</span><span class="p">.</span><span class="nx">removeEventListener</span><span class="p">(</span><span class="nx">orig</span><span class="p">,</span> <span class="nx">handler</span><span class="p">,</span> <span class="kc">true</span><span class="p">);</span>
+               <span class="p">}</span>
+            <span class="p">}</span>
+         <span class="p">};</span>
+      <span class="p">});</span>
+   <span class="p">}</span>
+
+   <span class="nx">jQuery</span><span class="p">.</span><span class="nx">fn</span><span class="p">.</span><span class="nx">extend</span><span class="p">({</span>
+
+      <span class="nx">on</span><span class="o">:</span> <span class="kd">function</span><span class="p">(</span><span class="nx">types</span><span class="p">,</span> <span class="nx">selector</span><span class="p">,</span> <span class="nx">data</span><span class="p">,</span> <span class="nx">fn</span><span class="p">,</span> <span class="cm">/*INTERNAL*/</span> <span class="nx">one</span><span class="p">)</span> <span class="p">{</span>
+         <span class="kd">var</span> <span class="nx">origFn</span><span class="p">,</span> <span class="nx">type</span><span class="p">;</span>
+
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-104">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-104">&#182;</a></div>
+      <p>Types can be a map of types/handlers</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+         <span class="k">if</span> <span class="p">(</span><span class="k">typeof</span> <span class="nx">types</span> <span class="o">===</span> <span class="s2">&quot;object&quot;</span><span class="p">)</span> <span class="p">{</span>
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-105">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-105">&#182;</a></div>
+      <p>( types-Object, selector, data )</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+            <span class="k">if</span> <span class="p">(</span><span class="k">typeof</span> <span class="nx">selector</span> <span class="o">!==</span> <span class="s2">&quot;string&quot;</span><span class="p">)</span> <span class="p">{</span> <span class="c1">// &amp;&amp; selector != null</span>
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-106">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-106">&#182;</a></div>
+      <p>( types-Object, data )</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+               <span class="nx">data</span> <span class="o">=</span> <span class="nx">data</span> <span class="o">||</span> <span class="nx">selector</span><span class="p">;</span>
+               <span class="nx">selector</span> <span class="o">=</span> <span class="kc">undefined</span><span class="p">;</span>
+            <span class="p">}</span>
+            <span class="k">for</span> <span class="p">(</span><span class="nx">type</span> <span class="k">in</span> <span class="nx">types</span><span class="p">)</span> <span class="p">{</span>
+               <span class="k">this</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="nx">type</span><span class="p">,</span> <span class="nx">selector</span><span class="p">,</span> <span class="nx">data</span><span class="p">,</span> <span class="nx">types</span><span class="p">[</span> <span class="nx">type</span> <span class="p">],</span> <span class="nx">one</span><span class="p">);</span>
+            <span class="p">}</span>
+            <span class="k">return</span> <span class="k">this</span><span class="p">;</span>
+         <span class="p">}</span>
+
+         <span class="k">if</span> <span class="p">(</span><span class="nx">data</span> <span class="o">==</span> <span class="kc">null</span> <span class="o">&amp;&amp;</span> <span class="nx">fn</span> <span class="o">==</span> <span class="kc">null</span><span class="p">)</span> <span class="p">{</span>
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-107">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-107">&#182;</a></div>
+      <p>( types, fn )</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+            <span class="nx">fn</span> <span class="o">=</span> <span class="nx">selector</span><span class="p">;</span>
+            <span class="nx">data</span> <span class="o">=</span> <span class="nx">selector</span> <span class="o">=</span> <span class="kc">undefined</span><span class="p">;</span>
+         <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="nx">fn</span> <span class="o">==</span> <span class="kc">null</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">if</span> <span class="p">(</span><span class="k">typeof</span> <span class="nx">selector</span> <span class="o">===</span> <span class="s2">&quot;string&quot;</span><span class="p">)</span> <span class="p">{</span>
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-108">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-108">&#182;</a></div>
+      <p>( types, selector, fn )</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+               <span class="nx">fn</span> <span class="o">=</span> <span class="nx">data</span><span class="p">;</span>
+               <span class="nx">data</span> <span class="o">=</span> <span class="kc">undefined</span><span class="p">;</span>
+            <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-109">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-109">&#182;</a></div>
+      <p>( types, data, fn )</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+               <span class="nx">fn</span> <span class="o">=</span> <span class="nx">data</span><span class="p">;</span>
+               <span class="nx">data</span> <span class="o">=</span> <span class="nx">selector</span><span class="p">;</span>
+               <span class="nx">selector</span> <span class="o">=</span> <span class="kc">undefined</span><span class="p">;</span>
+            <span class="p">}</span>
+         <span class="p">}</span>
+         <span class="k">if</span> <span class="p">(</span><span class="nx">fn</span> <span class="o">===</span> <span class="kc">false</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nx">fn</span> <span class="o">=</span> <span class="nx">returnFalse</span><span class="p">;</span>
+         <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">fn</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="k">this</span><span class="p">;</span>
+         <span class="p">}</span>
+
+         <span class="k">if</span> <span class="p">(</span><span class="nx">one</span> <span class="o">===</span> <span class="mi">1</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nx">origFn</span> <span class="o">=</span> <span class="nx">fn</span><span class="p">;</span>
+            <span class="nx">fn</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">event</span><span class="p">)</span> <span class="p">{</span>
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-110">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-110">&#182;</a></div>
+      <p>Can use an empty set, since event contains the info</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+               <span class="nx">jQuery</span><span class="p">().</span><span class="nx">off</span><span class="p">(</span><span class="nx">event</span><span class="p">);</span>
+               <span class="k">return</span> <span class="nx">origFn</span><span class="p">.</span><span class="nx">apply</span><span class="p">(</span><span class="k">this</span><span class="p">,</span> <span class="nx">arguments</span><span class="p">);</span>
+            <span class="p">};</span>
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-111">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-111">&#182;</a></div>
+      <p>Use same guid so caller can remove using origFn</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+            <span class="nx">fn</span><span class="p">.</span><span class="nx">guid</span> <span class="o">=</span> <span class="nx">origFn</span><span class="p">.</span><span class="nx">guid</span> <span class="o">||</span> <span class="p">(</span> <span class="nx">origFn</span><span class="p">.</span><span class="nx">guid</span> <span class="o">=</span> <span class="nx">jQuery</span><span class="p">.</span><span class="nx">guid</span><span class="o">++</span> <span class="p">);</span>
+         <span class="p">}</span>
+         <span class="k">return</span> <span class="k">this</span><span class="p">.</span><span class="nx">each</span><span class="p">(</span><span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+            <span class="nx">jQuery</span><span class="p">.</span><span class="nx">event</span><span class="p">.</span><span class="nx">add</span><span class="p">(</span><span class="k">this</span><span class="p">,</span> <span class="nx">types</span><span class="p">,</span> <span class="nx">fn</span><span class="p">,</span> <span class="nx">data</span><span class="p">,</span> <span class="nx">selector</span><span class="p">);</span>
+         <span class="p">});</span>
+      <span class="p">},</span>
+      <span class="nx">one</span><span class="o">:</span><span class="kd">function</span><span class="p">(</span><span class="nx">types</span><span class="p">,</span> <span class="nx">selector</span><span class="p">,</span> <span class="nx">data</span><span class="p">,</span> <span class="nx">fn</span><span class="p">)</span> <span class="p">{</span>
+         <span class="k">return</span> <span class="k">this</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="nx">types</span><span class="p">,</span> <span class="nx">selector</span><span class="p">,</span> <span class="nx">data</span><span class="p">,</span> <span class="nx">fn</span><span class="p">,</span> <span class="mi">1</span><span class="p">);</span>
+      <span class="p">},</span>
+      <span class="nx">off</span><span class="o">:</span><span class="kd">function</span><span class="p">(</span><span class="nx">types</span><span class="p">,</span> <span class="nx">selector</span><span class="p">,</span> <span class="nx">fn</span><span class="p">)</span> <span class="p">{</span>
+         <span class="k">if</span> <span class="p">(</span><span class="nx">types</span> <span class="o">&amp;&amp;</span> <span class="nx">types</span><span class="p">.</span><span class="nx">preventDefault</span> <span class="o">&amp;&amp;</span> <span class="nx">types</span><span class="p">.</span><span class="nx">handleObj</span><span class="p">)</span> <span class="p">{</span>
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-112">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-112">&#182;</a></div>
+      <p>( event ) dispatched jQuery.Event</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+            <span class="kd">var</span> <span class="nx">handleObj</span> <span class="o">=</span> <span class="nx">types</span><span class="p">.</span><span class="nx">handleObj</span><span class="p">;</span>
+            <span class="nx">jQuery</span><span class="p">(</span><span class="nx">types</span><span class="p">.</span><span class="nx">delegateTarget</span><span class="p">).</span><span class="nx">off</span><span class="p">(</span>
+                  <span class="nx">handleObj</span><span class="p">.</span><span class="nx">namespace</span> <span class="o">?</span> <span class="nx">handleObj</span><span class="p">.</span><span class="nx">origType</span> <span class="o">+</span> <span class="s2">&quot;.&quot;</span> <span class="o">+</span> <span class="nx">handleObj</span><span class="p">.</span><span class="nx">namespace</span> <span class="o">:</span> <span class="nx">handleObj</span><span class="p">.</span><span class="nx">origType</span><span class="p">,</span>
+                  <span class="nx">handleObj</span><span class="p">.</span><span class="nx">selector</span><span class="p">,</span>
+                  <span class="nx">handleObj</span><span class="p">.</span><span class="nx">handler</span>
+            <span class="p">);</span>
+            <span class="k">return</span> <span class="k">this</span><span class="p">;</span>
+         <span class="p">}</span>
+         <span class="k">if</span> <span class="p">(</span><span class="k">typeof</span> <span class="nx">types</span> <span class="o">===</span> <span class="s2">&quot;object&quot;</span><span class="p">)</span> <span class="p">{</span>
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-113">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-113">&#182;</a></div>
+      <p>( types-object [, selector] )</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+            <span class="k">for</span> <span class="p">(</span><span class="kd">var</span> <span class="nx">type</span> <span class="k">in</span> <span class="nx">types</span><span class="p">)</span> <span class="p">{</span>
+               <span class="k">this</span><span class="p">.</span><span class="nx">off</span><span class="p">(</span><span class="nx">type</span><span class="p">,</span> <span class="nx">selector</span><span class="p">,</span> <span class="nx">types</span><span class="p">[</span> <span class="nx">type</span> <span class="p">]);</span>
+            <span class="p">}</span>
+            <span class="k">return</span> <span class="k">this</span><span class="p">;</span>
+         <span class="p">}</span>
+         <span class="k">if</span> <span class="p">(</span><span class="nx">selector</span> <span class="o">===</span> <span class="kc">false</span> <span class="o">||</span> <span class="k">typeof</span> <span class="nx">selector</span> <span class="o">===</span> <span class="s2">&quot;function&quot;</span><span class="p">)</span> <span class="p">{</span>
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-114">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-114">&#182;</a></div>
+      <p>( types [, fn] )</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+            <span class="nx">fn</span> <span class="o">=</span> <span class="nx">selector</span><span class="p">;</span>
+            <span class="nx">selector</span> <span class="o">=</span> <span class="kc">undefined</span><span class="p">;</span>
+         <span class="p">}</span>
+         <span class="k">if</span> <span class="p">(</span><span class="nx">fn</span> <span class="o">===</span> <span class="kc">false</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nx">fn</span> <span class="o">=</span> <span class="nx">returnFalse</span><span class="p">;</span>
+         <span class="p">}</span>
+         <span class="k">return</span> <span class="k">this</span><span class="p">.</span><span class="nx">each</span><span class="p">(</span><span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+            <span class="nx">jQuery</span><span class="p">.</span><span class="nx">event</span><span class="p">.</span><span class="nx">remove</span><span class="p">(</span><span class="k">this</span><span class="p">,</span> <span class="nx">types</span><span class="p">,</span> <span class="nx">fn</span><span class="p">,</span> <span class="nx">selector</span><span class="p">);</span>
+         <span class="p">});</span>
+      <span class="p">},</span>
+
+      <span class="nx">bind</span><span class="o">:</span>  <span class="kd">function</span><span class="p">(</span><span class="nx">types</span><span class="p">,</span> <span class="nx">data</span><span class="p">,</span> <span class="nx">fn</span><span class="p">)</span> <span class="p">{</span>
+         <span class="k">return</span> <span class="k">this</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="nx">types</span><span class="p">,</span> <span class="kc">null</span><span class="p">,</span> <span class="nx">data</span><span class="p">,</span> <span class="nx">fn</span><span class="p">);</span>
+      <span class="p">},</span>
+      <span class="nx">unbind</span><span class="o">:</span><span class="kd">function</span><span class="p">(</span><span class="nx">types</span><span class="p">,</span> <span class="nx">fn</span><span class="p">)</span> <span class="p">{</span>
+         <span class="k">return</span> <span class="k">this</span><span class="p">.</span><span class="nx">off</span><span class="p">(</span><span class="nx">types</span><span class="p">,</span> <span class="kc">null</span><span class="p">,</span> <span class="nx">fn</span><span class="p">);</span>
+      <span class="p">},</span>
+
+      <span class="nx">live</span><span class="o">:</span><span class="kd">function</span><span class="p">(</span><span class="nx">types</span><span class="p">,</span> <span class="nx">data</span><span class="p">,</span> <span class="nx">fn</span><span class="p">)</span> <span class="p">{</span>
+         <span class="nx">jQuery</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">context</span><span class="p">).</span><span class="nx">on</span><span class="p">(</span><span class="nx">types</span><span class="p">,</span> <span class="k">this</span><span class="p">.</span><span class="nx">selector</span><span class="p">,</span> <span class="nx">data</span><span class="p">,</span> <span class="nx">fn</span><span class="p">);</span>
+         <span class="k">return</span> <span class="k">this</span><span class="p">;</span>
+      <span class="p">},</span>
+      <span class="nx">die</span><span class="o">:</span> <span class="kd">function</span><span class="p">(</span><span class="nx">types</span><span class="p">,</span> <span class="nx">fn</span><span class="p">)</span> <span class="p">{</span>
+         <span class="nx">jQuery</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">context</span><span class="p">).</span><span class="nx">off</span><span class="p">(</span><span class="nx">types</span><span class="p">,</span> <span class="k">this</span><span class="p">.</span><span class="nx">selector</span> <span class="o">||</span> <span class="s2">&quot;**&quot;</span><span class="p">,</span> <span class="nx">fn</span><span class="p">);</span>
+         <span class="k">return</span> <span class="k">this</span><span class="p">;</span>
+      <span class="p">},</span>
+
+      <span class="nx">delegate</span><span class="o">:</span>  <span class="kd">function</span><span class="p">(</span><span class="nx">selector</span><span class="p">,</span> <span class="nx">types</span><span class="p">,</span> <span class="nx">data</span><span class="p">,</span> <span class="nx">fn</span><span class="p">)</span> <span class="p">{</span>
+         <span class="k">return</span> <span class="k">this</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="nx">types</span><span class="p">,</span> <span class="nx">selector</span><span class="p">,</span> <span class="nx">data</span><span class="p">,</span> <span class="nx">fn</span><span class="p">);</span>
+      <span class="p">},</span>
+      <span class="nx">undelegate</span><span class="o">:</span><span class="kd">function</span><span class="p">(</span><span class="nx">selector</span><span class="p">,</span> <span class="nx">types</span><span class="p">,</span> <span class="nx">fn</span><span class="p">)</span> <span class="p">{</span>
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-115">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-115">&#182;</a></div>
+      <p>( namespace ) or ( selector, types [, fn] )</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+         <span class="k">return</span> <span class="nx">arguments</span><span class="p">.</span><span class="nx">length</span> <span class="o">==</span> <span class="mi">1</span> <span class="o">?</span> <span class="k">this</span><span class="p">.</span><span class="nx">off</span><span class="p">(</span><span class="nx">selector</span><span class="p">,</span> <span class="s2">&quot;**&quot;</span><span class="p">)</span> <span class="o">:</span> <span class="k">this</span><span class="p">.</span><span class="nx">off</span><span class="p">(</span><span class="nx">types</span><span class="p">,</span> <span class="nx">selector</span><span class="p">,</span> <span class="nx">fn</span><span class="p">);</span>
+      <span class="p">},</span>
+
+      <span class="nx">trigger</span><span class="o">:</span>       <span class="kd">function</span><span class="p">(</span><span class="nx">type</span><span class="p">,</span> <span class="nx">data</span><span class="p">)</span> <span class="p">{</span>
+         <span class="k">return</span> <span class="k">this</span><span class="p">.</span><span class="nx">each</span><span class="p">(</span><span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+            <span class="nx">jQuery</span><span class="p">.</span><span class="nx">event</span><span class="p">.</span><span class="nx">trigger</span><span class="p">(</span><span class="nx">type</span><span class="p">,</span> <span class="nx">data</span><span class="p">,</span> <span class="k">this</span><span class="p">);</span>
+         <span class="p">});</span>
+      <span class="p">},</span>
+      <span class="nx">triggerHandler</span><span class="o">:</span><span class="kd">function</span><span class="p">(</span><span class="nx">type</span><span class="p">,</span> <span class="nx">data</span><span class="p">)</span> <span class="p">{</span>
+         <span class="k">if</span> <span class="p">(</span><span class="k">this</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="nx">jQuery</span><span class="p">.</span><span class="nx">event</span><span class="p">.</span><span class="nx">trigger</span><span class="p">(</span><span class="nx">type</span><span class="p">,</span> <span class="nx">data</span><span class="p">,</span> <span class="k">this</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="kc">true</span><span class="p">);</span>
+         <span class="p">}</span>
+      <span class="p">},</span>
+
+      <span class="nx">toggle</span><span class="o">:</span><span class="kd">function</span><span class="p">(</span><span class="nx">fn</span><span class="p">)</span> <span class="p">{</span>
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-116">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-116">&#182;</a></div>
+      <p>Save reference to arguments for access in closure</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+         <span class="kd">var</span> <span class="nx">args</span> <span class="o">=</span> <span class="nx">arguments</span><span class="p">,</span>
+               <span class="nx">guid</span> <span class="o">=</span> <span class="nx">fn</span><span class="p">.</span><span class="nx">guid</span> <span class="o">||</span> <span class="nx">jQuery</span><span class="p">.</span><span class="nx">guid</span><span class="o">++</span><span class="p">,</span>
+               <span class="nx">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+               <span class="nx">toggler</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">event</span><span class="p">)</span> <span class="p">{</span>
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-117">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-117">&#182;</a></div>
+      <p>Figure out which function to execute</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+                  <span class="kd">var</span> <span class="nx">lastToggle</span> <span class="o">=</span> <span class="p">(</span> <span class="nx">jQuery</span><span class="p">.</span><span class="nx">_data</span><span class="p">(</span><span class="k">this</span><span class="p">,</span> <span class="s2">&quot;lastToggle&quot;</span> <span class="o">+</span> <span class="nx">fn</span><span class="p">.</span><span class="nx">guid</span><span class="p">)</span> <span class="o">||</span> <span class="mi">0</span> <span class="p">)</span> <span class="o">%</span> <span class="nx">i</span><span class="p">;</span>
+                  <span class="nx">jQuery</span><span class="p">.</span><span class="nx">_data</span><span class="p">(</span><span class="k">this</span><span class="p">,</span> <span class="s2">&quot;lastToggle&quot;</span> <span class="o">+</span> <span class="nx">fn</span><span class="p">.</span><span class="nx">guid</span><span class="p">,</span> <span class="nx">lastToggle</span> <span class="o">+</span> <span class="mi">1</span><span class="p">);</span>
+
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-118">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-118">&#182;</a></div>
+      <p>Make sure that clicks stop</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+                  <span class="nx">event</span><span class="p">.</span><span class="nx">preventDefault</span><span class="p">();</span>
+
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-119">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-119">&#182;</a></div>
+      <p>and execute the function</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+                  <span class="k">return</span> <span class="nx">args</span><span class="p">[</span> <span class="nx">lastToggle</span> <span class="p">].</span><span class="nx">apply</span><span class="p">(</span><span class="k">this</span><span class="p">,</span> <span class="nx">arguments</span><span class="p">)</span> <span class="o">||</span> <span class="kc">false</span><span class="p">;</span>
+               <span class="p">};</span>
+
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-120">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-120">&#182;</a></div>
+      <p>link all the functions, so any of them can unbind this click handler</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+         <span class="nx">toggler</span><span class="p">.</span><span class="nx">guid</span> <span class="o">=</span> <span class="nx">guid</span><span class="p">;</span>
+         <span class="k">while</span> <span class="p">(</span><span class="nx">i</span> <span class="o">&lt;</span> <span class="nx">args</span><span class="p">.</span><span class="nx">length</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nx">args</span><span class="p">[</span> <span class="nx">i</span><span class="o">++</span> <span class="p">].</span><span class="nx">guid</span> <span class="o">=</span> <span class="nx">guid</span><span class="p">;</span>
+         <span class="p">}</span>
+
+         <span class="k">return</span> <span class="k">this</span><span class="p">.</span><span class="nx">click</span><span class="p">(</span><span class="nx">toggler</span><span class="p">);</span>
+      <span class="p">},</span>
+
+      <span class="nx">hover</span><span class="o">:</span><span class="kd">function</span><span class="p">(</span><span class="nx">fnOver</span><span class="p">,</span> <span class="nx">fnOut</span><span class="p">)</span> <span class="p">{</span>
+         <span class="k">return</span> <span class="k">this</span><span class="p">.</span><span class="nx">mouseenter</span><span class="p">(</span><span class="nx">fnOver</span><span class="p">).</span><span class="nx">mouseleave</span><span class="p">(</span><span class="nx">fnOut</span> <span class="o">||</span> <span class="nx">fnOver</span><span class="p">);</span>
+      <span class="p">}</span>
+   <span class="p">});</span>
+
+   <span class="nx">jQuery</span><span class="p">.</span><span class="nx">each</span><span class="p">((</span><span class="s2">&quot;blur focus focusin focusout load resize scroll unload click dblclick &quot;</span> <span class="o">+</span>
+         <span class="s2">&quot;mousedown mouseup mousemove mouseover mouseout mouseenter mouseleave &quot;</span> <span class="o">+</span>
+         <span class="s2">&quot;change select submit keydown keypress keyup error contextmenu&quot;</span><span class="p">).</span><span class="nx">split</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">),</span> <span class="kd">function</span><span class="p">(</span><span class="nx">i</span><span class="p">,</span> <span class="nx">name</span><span class="p">)</span> <span class="p">{</span>
+
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-121">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-121">&#182;</a></div>
+      <p>Handle event binding</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+      <span class="nx">jQuery</span><span class="p">.</span><span class="nx">fn</span><span class="p">[</span> <span class="nx">name</span> <span class="p">]</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">data</span><span class="p">,</span> <span class="nx">fn</span><span class="p">)</span> <span class="p">{</span>
+         <span class="k">if</span> <span class="p">(</span><span class="nx">fn</span> <span class="o">==</span> <span class="kc">null</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nx">fn</span> <span class="o">=</span> <span class="nx">data</span><span class="p">;</span>
+            <span class="nx">data</span> <span class="o">=</span> <span class="kc">null</span><span class="p">;</span>
+         <span class="p">}</span>
+
+         <span class="k">return</span> <span class="nx">arguments</span><span class="p">.</span><span class="nx">length</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="o">?</span>
+               <span class="k">this</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="nx">name</span><span class="p">,</span> <span class="kc">null</span><span class="p">,</span> <span class="nx">data</span><span class="p">,</span> <span class="nx">fn</span><span class="p">)</span> <span class="o">:</span>
+               <span class="k">this</span><span class="p">.</span><span class="nx">trigger</span><span class="p">(</span><span class="nx">name</span><span class="p">);</span>
+      <span class="p">};</span>
+
+      <span class="k">if</span> <span class="p">(</span><span class="nx">jQuery</span><span class="p">.</span><span class="nx">attrFn</span><span class="p">)</span> <span class="p">{</span>
+         <span class="nx">jQuery</span><span class="p">.</span><span class="nx">attrFn</span><span class="p">[</span> <span class="nx">name</span> <span class="p">]</span> <span class="o">=</span> <span class="kc">true</span><span class="p">;</span>
+      <span class="p">}</span>
+
+      <span class="k">if</span> <span class="p">(</span><span class="nx">rkeyEvent</span><span class="p">.</span><span class="nx">test</span><span class="p">(</span><span class="nx">name</span><span class="p">))</span> <span class="p">{</span>
+         <span class="nx">jQuery</span><span class="p">.</span><span class="nx">event</span><span class="p">.</span><span class="nx">fixHooks</span><span class="p">[</span> <span class="nx">name</span> <span class="p">]</span> <span class="o">=</span> <span class="nx">jQuery</span><span class="p">.</span><span class="nx">event</span><span class="p">.</span><span class="nx">keyHooks</span><span class="p">;</span>
+      <span class="p">}</span>
+
+      <span class="k">if</span> <span class="p">(</span><span class="nx">rmouseEvent</span><span class="p">.</span><span class="nx">test</span><span class="p">(</span><span class="nx">name</span><span class="p">))</span> <span class="p">{</span>
+         <span class="nx">jQuery</span><span class="p">.</span><span class="nx">event</span><span class="p">.</span><span class="nx">fixHooks</span><span class="p">[</span> <span class="nx">name</span> <span class="p">]</span> <span class="o">=</span> <span class="nx">jQuery</span><span class="p">.</span><span class="nx">event</span><span class="p">.</span><span class="nx">mouseHooks</span><span class="p">;</span>
+      <span class="p">}</span>
+   <span class="p">});</span>
+
+<span class="p">})(</span><span class="nx">jQuery</span><span class="p">);</span>
+
+</pre>
+      </div>
+   </td>
+</tr>
+</tbody>
+</table>
+</div>
+</body>
+</html>
