@@ -1,19 +1,8 @@
-// **jQuery Annotated Source**. You can view the source and contribute on [Github](https://github.com/robflaherty/jquery-annotated-source).
-//
+// Chapter 1: Core
+// ===============
+
 // [Home](/jquery-annotated-source/) | [Next Chapter](02-deferred.html)
 
-//     jQuery JavaScript Library v1.6.2
-//     http://jquery.com
-//     Copyright 2011, John Resig
-//     Dual licensed under the MIT or GPL Version 2 licenses.
-//     http://jquery.org/license
-//     Includes Sizzle.js
-//     http://sizzlejs.com
-//     Copyright 2011, The Dojo Foundation
-//     Released under the MIT, BSD, and GPL Licenses.
-//     Date: Thu Jun 30 14:16:56 2011 -0400
-
-// ## Chapter 1: Core
 
 (function( window, undefined ) {
 
@@ -102,9 +91,9 @@ var jQuery = (function() {
 
 // ### jQuery prototype
 jQuery.fn = jQuery.prototype = {
-  
+
   constructor: jQuery,
-  
+
   // Main jQuery function
   init: function( selector, context, rootjQuery ) {
     var match, elem, ret, doc;
@@ -229,7 +218,7 @@ jQuery.fn = jQuery.prototype = {
   size: function() {
     return this.length;
   },
-  
+
   // Retrieve all the DOM elements contained in the jQuery set, as an array
   toArray: function() {
     return slice.call( this, 0 );
@@ -281,7 +270,7 @@ jQuery.fn = jQuery.prototype = {
   each: function( callback, args ) {
     return jQuery.each( this, callback, args );
   },
-  
+
   // Specify a function to execute when the DOM is fully loaded.
   ready: function( fn ) {
     // Attach the listeners
@@ -292,37 +281,37 @@ jQuery.fn = jQuery.prototype = {
 
     return this;
   },
-  
+
   // Reduce the set of matched elements to the one at the specified index
   eq: function( i ) {
     return i === -1 ?
       this.slice( i ) :
       this.slice( i, +i + 1 );
   },
-  
+
   // Reduce the set of matched elements to the first in the set
   first: function() {
     return this.eq( 0 );
   },
-  
+
   // Reduce the set of matched elements to the final one in the set
   last: function() {
     return this.eq( -1 );
   },
-  
+
   // Reduce the set of matched elements to a subset specified by a range of indices
   slice: function() {
     return this.pushStack( slice.apply( this, arguments ),
       "slice", slice.call(arguments).join(",") );
   },
-  
+
   // Pass each element in the current matched set through a function, producing a new jQuery object containing the return values
   map: function( callback ) {
     return this.pushStack( jQuery.map(this, function( elem, i ) {
       return callback.call( elem, i, elem );
     }));
   },
-  
+
   // End the most recent filtering operation in the current chain and return the set of matched elements to its previous state
   end: function() {
     return this.prevObject || this.constructor(null);
@@ -407,7 +396,7 @@ jQuery.extend = jQuery.fn.extend = function() {
 
 jQuery.extend({
 
-  //Relinquish jQuery's control of the $ variable  
+  //Relinquish jQuery's control of the $ variable
   noConflict: function( deep ) {
     if ( window.$ === jQuery ) {
       window.$ = _$;
@@ -419,7 +408,7 @@ jQuery.extend({
 
     return jQuery;
   },
-  
+
   // Is the DOM ready to be used? Set to true once it occurs.
   isReady: false,
 
@@ -514,7 +503,7 @@ jQuery.extend({
   isFunction: function( obj ) {
     return jQuery.type(obj) === "function";
   },
-  
+
   // Determine whether the argument is an array
   isArray: Array.isArray || function( obj ) {
     return jQuery.type(obj) === "array";
@@ -528,7 +517,7 @@ jQuery.extend({
   isNaN: function( obj ) {
     return obj == null || !rdigit.test( obj ) || isNaN( obj );
   },
-  
+
   // Determine the internal JavaScript [[Class]] of an object
   type: function( obj ) {
     return obj == null ?
@@ -572,7 +561,7 @@ jQuery.extend({
   error: function( msg ) {
     throw msg;
   },
-  
+
   // Takes a well-formed JSON string and returns the resulting JavaScript object.
   parseJSON: function( data ) {
     if ( typeof data !== "string" || !data ) {
@@ -741,7 +730,7 @@ jQuery.extend({
 
     return -1;
   },
-  
+
   // Merge the contents of two arrays together into the first array.
   merge: function( first, second ) {
     var i = first.length,
@@ -871,7 +860,7 @@ jQuery.extend({
     // Getting an attribute
     return length ? fn( elems[0], key ) : undefined;
   },
-  
+
   // Return a number representing the current time
   now: function() {
     return (new Date()).getTime();

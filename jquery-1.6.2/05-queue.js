@@ -1,8 +1,8 @@
-// **jQuery Annotated Source**.
-//
+// Chapter 5: Queue
+// ================
+
 // [Home](/jquery-annotated-source/) | [Previous Chapter](04-data.html) | [Next Chapter](06-attributes.html)
 
-// ## Queue
 
 function handleQueueMarkDefer( elem, type, src ) {
   var deferDataKey = type + "defer",

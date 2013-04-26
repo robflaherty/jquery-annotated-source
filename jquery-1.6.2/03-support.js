@@ -1,8 +1,8 @@
-// **jQuery Annotated Source**.
-//
+// Chapter 3: Support
+// ==================
+
 // [Home](/jquery-annotated-source/) | [Previous Chapter](02-deferred.html) | [Next Chapter](04-data.html)
 
-// ## Chapter 3: Support
 
 jQuery.support = (function() {
 

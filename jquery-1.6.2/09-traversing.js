@@ -1,8 +1,8 @@
-// **jQuery Annotated Source**.
-//
+// Chapter 9: Traversing
+// =====================
+
 // [Home](/jquery-annotated-source/) | [Previous Chapter](08-selector.html) | [Next Chapter](10-manipulation.html)
 
-// ## Traversing
 
 var runtil = /Until$/,
   rparentsprev = /^(?:parents|prevUntil|prevAll)/,
@@ -84,7 +84,7 @@ jQuery.fn.extend({
 
   closest: function( selectors, context ) {
     var ret = [], i, l, cur = this[0];
-    
+
     // Array
     if ( jQuery.isArray( selectors ) ) {
       var match, selector,

@@ -1,8 +1,8 @@
-// **jQuery Annotated Source**.
-//
+// Chapter 7: Events
+// =================
+
 // [Home](/jquery-annotated-source/) | [Previous Chapter](06-attributes.html) | [Next Chapter](08-selector.html)
 
-// ## Events
 
 var rnamespaces = /\.(.*)$/,
   rformElems = /^(?:textarea|input|select)$/i,
@@ -268,7 +268,7 @@ jQuery.event = {
       }
     }
   },
-  
+
   // Events that are safe to short-circuit if no handlers are attached.
   // Native DOM events should not be added, they may have inline handlers.
   customEvent: {
@@ -314,7 +314,7 @@ jQuery.event = {
     event.exclusive = exclusive;
     event.namespace = namespaces.join(".");
     event.namespace_re = new RegExp("(^|\\.)" + namespaces.join("\\.(?:.*\\.)?") + "(\\.|$)");
-    
+
     // triggerHandler() and global events don't bubble or run the default action
     if ( onlyHandlers || !elem ) {
       event.preventDefault();
@@ -405,7 +405,7 @@ jQuery.event = {
         jQuery.event.triggered = undefined;
       }
     }
-    
+
     return event.result;
   },
 

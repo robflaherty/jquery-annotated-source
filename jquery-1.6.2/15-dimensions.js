@@ -1,8 +1,8 @@
-// **jQuery Annotated Source**.
-//
+// Chapater 15: Dimensions
+// =======================
+
 // [Home](/jquery-annotated-source/) | [Previous Chapter](14-offset.html)
 
-// ## Dimensions
 
 // Create width, height, innerHeight, innerWidth, outerHeight and outerWidth methods
 jQuery.each([ "Height", "Width" ], function( i, name ) {

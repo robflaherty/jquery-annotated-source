@@ -1,8 +1,8 @@
-// **jQuery Annotated Source**.
-//
+// Chapter 2: Deferred
+// ===================
+
 // [Home](/jquery-annotated-source/) | [Previous Chapter](01-core.html) | [Next Chapter](03-support.html)
 
-// ## Chapter 2: Deferred
 
 // Promise methods
 var promiseMethods = "done fail isResolved isRejected promise then always pipe".split( " " ),
