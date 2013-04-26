@@ -1,8 +1,8 @@
-// **jQuery Annotated Source**.
-//
+// Chapter 12: AJAX
+// ================
+
 // [Home](/jquery-annotated-source/) | [Previous Chapter](11-css.html) | [Next Chapter](13-effects.html)
 
-// ## AJAX
 
 var r20 = /%20/g,
   rbracket = /\[\]$/,

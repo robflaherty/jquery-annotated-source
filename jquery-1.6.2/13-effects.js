@@ -1,8 +1,8 @@
-// **jQuery Annotated Source**.
-//
+// Chapter 13: Effects
+// ===================
+
 // [Home](/jquery-annotated-source/) | [Previous Chapter](12-ajax.html) | [Next Chapter](14-offset.html)
 
-// ## Effects
 
 var elemdisplay = {},
   iframe, iframeDoc,

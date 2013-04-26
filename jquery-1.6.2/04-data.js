@@ -1,8 +1,8 @@
-// **jQuery Annotated Source**.
-//
+// Chapter 4: Data
+// ===============
+
 // [Home](/jquery-annotated-source/) | [Previous Chapter](03-support.html) | [Next Chapter](05-queue.html)
 
-// ## Chapter 4: Data
 
 var rbrace = /^(?:\{.*\}|\[.*\])$/,
   rmultiDash = /([a-z])([A-Z])/g;
@@ -112,7 +112,7 @@ jQuery.extend({
       return thisCache[ internalKey ] && thisCache[ internalKey ].events;
     }
 
-    return getByName ? 
+    return getByName ?
       // Check for both converted-to-camel and non-converted data property names
       thisCache[ jQuery.camelCase( name ) ] || thisCache[ name ] :
       thisCache;
