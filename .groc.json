@@ -1,0 +1,5 @@
+{
+  "glob": ["readme.md", "jquery-1.6.2/*.js"],
+  "index": "readme.md",
+  "github": true
+}
