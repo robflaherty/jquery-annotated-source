@@ -22,8 +22,8 @@ I've gotten things started. If you're a jQuery nerd that knows the jQuery intern
 Questions/Comments? Hit up the Issues tab or find me on the Twitters at [@robflaherty](http://twitter.com/robflaherty).
 
 
-Currently Documented: jQuery v1.6.2
------------------------------------
+Currently Documented: v1.6.2
+----------------------------
 
     jQuery JavaScript Library v1.6.2
     http://jquery.com
