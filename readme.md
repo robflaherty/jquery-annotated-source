@@ -1,4 +1,6 @@
 # jQuery Annotated Source
+*Please Note: This project was released in 2011 when 1.6.2 was the latest jQuery version. It is no longer maintained.*
+
 Jumping in to the source code of a popular library and seeing **how the sausage is made** is a great way to level-up on your journey to JavaScript badassery. But reading through 10K lines of highly refined code can be a daunting task.
 
 One solution is an "annotated source" (seen in libraries like [Underscore.js](http://documentcloud.github.com/underscore/docs/underscore.html) and [Backbone.js](http://documentcloud.github.com/backbone/docs/backbone.html)), which makes source code much more accessible by making the accompanying comments easier to read.
