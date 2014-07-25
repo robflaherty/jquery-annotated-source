@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html>
+<head><title>06-queue.js</title>
+   <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+   <link rel="stylesheet" media="all" href="docco.css"/>
+</head>
+<body>
+<div id="container">
+   <div id="background"></div>
+   <table cellpadding="0" cellspacing="0">
+      <thead>
+      <tr>
+         <th class="docs"><h1> 06-queue.js </h1></th>
+         <th class="code"></th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr id="section-1">
+         <td class="docs">
+            <div class="pilwrap"><a class="pilcrow" href="#section-1">&#182;</a></div>
+            <p><strong>jQuery Annotated Source</strong>.</p>
+
+            <p><a href="/jquery-annotated-source/">Home</a> | <a href="05-data.html">Previous Chapter</a> |
+               <a href="07-attributes.html">Next Chapter</a></p></td>
+         <td class="code">
+            <div class="highlight">
+               <pre></pre>
+            </div>
+         </td>
+      </tr>
+      <tr id="section-2">
+         <td class="docs">
+            <div class="pilwrap"><a class="pilcrow" href="#section-2">&#182;</a></div>
+            <h2>Chapter 6: Queue</h2></td>
+         <td class="code">
+            <div class="highlight"><pre>
+
+<span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">jQuery</span><span class="p">)</span> <span class="p">{</span>
+
+   <span class="kd">function</span> <span class="nx">handleQueueMarkDefer</span><span class="p">(</span><span class="nx">elem</span><span class="p">,</span> <span class="nx">type</span><span class="p">,</span> <span class="nx">src</span><span class="p">)</span> <span class="p">{</span>
+      <span class="kd">var</span> <span class="nx">deferDataKey</span> <span class="o">=</span> <span class="nx">type</span> <span class="o">+</span> <span class="s2">&quot;defer&quot;</span><span class="p">,</span>
+            <span class="nx">queueDataKey</span> <span class="o">=</span> <span class="nx">type</span> <span class="o">+</span> <span class="s2">&quot;queue&quot;</span><span class="p">,</span>
+            <span class="nx">markDataKey</span> <span class="o">=</span> <span class="nx">type</span> <span class="o">+</span> <span class="s2">&quot;mark&quot;</span><span class="p">,</span>
+            <span class="nx">defer</span> <span class="o">=</span> <span class="nx">jQuery</span><span class="p">.</span><span class="nx">_data</span><span class="p">(</span><span class="nx">elem</span><span class="p">,</span> <span class="nx">deferDataKey</span><span class="p">);</span>
+      <span class="k">if</span> <span class="p">(</span><span class="nx">defer</span> <span class="o">&amp;&amp;</span>
+            <span class="p">(</span> <span class="nx">src</span> <span class="o">===</span> <span class="s2">&quot;queue&quot;</span> <span class="o">||</span> <span class="o">!</span><span class="nx">jQuery</span><span class="p">.</span><span class="nx">_data</span><span class="p">(</span><span class="nx">elem</span><span class="p">,</span> <span class="nx">queueDataKey</span><span class="p">)</span> <span class="p">)</span> <span class="o">&amp;&amp;</span>
+            <span class="p">(</span> <span class="nx">src</span> <span class="o">===</span> <span class="s2">&quot;mark&quot;</span> <span class="o">||</span> <span class="o">!</span><span class="nx">jQuery</span><span class="p">.</span><span class="nx">_data</span><span class="p">(</span><span class="nx">elem</span><span class="p">,</span> <span class="nx">markDataKey</span><span class="p">)</span> <span class="p">))</span> <span class="p">{</span>
+
+</pre>
+            </div>
+         </td>
+      </tr>
+      <tr id="section-3">
+         <td class="docs">
+            <div class="pilwrap"><a class="pilcrow" href="#section-3">&#182;</a></div>
+            <p>Give room for hard-coded callbacks to fire first
+               and eventually mark/queue something else on the element</p></td>
+         <td class="code">
+            <div class="highlight"><pre>
+         <span class="nx">setTimeout</span><span class="p">(</span><span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+            <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">jQuery</span><span class="p">.</span><span class="nx">_data</span><span class="p">(</span><span class="nx">elem</span><span class="p">,</span> <span class="nx">queueDataKey</span><span class="p">)</span> <span class="o">&amp;&amp;</span>
+                  <span class="o">!</span><span class="nx">jQuery</span><span class="p">.</span><span class="nx">_data</span><span class="p">(</span><span class="nx">elem</span><span class="p">,</span> <span class="nx">markDataKey</span><span class="p">))</span> <span class="p">{</span>
+               <span class="nx">jQuery</span><span class="p">.</span><span class="nx">removeData</span><span class="p">(</span><span class="nx">elem</span><span class="p">,</span> <span class="nx">deferDataKey</span><span class="p">,</span> <span class="kc">true</span><span class="p">);</span>
+               <span class="nx">defer</span><span class="p">.</span><span class="nx">fire</span><span class="p">();</span>
+            <span class="p">}</span>
+         <span class="p">},</span> <span class="mi">0</span><span class="p">);</span>
+      <span class="p">}</span>
+   <span class="p">}</span>
+
+   <span class="nx">jQuery</span><span class="p">.</span><span class="nx">extend</span><span class="p">({</span>
+
+      <span class="nx">_mark</span><span class="o">:</span><span class="kd">function</span><span class="p">(</span><span class="nx">elem</span><span class="p">,</span> <span class="nx">type</span><span class="p">)</span> <span class="p">{</span>
+         <span class="k">if</span> <span class="p">(</span><span class="nx">elem</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nx">type</span> <span class="o">=</span> <span class="p">(</span> <span class="nx">type</span> <span class="o">||</span> <span class="s2">&quot;fx&quot;</span> <span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;mark&quot;</span><span class="p">;</span>
+            <span class="nx">jQuery</span><span class="p">.</span><span class="nx">_data</span><span class="p">(</span><span class="nx">elem</span><span class="p">,</span> <span class="nx">type</span><span class="p">,</span> <span class="p">(</span><span class="nx">jQuery</span><span class="p">.</span><span class="nx">_data</span><span class="p">(</span><span class="nx">elem</span><span class="p">,</span> <span class="nx">type</span><span class="p">)</span> <span class="o">||</span> <span class="mi">0</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">);</span>
+         <span class="p">}</span>
+      <span class="p">},</span>
+
+      <span class="nx">_unmark</span><span class="o">:</span><span class="kd">function</span><span class="p">(</span><span class="nx">force</span><span class="p">,</span> <span class="nx">elem</span><span class="p">,</span> <span class="nx">type</span><span class="p">)</span> <span class="p">{</span>
+         <span class="k">if</span> <span class="p">(</span><span class="nx">force</span> <span class="o">!==</span> <span class="kc">true</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nx">type</span> <span class="o">=</span> <span class="nx">elem</span><span class="p">;</span>
+            <span class="nx">elem</span> <span class="o">=</span> <span class="nx">force</span><span class="p">;</span>
+            <span class="nx">force</span> <span class="o">=</span> <span class="kc">false</span><span class="p">;</span>
+         <span class="p">}</span>
+         <span class="k">if</span> <span class="p">(</span><span class="nx">elem</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nx">type</span> <span class="o">=</span> <span class="nx">type</span> <span class="o">||</span> <span class="s2">&quot;fx&quot;</span><span class="p">;</span>
+            <span class="kd">var</span> <span class="nx">key</span> <span class="o">=</span> <span class="nx">type</span> <span class="o">+</span> <span class="s2">&quot;mark&quot;</span><span class="p">,</span>
+                  <span class="nx">count</span> <span class="o">=</span> <span class="nx">force</span> <span class="o">?</span> <span class="mi">0</span> <span class="o">:</span> <span class="p">(</span> <span class="p">(</span><span class="nx">jQuery</span><span class="p">.</span><span class="nx">_data</span><span class="p">(</span><span class="nx">elem</span><span class="p">,</span> <span class="nx">key</span><span class="p">)</span> <span class="o">||</span> <span class="mi">1</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span> <span class="p">);</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nx">count</span><span class="p">)</span> <span class="p">{</span>
+               <span class="nx">jQuery</span><span class="p">.</span><span class="nx">_data</span><span class="p">(</span><span class="nx">elem</span><span class="p">,</span> <span class="nx">key</span><span class="p">,</span> <span class="nx">count</span><span class="p">);</span>
+            <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+               <span class="nx">jQuery</span><span class="p">.</span><span class="nx">removeData</span><span class="p">(</span><span class="nx">elem</span><span class="p">,</span> <span class="nx">key</span><span class="p">,</span> <span class="kc">true</span><span class="p">);</span>
+               <span class="nx">handleQueueMarkDefer</span><span class="p">(</span><span class="nx">elem</span><span class="p">,</span> <span class="nx">type</span><span class="p">,</span> <span class="s2">&quot;mark&quot;</span><span class="p">);</span>
+            <span class="p">}</span>
+         <span class="p">}</span>
+      <span class="p">},</span>
+
+      <span class="nx">queue</span><span class="o">:</span><span class="kd">function</span><span class="p">(</span><span class="nx">elem</span><span class="p">,</span> <span class="nx">type</span><span class="p">,</span> <span class="nx">data</span><span class="p">)</span> <span class="p">{</span>
+         <span class="kd">var</span> <span class="nx">q</span><span class="p">;</span>
+         <span class="k">if</span> <span class="p">(</span><span class="nx">elem</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nx">type</span> <span class="o">=</span> <span class="p">(</span> <span class="nx">type</span> <span class="o">||</span> <span class="s2">&quot;fx&quot;</span> <span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;queue&quot;</span><span class="p">;</span>
+            <span class="nx">q</span> <span class="o">=</span> <span class="nx">jQuery</span><span class="p">.</span><span class="nx">_data</span><span class="p">(</span><span class="nx">elem</span><span class="p">,</span> <span class="nx">type</span><span class="p">);</span>
+
+
+</pre>
+            </div>
+         </td>
+      </tr>
+      <tr id="section-4">
+         <td class="docs">
+            <div class="pilwrap"><a class="pilcrow" href="#section-4">&#182;</a></div>
+            <p>Speed up dequeue by getting out quickly if this is just a lookup</p></td>
+         <td class="code">
+            <div class="highlight"><pre>
+            <span class="k">if</span> <span class="p">(</span><span class="nx">data</span><span class="p">)</span> <span class="p">{</span>
+               <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">q</span> <span class="o">||</span> <span class="nx">jQuery</span><span class="p">.</span><span class="nx">isArray</span><span class="p">(</span><span class="nx">data</span><span class="p">))</span> <span class="p">{</span>
+                  <span class="nx">q</span> <span class="o">=</span> <span class="nx">jQuery</span><span class="p">.</span><span class="nx">_data</span><span class="p">(</span><span class="nx">elem</span><span class="p">,</span> <span class="nx">type</span><span class="p">,</span> <span class="nx">jQuery</span><span class="p">.</span><span class="nx">makeArray</span><span class="p">(</span><span class="nx">data</span><span class="p">));</span>
+               <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+                  <span class="nx">q</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="nx">data</span><span class="p">);</span>
+               <span class="p">}</span>
+            <span class="p">}</span>
+            <span class="k">return</span> <span class="nx">q</span> <span class="o">||</span> <span class="p">[];</span>
+         <span class="p">}</span>
+      <span class="p">},</span>
+
+      <span class="nx">dequeue</span><span class="o">:</span><span class="kd">function</span><span class="p">(</span><span class="nx">elem</span><span class="p">,</span> <span class="nx">type</span><span class="p">)</span> <span class="p">{</span>
+         <span class="nx">type</span> <span class="o">=</span> <span class="nx">type</span> <span class="o">||</span> <span class="s2">&quot;fx&quot;</span><span class="p">;</span>
+
+         <span class="kd">var</span> <span class="nx">queue</span> <span class="o">=</span> <span class="nx">jQuery</span><span class="p">.</span><span class="nx">queue</span><span class="p">(</span><span class="nx">elem</span><span class="p">,</span> <span class="nx">type</span><span class="p">),</span>
+               <span class="nx">fn</span> <span class="o">=</span> <span class="nx">queue</span><span class="p">.</span><span class="nx">shift</span><span class="p">(),</span>
+               <span class="nx">hooks</span> <span class="o">=</span> <span class="p">{};</span>
+
+
+</pre>
+            </div>
+         </td>
+      </tr>
+      <tr id="section-5">
+         <td class="docs">
+            <div class="pilwrap"><a class="pilcrow" href="#section-5">&#182;</a></div>
+            <p>If the fx queue is dequeued, always remove the progress sentinel</p></td>
+         <td class="code">
+            <div class="highlight"><pre>
+         <span class="k">if</span> <span class="p">(</span><span class="nx">fn</span> <span class="o">===</span> <span class="s2">&quot;inprogress&quot;</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nx">fn</span> <span class="o">=</span> <span class="nx">queue</span><span class="p">.</span><span class="nx">shift</span><span class="p">();</span>
+         <span class="p">}</span>
+
+         <span class="k">if</span> <span class="p">(</span><span class="nx">fn</span><span class="p">)</span> <span class="p">{</span>
+
+</pre>
+            </div>
+         </td>
+      </tr>
+      <tr id="section-6">
+         <td class="docs">
+            <div class="pilwrap"><a class="pilcrow" href="#section-6">&#182;</a></div>
+            <p>Add a progress sentinel to prevent the fx queue from being
+               automatically dequeued</p></td>
+         <td class="code">
+            <div class="highlight"><pre>
+            <span class="k">if</span> <span class="p">(</span><span class="nx">type</span> <span class="o">===</span> <span class="s2">&quot;fx&quot;</span><span class="p">)</span> <span class="p">{</span>
+               <span class="nx">queue</span><span class="p">.</span><span class="nx">unshift</span><span class="p">(</span><span class="s2">&quot;inprogress&quot;</span><span class="p">);</span>
+            <span class="p">}</span>
+
+            <span class="nx">jQuery</span><span class="p">.</span><span class="nx">_data</span><span class="p">(</span><span class="nx">elem</span><span class="p">,</span> <span class="nx">type</span> <span class="o">+</span> <span class="s2">&quot;.run&quot;</span><span class="p">,</span> <span class="nx">hooks</span><span class="p">);</span>
+            <span class="nx">fn</span><span class="p">.</span><span class="nx">call</span><span class="p">(</span><span class="nx">elem</span><span class="p">,</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+               <span class="nx">jQuery</span><span class="p">.</span><span class="nx">dequeue</span><span class="p">(</span><span class="nx">elem</span><span class="p">,</span> <span class="nx">type</span><span class="p">);</span>
+            <span class="p">},</span> <span class="nx">hooks</span><span class="p">);</span>
+         <span class="p">}</span>
+
+         <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">queue</span><span class="p">.</span><span class="nx">length</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nx">jQuery</span><span class="p">.</span><span class="nx">removeData</span><span class="p">(</span><span class="nx">elem</span><span class="p">,</span> <span class="nx">type</span> <span class="o">+</span> <span class="s2">&quot;queue &quot;</span> <span class="o">+</span> <span class="nx">type</span> <span class="o">+</span> <span class="s2">&quot;.run&quot;</span><span class="p">,</span> <span class="kc">true</span><span class="p">);</span>
+            <span class="nx">handleQueueMarkDefer</span><span class="p">(</span><span class="nx">elem</span><span class="p">,</span> <span class="nx">type</span><span class="p">,</span> <span class="s2">&quot;queue&quot;</span><span class="p">);</span>
+         <span class="p">}</span>
+      <span class="p">}</span>
+   <span class="p">});</span>
+
+   <span class="nx">jQuery</span><span class="p">.</span><span class="nx">fn</span><span class="p">.</span><span class="nx">extend</span><span class="p">({</span>
+      <span class="nx">queue</span><span class="o">:</span>     <span class="kd">function</span><span class="p">(</span><span class="nx">type</span><span class="p">,</span> <span class="nx">data</span><span class="p">)</span> <span class="p">{</span>
+         <span class="kd">var</span> <span class="nx">setter</span> <span class="o">=</span> <span class="mi">2</span><span class="p">;</span>
+
+         <span class="k">if</span> <span class="p">(</span><span class="k">typeof</span> <span class="nx">type</span> <span class="o">!==</span> <span class="s2">&quot;string&quot;</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nx">data</span> <span class="o">=</span> <span class="nx">type</span><span class="p">;</span>
+            <span class="nx">type</span> <span class="o">=</span> <span class="s2">&quot;fx&quot;</span><span class="p">;</span>
+            <span class="nx">setter</span><span class="o">--</span><span class="p">;</span>
+         <span class="p">}</span>
+
+         <span class="k">if</span> <span class="p">(</span><span class="nx">arguments</span><span class="p">.</span><span class="nx">length</span> <span class="o">&lt;</span> <span class="nx">setter</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="nx">jQuery</span><span class="p">.</span><span class="nx">queue</span><span class="p">(</span><span class="k">this</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="nx">type</span><span class="p">);</span>
+         <span class="p">}</span>
+
+         <span class="k">return</span> <span class="nx">data</span> <span class="o">===</span> <span class="kc">undefined</span> <span class="o">?</span>
+               <span class="k">this</span> <span class="o">:</span>
+               <span class="k">this</span><span class="p">.</span><span class="nx">each</span><span class="p">(</span><span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+                  <span class="kd">var</span> <span class="nx">queue</span> <span class="o">=</span> <span class="nx">jQuery</span><span class="p">.</span><span class="nx">queue</span><span class="p">(</span><span class="k">this</span><span class="p">,</span> <span class="nx">type</span><span class="p">,</span> <span class="nx">data</span><span class="p">);</span>
+
+                  <span class="k">if</span> <span class="p">(</span><span class="nx">type</span> <span class="o">===</span> <span class="s2">&quot;fx&quot;</span> <span class="o">&amp;&amp;</span> <span class="nx">queue</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!==</span> <span class="s2">&quot;inprogress&quot;</span><span class="p">)</span> <span class="p">{</span>
+                     <span class="nx">jQuery</span><span class="p">.</span><span class="nx">dequeue</span><span class="p">(</span><span class="k">this</span><span class="p">,</span> <span class="nx">type</span><span class="p">);</span>
+                  <span class="p">}</span>
+               <span class="p">});</span>
+      <span class="p">},</span>
+      <span class="nx">dequeue</span><span class="o">:</span>   <span class="kd">function</span><span class="p">(</span><span class="nx">type</span><span class="p">)</span> <span class="p">{</span>
+         <span class="k">return</span> <span class="k">this</span><span class="p">.</span><span class="nx">each</span><span class="p">(</span><span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+            <span class="nx">jQuery</span><span class="p">.</span><span class="nx">dequeue</span><span class="p">(</span><span class="k">this</span><span class="p">,</span> <span class="nx">type</span><span class="p">);</span>
+         <span class="p">});</span>
+      <span class="p">},</span>
+
+</pre>
+            </div>
+         </td>
+      </tr>
+      <tr id="section-7">
+         <td class="docs">
+            <div class="pilwrap"><a class="pilcrow" href="#section-7">&#182;</a></div>
+            <p>Based off of the plugin by Clint Helfers, with permission.
+               http://blindsignals.com/index.php/2009/07/jquery-delay/</p></td>
+         <td class="code">
+            <div class="highlight"><pre>
+      <span class="nx">delay</span><span class="o">:</span>     <span class="kd">function</span><span class="p">(</span><span class="nx">time</span><span class="p">,</span> <span class="nx">type</span><span class="p">)</span> <span class="p">{</span>
+         <span class="nx">time</span> <span class="o">=</span> <span class="nx">jQuery</span><span class="p">.</span><span class="nx">fx</span> <span class="o">?</span> <span class="nx">jQuery</span><span class="p">.</span><span class="nx">fx</span><span class="p">.</span><span class="nx">speeds</span><span class="p">[</span> <span class="nx">time</span> <span class="p">]</span> <span class="o">||</span> <span class="nx">time</span> <span class="o">:</span> <span class="nx">time</span><span class="p">;</span>
+         <span class="nx">type</span> <span class="o">=</span> <span class="nx">type</span> <span class="o">||</span> <span class="s2">&quot;fx&quot;</span><span class="p">;</span>
+
+         <span class="k">return</span> <span class="k">this</span><span class="p">.</span><span class="nx">queue</span><span class="p">(</span><span class="nx">type</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">next</span><span class="p">,</span> <span class="nx">hooks</span><span class="p">)</span> <span class="p">{</span>
+            <span class="kd">var</span> <span class="nx">timeout</span> <span class="o">=</span> <span class="nx">setTimeout</span><span class="p">(</span><span class="nx">next</span><span class="p">,</span> <span class="nx">time</span><span class="p">);</span>
+            <span class="nx">hooks</span><span class="p">.</span><span class="nx">stop</span> <span class="o">=</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+               <span class="nx">clearTimeout</span><span class="p">(</span><span class="nx">timeout</span><span class="p">);</span>
+            <span class="p">};</span>
+         <span class="p">});</span>
+      <span class="p">},</span>
+      <span class="nx">clearQueue</span><span class="o">:</span><span class="kd">function</span><span class="p">(</span><span class="nx">type</span><span class="p">)</span> <span class="p">{</span>
+         <span class="k">return</span> <span class="k">this</span><span class="p">.</span><span class="nx">queue</span><span class="p">(</span><span class="nx">type</span> <span class="o">||</span> <span class="s2">&quot;fx&quot;</span><span class="p">,</span> <span class="p">[]);</span>
+      <span class="p">},</span>
+
+</pre>
+            </div>
+         </td>
+      </tr>
+      <tr id="section-8">
+         <td class="docs">
+            <div class="pilwrap"><a class="pilcrow" href="#section-8">&#182;</a></div>
+            <p>Get a promise resolved when queues of a certain type
+               are emptied (fx is the type by default)</p></td>
+         <td class="code">
+            <div class="highlight"><pre>
+      <span class="nx">promise</span><span class="o">:</span>   <span class="kd">function</span><span class="p">(</span><span class="nx">type</span><span class="p">,</span> <span class="nx">object</span><span class="p">)</span> <span class="p">{</span>
+         <span class="k">if</span> <span class="p">(</span><span class="k">typeof</span> <span class="nx">type</span> <span class="o">!==</span> <span class="s2">&quot;string&quot;</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nx">object</span> <span class="o">=</span> <span class="nx">type</span><span class="p">;</span>
+            <span class="nx">type</span> <span class="o">=</span> <span class="kc">undefined</span><span class="p">;</span>
+         <span class="p">}</span>
+         <span class="nx">type</span> <span class="o">=</span> <span class="nx">type</span> <span class="o">||</span> <span class="s2">&quot;fx&quot;</span><span class="p">;</span>
+         <span class="kd">var</span> <span class="nx">defer</span> <span class="o">=</span> <span class="nx">jQuery</span><span class="p">.</span><span class="nx">Deferred</span><span class="p">(),</span>
+               <span class="nx">elements</span> <span class="o">=</span> <span class="k">this</span><span class="p">,</span>
+               <span class="nx">i</span> <span class="o">=</span> <span class="nx">elements</span><span class="p">.</span><span class="nx">length</span><span class="p">,</span>
+               <span class="nx">count</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+               <span class="nx">deferDataKey</span> <span class="o">=</span> <span class="nx">type</span> <span class="o">+</span> <span class="s2">&quot;defer&quot;</span><span class="p">,</span>
+               <span class="nx">queueDataKey</span> <span class="o">=</span> <span class="nx">type</span> <span class="o">+</span> <span class="s2">&quot;queue&quot;</span><span class="p">,</span>
+               <span class="nx">markDataKey</span> <span class="o">=</span> <span class="nx">type</span> <span class="o">+</span> <span class="s2">&quot;mark&quot;</span><span class="p">,</span>
+               <span class="nx">tmp</span><span class="p">;</span>
+
+         <span class="kd">function</span> <span class="nx">resolve</span><span class="p">()</span> <span class="p">{</span>
+            <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="p">(</span> <span class="o">--</span><span class="nx">count</span> <span class="p">))</span> <span class="p">{</span>
+               <span class="nx">defer</span><span class="p">.</span><span class="nx">resolveWith</span><span class="p">(</span><span class="nx">elements</span><span class="p">,</span> <span class="p">[</span> <span class="nx">elements</span> <span class="p">]);</span>
+            <span class="p">}</span>
+         <span class="p">}</span>
+
+         <span class="k">while</span> <span class="p">(</span><span class="nx">i</span><span class="o">--</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">if</span> <span class="p">((</span> <span class="nx">tmp</span> <span class="o">=</span> <span class="nx">jQuery</span><span class="p">.</span><span class="nx">data</span><span class="p">(</span><span class="nx">elements</span><span class="p">[</span> <span class="nx">i</span> <span class="p">],</span> <span class="nx">deferDataKey</span><span class="p">,</span> <span class="kc">undefined</span><span class="p">,</span> <span class="kc">true</span><span class="p">)</span> <span class="o">||</span>
+                  <span class="p">(</span> <span class="nx">jQuery</span><span class="p">.</span><span class="nx">data</span><span class="p">(</span><span class="nx">elements</span><span class="p">[</span> <span class="nx">i</span> <span class="p">],</span> <span class="nx">queueDataKey</span><span class="p">,</span> <span class="kc">undefined</span><span class="p">,</span> <span class="kc">true</span><span class="p">)</span> <span class="o">||</span>
+                        <span class="nx">jQuery</span><span class="p">.</span><span class="nx">data</span><span class="p">(</span><span class="nx">elements</span><span class="p">[</span> <span class="nx">i</span> <span class="p">],</span> <span class="nx">markDataKey</span><span class="p">,</span> <span class="kc">undefined</span><span class="p">,</span> <span class="kc">true</span><span class="p">)</span> <span class="p">)</span> <span class="o">&amp;&amp;</span>
+                        <span class="nx">jQuery</span><span class="p">.</span><span class="nx">data</span><span class="p">(</span><span class="nx">elements</span><span class="p">[</span> <span class="nx">i</span> <span class="p">],</span> <span class="nx">deferDataKey</span><span class="p">,</span> <span class="nx">jQuery</span><span class="p">.</span><span class="nx">Callbacks</span><span class="p">(</span><span class="s2">&quot;once memory&quot;</span><span class="p">),</span> <span class="kc">true</span><span class="p">)</span> <span class="p">))</span> <span class="p">{</span>
+               <span class="nx">count</span><span class="o">++</span><span class="p">;</span>
+               <span class="nx">tmp</span><span class="p">.</span><span class="nx">add</span><span class="p">(</span><span class="nx">resolve</span><span class="p">);</span>
+            <span class="p">}</span>
+         <span class="p">}</span>
+         <span class="nx">resolve</span><span class="p">();</span>
+         <span class="k">return</span> <span class="nx">defer</span><span class="p">.</span><span class="nx">promise</span><span class="p">(</span><span class="nx">object</span><span class="p">);</span>
+      <span class="p">}</span>
+   <span class="p">});</span>
+
+<span class="p">})(</span><span class="nx">jQuery</span><span class="p">);</span>
+
+</pre>
+            </div>
+         </td>
+      </tr>
+      </tbody>
+   </table>
+</div>
+</body>
+</html>

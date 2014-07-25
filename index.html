@@ -1,70 +1,79 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta charset='utf-8'>
+   <meta charset='utf-8'>
 
-  <title>robflaherty/jquery-annotated-source @ GitHub</title>
+   <title>robflaherty/jquery-annotated-source @ GitHub</title>
 
-  <style type="text/css">
-    body { margin: 1.0em 0; font-family: Helvetica, Arial, FreeSans, san-serif; color: #333; }
-    #container { margin: 0 auto; width: 700px; }
-    h1 { font-size: 72px; color: #2567a1; margin-bottom: 3px; font-family: reenie-beanie; }
-    h2 { font-size: 36px; color: #333; margin-bottom: 3px; font-family: reenie-beanie; }
-    p, li { font-family: reenie-beanie; font-size: 36px; }
-    li:before { content: "* "; }
-    li { margin: 0; padding: 0; }
-    ul { margin: 0 0 30px; padding: 0; list-style-type: none; }
-    p.small { font-size: 24px; }
-    a { color: #5e9cd3; text-decoration: none; }
-    a:hover { color: #2567a1; }
-  </style>
-  
-<script type="text/javascript" src="http://use.typekit.com/hrj4atz.js"></script>
-<script type="text/javascript">try{Typekit.load();}catch(e){}</script>
-       
-<script>
-  var _gaq = _gaq || [];
-  _gaq.push(['_setAccount', 'UA-1413210-11']);
-  _gaq.push(['_trackPageview']);
+   <style type="text/css">
+      body { margin: 1.0em 0; font-family: Helvetica, Arial, FreeSans, san-serif; color: #333; }
+      #container { margin: 0 auto; width: 700px; }
+      h1 { font-size: 72px; color: #2567a1; margin-bottom: 3px; font-family: reenie-beanie; }
+      h2 { font-size: 36px; color: #333; margin-bottom: 3px; font-family: reenie-beanie; }
+      p, li { font-family: reenie-beanie; font-size: 36px; }
+      li:before { content: "* "; }
+      li { margin: 0; padding: 0; }
+      ul { margin: 0 0 30px; padding: 0; list-style-type: none; }
+      p.small { font-size: 24px; }
+      a { color: #5e9cd3; text-decoration: none; }
+      a:hover { color: #2567a1; }
+   </style>
 
-  (function() {
-    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
-    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
-    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
-  })();
-</script>  
-  
+   <script type="text/javascript" src="http://use.typekit.com/hrj4atz.js"></script>
+   <script type="text/javascript">try {
+      Typekit.load();
+   } catch (e) {
+   }</script>
+
+   <script>
+      var _gaq = _gaq || [];
+      _gaq.push(['_setAccount', 'UA-1413210-11']);
+      _gaq.push(['_trackPageview']);
+
+      (function() {
+         var ga = document.createElement('script');
+         ga.type = 'text/javascript';
+         ga.async = true;
+         ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+         var s = document.getElementsByTagName('script')[0];
+         s.parentNode.insertBefore(ga, s);
+      })();
+   </script>
+
 </head>
 
 <body>
-  <a href="http://github.com/robflaherty/jquery-annotated-source"><img style="position: absolute; top: 0; right: 0; border: 0;" src="http://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub" /></a>
+<a href="http://github.com/robflaherty/jquery-annotated-source"><img style="position: absolute; top: 0; right: 0; border: 0;" src="http://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"/></a>
 
-  <div id="container">
-    <h1>jQuery Annotated Source</h1>
-    
-    <p>Read the jQuery source like a book like a boss.</p>
-    <p>Make it better by <a href="http://github.com/robflaherty/jquery-annotated-source">contributing on GitHub</a>.</p>
-    
-    <h2>Chapters</h2>
-    <ul>
-      <li><a href="/jquery-annotated-source/docs/01-core.html">Core</a></li>
-      <li><a href="/jquery-annotated-source/docs/02-deferred.html">Deferred</a></li>
-      <li><a href="/jquery-annotated-source/docs/03-support.html">Support</a></li>
-      <li><a href="/jquery-annotated-source/docs/04-data.html">Data</a></li>
-      <li><a href="/jquery-annotated-source/docs/05-queue.html">Queue</a></li>
-      <li><a href="/jquery-annotated-source/docs/06-attributes.html">Attributes</a></li>
-      <li><a href="/jquery-annotated-source/docs/07-event.html">Event</a></li>
-      <li><a href="/jquery-annotated-source/docs/08-selector.html">Selector</a></li>
-      <li><a href="/jquery-annotated-source/docs/09-traversing.html">Traversing</a></li>
-      <li><a href="/jquery-annotated-source/docs/10-manipulation.html">Manipulation</a></li>
-      <li><a href="/jquery-annotated-source/docs/11-css.html">CSS</a></li>
-      <li><a href="/jquery-annotated-source/docs/12-ajax.html">Ajax</a></li>
-      <li><a href="/jquery-annotated-source/docs/13-effects.html">Effects</a></li>
-      <li><a href="/jquery-annotated-source/docs/14-offset.html">Offset</a></li>
-      <li><a href="/jquery-annotated-source/docs/15-dimensions.html">Dimensions</a></li>
-    </ul>
-    <p>~<a href="http://www.twitter.com/robflaherty">@robflaherty</a></p>
+<div id="container">
+   <h1>jQuery Annotated Source</h1>
 
-  </div>  
+   <p>Read the jQuery source like a book like a boss.</p>
+
+   <p>Make it better by <a href="http://github.com/robflaherty/jquery-annotated-source">contributing on GitHub</a>.</p>
+
+   <h2>Chapters</h2>
+   <ul>
+      <li><a href="/jquery-annotated-source/docs/01-core.html">Code</a></li>
+      <li><a href="/jquery-annotated-source/docs/02-callbacks.html">Callbacks</a></li>
+      <li><a href="/jquery-annotated-source/docs/03-deferred.html">Deferred</a></li>
+      <li><a href="/jquery-annotated-source/docs/04-support.html">Support</a></li>
+      <li><a href="/jquery-annotated-source/docs/05-data.html">Data</a></li>
+      <li><a href="/jquery-annotated-source/docs/06-queue.html">Queue</a></li>
+      <li><a href="/jquery-annotated-source/docs/07-attributes.html">Attributes</a></li>
+      <li><a href="/jquery-annotated-source/docs/08-event.html">Event</a></li>
+      <li><a href="/jquery-annotated-source/docs/09-sizzle-jquery.html">Sizzle (jQuery)</a></li>
+      <li><a href="/jquery-annotated-source/docs/10-traversing.html">Traversing</a></li>
+      <li><a href="/jquery-annotated-source/docs/11-manipulation.html">Manipulation</a></li>
+      <li><a href="/jquery-annotated-source/docs/12-css.html">CSS</a></li>
+      <li><a href="/jquery-annotated-source/docs/13-ajax.html">Ajax</a></li>
+      <li><a href="/jquery-annotated-source/docs/14-effects.html">Effects</a></li>
+      <li><a href="/jquery-annotated-source/docs/15-offset.html">Offset</a></li>
+      <li><a href="/jquery-annotated-source/docs/16-dimensions.html">Dimensions</a></li>
+      <li><a href="/jquery-annotated-source/docs/17-exports.html">Exports</a></li>
+   </ul>
+   <p>~<a href="http://www.twitter.com/robflaherty">@robflaherty</a></p>
+
+</div>
 </body>
 </html>

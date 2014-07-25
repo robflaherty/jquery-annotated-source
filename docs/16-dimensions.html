@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html>
+<head><title>16-dimensions.js</title>
+   <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+   <link rel="stylesheet" media="all" href="docco.css"/>
+</head>
+<body>
+<div id="container">
+   <div id="background"></div>
+   <table cellpadding="0" cellspacing="0">
+      <thead>
+      <tr>
+         <th class="docs"><h1> 16-dimensions.js </h1></th>
+         <th class="code"></th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr id="section-1">
+         <td class="docs">
+            <div class="pilwrap"><a class="pilcrow" href="#section-1">&#182;</a></div>
+            <p><strong>jQuery Annotated Source</strong>.</p>
+
+            <p><a href="/jquery-annotated-source/">Home</a> | <a href="15-offset.html">Previous Chapter</a> |
+               <a href="17-exports.html">Next Chapter</a></p></td>
+         <td class="code">
+            <div class="highlight">
+               <pre></pre>
+            </div>
+         </td>
+      </tr>
+      <tr id="section-2">
+         <td class="docs">
+            <div class="pilwrap"><a class="pilcrow" href="#section-2">&#182;</a></div>
+            <h2>Chapter 16: Dimensions</h2></td>
+         <td class="code">
+            <div class="highlight"><pre>
+
+<span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">jQuery</span><span class="p">)</span> <span class="p">{</span>
+
+
+</pre>
+            </div>
+         </td>
+      </tr>
+      <tr id="section-3">
+         <td class="docs">
+            <div class="pilwrap"><a class="pilcrow" href="#section-3">&#182;</a></div>
+            <p>Create width, height, innerHeight, innerWidth, outerHeight and outerWidth methods</p></td>
+         <td class="code">
+            <div class="highlight"><pre>
+   <span class="nx">jQuery</span><span class="p">.</span><span class="nx">each</span><span class="p">({</span> <span class="nx">Height</span><span class="o">:</span><span class="s2">&quot;height&quot;</span><span class="p">,</span> <span class="nx">Width</span><span class="o">:</span><span class="s2">&quot;width&quot;</span> <span class="p">},</span> <span class="kd">function</span><span class="p">(</span><span class="nx">name</span><span class="p">,</span> <span class="nx">type</span><span class="p">)</span> <span class="p">{</span>
+      <span class="kd">var</span> <span class="nx">clientProp</span> <span class="o">=</span> <span class="s2">&quot;client&quot;</span> <span class="o">+</span> <span class="nx">name</span><span class="p">,</span>
+            <span class="nx">scrollProp</span> <span class="o">=</span> <span class="s2">&quot;scroll&quot;</span> <span class="o">+</span> <span class="nx">name</span><span class="p">,</span>
+            <span class="nx">offsetProp</span> <span class="o">=</span> <span class="s2">&quot;offset&quot;</span> <span class="o">+</span> <span class="nx">name</span><span class="p">;</span>
+
+
+</pre>
+            </div>
+         </td>
+      </tr>
+      <tr id="section-4">
+         <td class="docs">
+            <div class="pilwrap"><a class="pilcrow" href="#section-4">&#182;</a></div>
+            <p>innerHeight and innerWidth</p></td>
+         <td class="code">
+            <div class="highlight"><pre>
+      <span class="nx">jQuery</span><span class="p">.</span><span class="nx">fn</span><span class="p">[</span> <span class="s2">&quot;inner&quot;</span> <span class="o">+</span> <span class="nx">name</span> <span class="p">]</span> <span class="o">=</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+         <span class="kd">var</span> <span class="nx">elem</span> <span class="o">=</span> <span class="k">this</span><span class="p">[</span><span class="mi">0</span><span class="p">];</span>
+         <span class="k">return</span> <span class="nx">elem</span> <span class="o">?</span>
+               <span class="nx">elem</span><span class="p">.</span><span class="nx">style</span> <span class="o">?</span>
+                     <span class="nb">parseFloat</span><span class="p">(</span><span class="nx">jQuery</span><span class="p">.</span><span class="nx">css</span><span class="p">(</span><span class="nx">elem</span><span class="p">,</span> <span class="nx">type</span><span class="p">,</span> <span class="s2">&quot;padding&quot;</span><span class="p">))</span> <span class="o">:</span>
+                     <span class="k">this</span><span class="p">[</span> <span class="nx">type</span> <span class="p">]()</span> <span class="o">:</span>
+               <span class="kc">null</span><span class="p">;</span>
+      <span class="p">};</span>
+
+
+</pre>
+            </div>
+         </td>
+      </tr>
+      <tr id="section-5">
+         <td class="docs">
+            <div class="pilwrap"><a class="pilcrow" href="#section-5">&#182;</a></div>
+            <p>outerHeight and outerWidth</p></td>
+         <td class="code">
+            <div class="highlight"><pre>
+      <span class="nx">jQuery</span><span class="p">.</span><span class="nx">fn</span><span class="p">[</span> <span class="s2">&quot;outer&quot;</span> <span class="o">+</span> <span class="nx">name</span> <span class="p">]</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">margin</span><span class="p">)</span> <span class="p">{</span>
+         <span class="kd">var</span> <span class="nx">elem</span> <span class="o">=</span> <span class="k">this</span><span class="p">[</span><span class="mi">0</span><span class="p">];</span>
+         <span class="k">return</span> <span class="nx">elem</span> <span class="o">?</span>
+               <span class="nx">elem</span><span class="p">.</span><span class="nx">style</span> <span class="o">?</span>
+                     <span class="nb">parseFloat</span><span class="p">(</span><span class="nx">jQuery</span><span class="p">.</span><span class="nx">css</span><span class="p">(</span><span class="nx">elem</span><span class="p">,</span> <span class="nx">type</span><span class="p">,</span> <span class="nx">margin</span> <span class="o">?</span> <span class="s2">&quot;margin&quot;</span> <span class="o">:</span> <span class="s2">&quot;border&quot;</span><span class="p">))</span> <span class="o">:</span>
+                     <span class="k">this</span><span class="p">[</span> <span class="nx">type</span> <span class="p">]()</span> <span class="o">:</span>
+               <span class="kc">null</span><span class="p">;</span>
+      <span class="p">};</span>
+
+      <span class="nx">jQuery</span><span class="p">.</span><span class="nx">fn</span><span class="p">[</span> <span class="nx">type</span> <span class="p">]</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">value</span><span class="p">)</span> <span class="p">{</span>
+         <span class="k">return</span> <span class="nx">jQuery</span><span class="p">.</span><span class="nx">access</span><span class="p">(</span><span class="k">this</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">elem</span><span class="p">,</span> <span class="nx">type</span><span class="p">,</span> <span class="nx">value</span><span class="p">)</span> <span class="p">{</span>
+            <span class="kd">var</span> <span class="nx">doc</span><span class="p">,</span> <span class="nx">docElemProp</span><span class="p">,</span> <span class="nx">orig</span><span class="p">,</span> <span class="nx">ret</span><span class="p">;</span>
+
+            <span class="k">if</span> <span class="p">(</span><span class="nx">jQuery</span><span class="p">.</span><span class="nx">isWindow</span><span class="p">(</span><span class="nx">elem</span><span class="p">))</span> <span class="p">{</span>
+
+</pre>
+            </div>
+         </td>
+      </tr>
+      <tr id="section-6">
+         <td class="docs">
+            <div class="pilwrap"><a class="pilcrow" href="#section-6">&#182;</a></div>
+            <p>3rd condition allows Nokia support, as it supports the docElem prop but not CSS1Compat</p></td>
+         <td class="code">
+            <div class="highlight"><pre>
+               <span class="nx">doc</span> <span class="o">=</span> <span class="nx">elem</span><span class="p">.</span><span class="nb">document</span><span class="p">;</span>
+               <span class="nx">docElemProp</span> <span class="o">=</span> <span class="nx">doc</span><span class="p">.</span><span class="nx">documentElement</span><span class="p">[</span> <span class="nx">clientProp</span> <span class="p">];</span>
+               <span class="k">return</span> <span class="nx">jQuery</span><span class="p">.</span><span class="nx">support</span><span class="p">.</span><span class="nx">boxModel</span> <span class="o">&amp;&amp;</span> <span class="nx">docElemProp</span> <span class="o">||</span>
+                     <span class="nx">doc</span><span class="p">.</span><span class="nx">body</span> <span class="o">&amp;&amp;</span> <span class="nx">doc</span><span class="p">.</span><span class="nx">body</span><span class="p">[</span> <span class="nx">clientProp</span> <span class="p">]</span> <span class="o">||</span> <span class="nx">docElemProp</span><span class="p">;</span>
+            <span class="p">}</span>
+
+
+</pre>
+            </div>
+         </td>
+      </tr>
+      <tr id="section-7">
+         <td class="docs">
+            <div class="pilwrap"><a class="pilcrow" href="#section-7">&#182;</a></div>
+            <p>Get document width or height</p></td>
+         <td class="code">
+            <div class="highlight"><pre>
+            <span class="k">if</span> <span class="p">(</span><span class="nx">elem</span><span class="p">.</span><span class="nx">nodeType</span> <span class="o">===</span> <span class="mi">9</span><span class="p">)</span> <span class="p">{</span>
+
+</pre>
+            </div>
+         </td>
+      </tr>
+      <tr id="section-8">
+         <td class="docs">
+            <div class="pilwrap"><a class="pilcrow" href="#section-8">&#182;</a></div>
+            <p>Either scroll[Width/Height] or offset[Width/Height], whichever is greater</p></td>
+         <td class="code">
+            <div class="highlight"><pre>
+               <span class="nx">doc</span> <span class="o">=</span> <span class="nx">elem</span><span class="p">.</span><span class="nx">documentElement</span><span class="p">;</span>
+
+
+</pre>
+            </div>
+         </td>
+      </tr>
+      <tr id="section-9">
+         <td class="docs">
+            <div class="pilwrap"><a class="pilcrow" href="#section-9">&#182;</a></div>
+            <p>when a window > document, IE6 reports a offset[Width/Height] > client[Width/Height]
+               so we can't use max, as it'll choose the incorrect offset[Width/Height]
+               instead we use the correct client[Width/Height]
+               support:IE6</p></td>
+         <td class="code">
+            <div class="highlight"><pre>
+               <span class="k">if</span> <span class="p">(</span><span class="nx">doc</span><span class="p">[</span> <span class="nx">clientProp</span> <span class="p">]</span> <span class="o">&gt;=</span> <span class="nx">doc</span><span class="p">[</span> <span class="nx">scrollProp</span> <span class="p">])</span> <span class="p">{</span>
+                  <span class="k">return</span> <span class="nx">doc</span><span class="p">[</span> <span class="nx">clientProp</span> <span class="p">];</span>
+               <span class="p">}</span>
+
+               <span class="k">return</span> <span class="nb">Math</span><span class="p">.</span><span class="nx">max</span><span class="p">(</span>
+                     <span class="nx">elem</span><span class="p">.</span><span class="nx">body</span><span class="p">[</span> <span class="nx">scrollProp</span> <span class="p">],</span> <span class="nx">doc</span><span class="p">[</span> <span class="nx">scrollProp</span> <span class="p">],</span>
+                     <span class="nx">elem</span><span class="p">.</span><span class="nx">body</span><span class="p">[</span> <span class="nx">offsetProp</span> <span class="p">],</span> <span class="nx">doc</span><span class="p">[</span> <span class="nx">offsetProp</span> <span class="p">]</span>
+               <span class="p">);</span>
+            <span class="p">}</span>
+
+
+</pre>
+            </div>
+         </td>
+      </tr>
+      <tr id="section-10">
+         <td class="docs">
+            <div class="pilwrap"><a class="pilcrow" href="#section-10">&#182;</a></div>
+            <p>Get width or height on the element</p></td>
+         <td class="code">
+            <div class="highlight"><pre>
+            <span class="k">if</span> <span class="p">(</span><span class="nx">value</span> <span class="o">===</span> <span class="kc">undefined</span><span class="p">)</span> <span class="p">{</span>
+               <span class="nx">orig</span> <span class="o">=</span> <span class="nx">jQuery</span><span class="p">.</span><span class="nx">css</span><span class="p">(</span><span class="nx">elem</span><span class="p">,</span> <span class="nx">type</span><span class="p">);</span>
+               <span class="nx">ret</span> <span class="o">=</span> <span class="nb">parseFloat</span><span class="p">(</span><span class="nx">orig</span><span class="p">);</span>
+               <span class="k">return</span> <span class="nx">jQuery</span><span class="p">.</span><span class="nx">isNumeric</span><span class="p">(</span><span class="nx">ret</span><span class="p">)</span> <span class="o">?</span> <span class="nx">ret</span> <span class="o">:</span> <span class="nx">orig</span><span class="p">;</span>
+            <span class="p">}</span>
+
+
+</pre>
+            </div>
+         </td>
+      </tr>
+      <tr id="section-11">
+         <td class="docs">
+            <div class="pilwrap"><a class="pilcrow" href="#section-11">&#182;</a></div>
+            <p>Set the width or height on the element</p></td>
+         <td class="code">
+            <div class="highlight"><pre>
+            <span class="nx">jQuery</span><span class="p">(</span><span class="nx">elem</span><span class="p">).</span><span class="nx">css</span><span class="p">(</span><span class="nx">type</span><span class="p">,</span> <span class="nx">value</span><span class="p">);</span>
+         <span class="p">},</span> <span class="nx">type</span><span class="p">,</span> <span class="nx">value</span><span class="p">,</span> <span class="nx">arguments</span><span class="p">.</span><span class="nx">length</span><span class="p">,</span> <span class="kc">null</span><span class="p">);</span>
+      <span class="p">};</span>
+   <span class="p">});</span>
+
+<span class="p">})(</span><span class="nx">jQuery</span><span class="p">);</span>
+
+</pre>
+            </div>
+         </td>
+      </tr>
+      </tbody>
+   </table>
+</div>
+</body>
+</html>

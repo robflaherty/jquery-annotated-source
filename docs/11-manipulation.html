@@ -1,0 +1,9900 @@
+<!DOCTYPE html>
+<html>
+<head><title>11-manipulation.js</title>
+   <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+   <link rel="stylesheet" media="all" href="docco.css"/>
+</head>
+<body>
+<div id="container">
+<div id="background"></div>
+<table cellpadding="0" cellspacing="0">
+<thead>
+<tr>
+   <th class="docs"><h1> 11-manipulation.js </h1></th>
+   <th class="code"></th>
+</tr>
+</thead>
+<tbody>
+<tr id="section-1">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-1">&#182;</a></div>
+      <p><strong>jQuery Annotated Source</strong>.</p>
+
+      <p><a href="/jquery-annotated-source/">Home</a> | <a href="10-traversing.html">Previous Chapter</a> |
+         <a href="12-css.html">Next Chapter</a></p></td>
+   <td class="code">
+      <div class="highlight">
+         <pre></pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-2">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-2">&#182;</a></div>
+      <h2>Chapter 11: Manipulation</h2></td>
+   <td class="code">
+      <div class="highlight"><pre>
+
+<span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">jQuery</span><span class="p">)</span> <span class="p">{</span>
+
+   <span class="kd">function</span> <span class="nx">createSafeFragment</span><span class="p">(</span><span class="nb">document</span><span class="p">)</span> <span class="p">{</span>
+      <span class="kd">var</span> <span class="nx">list</span> <span class="o">=</span> <span class="nx">nodeNames</span><span class="p">.</span><span class="nx">split</span><span class="p">(</span><span class="s2">&quot;|&quot;</span><span class="p">),</span>
+            <span class="nx">safeFrag</span> <span class="o">=</span> <span class="nb">document</span><span class="p">.</span><span class="nx">createDocumentFragment</span><span class="p">();</span>
+
+      <span class="k">if</span> <span class="p">(</span><span class="nx">safeFrag</span><span class="p">.</span><span class="nx">createElement</span><span class="p">)</span> <span class="p">{</span>
+         <span class="k">while</span> <span class="p">(</span><span class="nx">list</span><span class="p">.</span><span class="nx">length</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nx">safeFrag</span><span class="p">.</span><span class="nx">createElement</span><span class="p">(</span>
+                  <span class="nx">list</span><span class="p">.</span><span class="nx">pop</span><span class="p">()</span>
+            <span class="p">);</span>
+         <span class="p">}</span>
+      <span class="p">}</span>
+      <span class="k">return</span> <span class="nx">safeFrag</span><span class="p">;</span>
+   <span class="p">}</span>
+
+   <span class="kd">var</span> <span class="nx">nodeNames</span> <span class="o">=</span> <span class="s2">&quot;abbr|article|aside|audio|bdi|canvas|data|datalist|details|figcaption|figure|footer|&quot;</span> <span class="o">+</span>
+               <span class="s2">&quot;header|hgroup|mark|meter|nav|output|progress|section|summary|time|video&quot;</span><span class="p">,</span>
+         <span class="nx">rinlinejQuery</span> <span class="o">=</span> <span class="sr">/ jQuery\d+=&quot;(?:\d+|null)&quot;/g</span><span class="p">,</span>
+         <span class="nx">rleadingWhitespace</span> <span class="o">=</span> <span class="sr">/^\s+/</span><span class="p">,</span>
+         <span class="nx">rxhtmlTag</span> <span class="o">=</span> <span class="sr">/&lt;(?!area|br|col|embed|hr|img|input|link|meta|param)(([\w:]+)[^&gt;]*)\/&gt;/ig</span><span class="p">,</span>
+         <span class="nx">rtagName</span> <span class="o">=</span> <span class="sr">/&lt;([\w:]+)/</span><span class="p">,</span>
+         <span class="nx">rtbody</span> <span class="o">=</span> <span class="sr">/&lt;tbody/i</span><span class="p">,</span>
+         <span class="nx">rhtml</span> <span class="o">=</span> <span class="sr">/&lt;|&amp;#?\w+;/</span><span class="p">,</span>
+         <span class="nx">rnoInnerhtml</span> <span class="o">=</span> <span class="sr">/&lt;(?:script|style)/i</span><span class="p">,</span>
+         <span class="nx">rnocache</span> <span class="o">=</span> <span class="sr">/&lt;(?:script|object|embed|option|style)/i</span><span class="p">,</span>
+         <span class="nx">rnoshimcache</span> <span class="o">=</span> <span class="k">new</span> <span class="nb">RegExp</span><span class="p">(</span><span class="s2">&quot;&lt;(?:&quot;</span> <span class="o">+</span> <span class="nx">nodeNames</span> <span class="o">+</span> <span class="s2">&quot;)[\\s/&gt;]&quot;</span><span class="p">,</span> <span class="s2">&quot;i&quot;</span><span class="p">),</span>
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-3">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-3">&#182;</a></div>
+      <p>checked="checked" or checked</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+         <span class="nx">rchecked</span> <span class="o">=</span> <span class="sr">/checked\s*(?:[^=]|=\s*.checked.)/i</span><span class="p">,</span>
+         <span class="nx">rscriptType</span> <span class="o">=</span> <span class="sr">/\/(java|ecma)script/i</span><span class="p">,</span>
+         <span class="nx">rcleanScript</span> <span class="o">=</span> <span class="sr">/^\s*&lt;!(?:\[CDATA\[|\-\-)/</span><span class="p">,</span>
+         <span class="nx">wrapMap</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="nx">option</span><span class="o">:</span>  <span class="p">[</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;&lt;select multiple=&#39;multiple&#39;&gt;&quot;</span><span class="p">,</span> <span class="s2">&quot;&lt;/select&gt;&quot;</span> <span class="p">],</span>
+            <span class="nx">legend</span><span class="o">:</span>  <span class="p">[</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;&lt;fieldset&gt;&quot;</span><span class="p">,</span> <span class="s2">&quot;&lt;/fieldset&gt;&quot;</span> <span class="p">],</span>
+            <span class="nx">thead</span><span class="o">:</span>   <span class="p">[</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;&lt;table&gt;&quot;</span><span class="p">,</span> <span class="s2">&quot;&lt;/table&gt;&quot;</span> <span class="p">],</span>
+            <span class="nx">tr</span><span class="o">:</span>      <span class="p">[</span> <span class="mi">2</span><span class="p">,</span> <span class="s2">&quot;&lt;table&gt;&lt;tbody&gt;&quot;</span><span class="p">,</span> <span class="s2">&quot;&lt;/tbody&gt;&lt;/table&gt;&quot;</span> <span class="p">],</span>
+            <span class="nx">td</span><span class="o">:</span>      <span class="p">[</span> <span class="mi">3</span><span class="p">,</span> <span class="s2">&quot;&lt;table&gt;&lt;tbody&gt;&lt;tr&gt;&quot;</span><span class="p">,</span> <span class="s2">&quot;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&quot;</span> <span class="p">],</span>
+            <span class="nx">col</span><span class="o">:</span>     <span class="p">[</span> <span class="mi">2</span><span class="p">,</span> <span class="s2">&quot;&lt;table&gt;&lt;tbody&gt;&lt;/tbody&gt;&lt;colgroup&gt;&quot;</span><span class="p">,</span> <span class="s2">&quot;&lt;/colgroup&gt;&lt;/table&gt;&quot;</span> <span class="p">],</span>
+            <span class="nx">area</span><span class="o">:</span>    <span class="p">[</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;&lt;map&gt;&quot;</span><span class="p">,</span> <span class="s2">&quot;&lt;/map&gt;&quot;</span> <span class="p">],</span>
+            <span class="nx">_default</span><span class="o">:</span><span class="p">[</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span> <span class="p">]</span>
+         <span class="p">},</span>
+         <span class="nx">safeFragment</span> <span class="o">=</span> <span class="nx">createSafeFragment</span><span class="p">(</span><span class="nb">document</span><span class="p">);</span>
+
+   <span class="nx">wrapMap</span><span class="p">.</span><span class="nx">optgroup</span> <span class="o">=</span> <span class="nx">wrapMap</span><span class="p">.</span><span class="nx">option</span><span class="p">;</span>
+   <span class="nx">wrapMap</span><span class="p">.</span><span class="nx">tbody</span> <span class="o">=</span> <span class="nx">wrapMap</span><span class="p">.</span><span class="nx">tfoot</span> <span class="o">=</span> <span class="nx">wrapMap</span><span class="p">.</span><span class="nx">colgroup</span> <span class="o">=</span> <span class="nx">wrapMap</span><span class="p">.</span><span class="nx">caption</span> <span class="o">=</span> <span class="nx">wrapMap</span><span class="p">.</span><span class="nx">thead</span><span class="p">;</span>
+   <span class="nx">wrapMap</span><span class="p">.</span><span class="nx">th</span> <span class="o">=</span> <span class="nx">wrapMap</span><span class="p">.</span><span class="nx">td</span><span class="p">;</span>
+
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-4">
+<td class="docs">
+<div class="pilwrap"><a class="pilcrow" href="#section-4">&#182;</a></div>
+<p>IE can't serialize
+<link>
+and
+<script> tags
+normally < /p>             </
+td > < td
+class
+= "code" > < div
+class
+= "highlight" > < pre >
+      < span
+class
+= "k" >
+if<
+/span> <span class="p">(</s
+pan > < span
+class
+= "o" > ! < /span><span class="nx">jQuery</s
+pan > < span
+class
+= "p" >
+.<
+/span><span class="nx">support</s
+pan > < span
+class
+= "p" >
+.<
+/span><span class="nx">htmlSerialize</s
+pan > < span
+class
+= "p" >
+)<
+/span> <span class="p">{</s
+pan >
+< span
+class
+= "nx" > wrapMap < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > _default < /span> <span class="o">=</s
+pan > < span
+class
+= "p" > [ < /span> <span class="mi">1</s
+pan > < span
+class
+= "p" >,
+<
+/span> <span class="s2">&quot;div&lt;div&gt;&quot;</s
+pan > < span
+class
+= "p" >,
+<
+/span> <span class="s2">&quot;&lt;/
+div &gt; & quot;
+<
+/span> <span class="p">];</s
+pan >
+< span
+class
+= "p" >
+}<
+/span>
+
+< span
+class
+= "nx" > jQuery < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > fn < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > extend < /span><span class="p">({</s
+pan >
+< span
+class
+= "nx" > text < /span><span class="o">:</s
+pan > < span
+class
+= "kd" > function < /span><span class="p">(</s
+pan > < span
+class
+= "nx" > value < /span><span class="p">)</s
+pan > < span
+class
+= "p" > { < /span>
+      < span
+class
+= "k" >
+return
+<
+/span> <span class="nx">jQuery</s
+pan > < span
+class
+= "p" >
+.<
+/span><span class="nx">access</s
+pan > < span
+class
+= "p" > ( < /span><span class="k">this</s
+pan > < span
+class
+= "p" >,
+<
+/span> <span class="kd">function</s
+pan > < span
+class
+= "p" > ( < /span><span class="nx">value</s
+pan > < span
+class
+= "p" >
+)<
+/span> <span class="p">{</s
+pan >
+< span
+class
+= "k" >
+return
+<
+/span> <span class="nx">value</s
+pan > < span
+class
+= "o" >= ==
+<
+/span> <span class="kc">undefined</s
+pan > < span
+class
+= "o" > ?
+<
+/span>
+< span
+class
+= "nx" > jQuery < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > text < /span><span class="p">(</s
+pan > < span
+class
+= "k" > this < /span><span class="p">)</s
+pan > < span
+class
+= "o" >
+:<
+/span>
+< span
+class
+= "k" > this < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > empty < /span><span class="p">().</s
+pan > < span
+class
+= "nx" > append < /span><span class="p">((</s
+pan > < span
+class
+= "k" > this < /span><span class="p">[</span><span class="mi">0</span><span class="p">]</s
+pan > < span
+class
+= "o" > &amp;&amp;
+<
+/span> <span class="k">this</s
+pan > < span
+class
+= "p" > [ < /span><span class="mi">0</s
+pan > < span
+class
+= "p" >
+].<
+/span><span class="nx">ownerDocument</s
+pan > < span
+class
+= "o" > ||
+<
+/span> <span class="nb">document</s
+pan > < span
+class
+= "p" >
+).<
+/span><span class="nx">createTextNode</s
+pan > < span
+class
+= "p" > ( < /span><span class="nx">value</s
+pan > < span
+class
+= "p" >
+))
+;
+<
+/span>
+< span
+class
+= "p" >
+},<
+/span> <span class="kc">null</s
+pan > < span
+class
+= "p" >,
+<
+/span> <span class="nx">value</s
+pan > < span
+class
+= "p" >,
+<
+/span> <span class="nx">arguments</s
+pan > < span
+class
+= "p" >
+.<
+/span><span class="nx">length</s
+pan > < span
+class
+= "p" >
+)
+;
+<
+/span>
+< span
+class
+= "p" >
+},<
+/span>
+
+< span
+class
+= "nx" > wrapAll < /span><span class="o">:</s
+pan > < span
+class
+= "kd" > function < /span><span class="p">(</s
+pan > < span
+class
+= "nx" > html < /span><span class="p">)</s
+pan > < span
+class
+= "p" > { < /span>
+      < span
+class
+= "k" >
+if<
+/span> <span class="p">(</s
+pan > < span
+class
+= "nx" > jQuery < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > isFunction < /span><span class="p">(</s
+pan > < span
+class
+= "nx" > html < /span><span class="p">))</s
+pan > < span
+class
+= "p" > { < /span>
+      < span
+class
+= "k" >
+return
+<
+/span> <span class="k">this</s
+pan > < span
+class
+= "p" >
+.<
+/span><span class="nx">each</s
+pan > < span
+class
+= "p" > ( < /span><span class="kd">function</s
+pan > < span
+class
+= "p" > ( < /span><span class="nx">i</s
+pan > < span
+class
+= "p" >
+)<
+/span> <span class="p">{</s
+pan >
+< span
+class
+= "nx" > jQuery < /span><span class="p">(</s
+pan > < span
+class
+= "k" > this < /span><span class="p">).</s
+pan > < span
+class
+= "nx" > wrapAll < /span><span class="p">(</s
+pan > < span
+class
+= "nx" > html < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > call < /span><span class="p">(</s
+pan > < span
+class
+= "k" > this < /span><span class="p">,</s
+pan > < span
+class
+= "nx" > i < /span><span class="p">));</s
+pan >
+< span
+class
+= "p" >
+})
+;
+<
+/span>
+< span
+class
+= "p" >
+}<
+/span>
+
+< span
+class
+= "k" >
+if<
+/span> <span class="p">(</s
+pan > < span
+class
+= "k" > this < /span><span class="p">[</span><span class="mi">0</span><span class="p">])</s
+pan > < span
+class
+= "p" > { < /span>
+
+      < /pre></
+div > < /td>           </
+tr > < tr
+id = "section-5" > < td
+class
+= "docs" > < div
+class
+= "pilwrap" > < a
+class
+= "pilcrow"
+href = "#section-5" >
+&#182;<
+/a>               </
+div > < p > The
+elements
+to
+wrap
+the
+target
+around < /p>             </
+td > < td
+class
+= "code" > < div
+class
+= "highlight" > < pre >
+      < span
+class
+= "kd" >
+var <
+/span> <span class="nx">wrap</s
+pan > < span
+class
+= "o" >= < /span> <span class="nx">jQuery</s
+pan > < span
+class
+= "p" > ( < /span><span class="nx">html</s
+pan > < span
+class
+= "p" >,
+<
+/span> <span class="k">this</s
+pan > < span
+class
+= "p" > [ < /span><span class="mi">0</s
+pan > < span
+class
+= "p" >
+].<
+/span><span class="nx">ownerDocument</s
+pan > < span
+class
+= "p" >
+).<
+/span><span class="nx">eq</s
+pan > < span
+class
+= "p" > ( < /span><span class="mi">0</s
+pan > < span
+class
+= "p" >
+).<
+/span><span class="nx">clone</s
+pan > < span
+class
+= "p" > ( < /span><span class="kc">true</s
+pan > < span
+class
+= "p" >
+)
+;
+<
+/span>
+
+< span
+class
+= "k" >
+if<
+/span> <span class="p">(</s
+pan > < span
+class
+= "k" > this < /span><span class="p">[</span><span class="mi">0</span><span class="p">].</s
+pan > < span
+class
+= "nx" > parentNode < /span><span class="p">)</s
+pan > < span
+class
+= "p" > { < /span>
+      < span
+class
+= "nx" > wrap < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > insertBefore < /span><span class="p">(</s
+pan > < span
+class
+= "k" > this < /span><span class="p">[</span><span class="mi">0</span><span class="p">]);</s
+pan >
+< span
+class
+= "p" >
+}<
+/span>
+
+< span
+class
+= "nx" > wrap < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > map < /span><span class="p">(</s
+pan > < span
+class
+= "kd" > function < /span><span class="p">()</s
+pan > < span
+class
+= "p" > { < /span>
+      < span
+class
+= "kd" >
+var <
+/span> <span class="nx">elem</s
+pan > < span
+class
+= "o" >= < /span> <span class="k">this</s
+pan > < span
+class
+= "p" >;
+<
+/span>
+
+< span
+class
+= "k" >
+while<
+/span> <span class="p">(</s
+pan > < span
+class
+= "nx" > elem < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > firstChild < /span> <span class="o">&amp;&amp;</s
+pan > < span
+class
+= "nx" > elem < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > firstChild < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > nodeType < /span> <span class="o">===</s
+pan > < span
+class
+= "mi" > 1 < /span><span class="p">)</s
+pan > < span
+class
+= "p" > { < /span>
+      < span
+class
+= "nx" > elem < /span> <span class="o">=</s
+pan > < span
+class
+= "nx" > elem < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > firstChild < /span><span class="p">;</s
+pan >
+< span
+class
+= "p" >
+}<
+/span>
+
+< span
+class
+= "k" >
+return
+<
+/span> <span class="nx">elem</s
+pan > < span
+class
+= "p" >;
+<
+/span>
+< span
+class
+= "p" >
+}).<
+/span><span class="nx">append</s
+pan > < span
+class
+= "p" > ( < /span><span class="k">this</s
+pan > < span
+class
+= "p" >
+)
+;
+<
+/span>
+< span
+class
+= "p" >
+}<
+/span>
+
+< span
+class
+= "k" >
+return
+<
+/span> <span class="k">this</s
+pan > < span
+class
+= "p" >;
+<
+/span>
+< span
+class
+= "p" >
+},<
+/span>
+
+< span
+class
+= "nx" > wrapInner < /span><span class="o">:</s
+pan > < span
+class
+= "kd" > function < /span><span class="p">(</s
+pan > < span
+class
+= "nx" > html < /span><span class="p">)</s
+pan > < span
+class
+= "p" > { < /span>
+      < span
+class
+= "k" >
+if<
+/span> <span class="p">(</s
+pan > < span
+class
+= "nx" > jQuery < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > isFunction < /span><span class="p">(</s
+pan > < span
+class
+= "nx" > html < /span><span class="p">))</s
+pan > < span
+class
+= "p" > { < /span>
+      < span
+class
+= "k" >
+return
+<
+/span> <span class="k">this</s
+pan > < span
+class
+= "p" >
+.<
+/span><span class="nx">each</s
+pan > < span
+class
+= "p" > ( < /span><span class="kd">function</s
+pan > < span
+class
+= "p" > ( < /span><span class="nx">i</s
+pan > < span
+class
+= "p" >
+)<
+/span> <span class="p">{</s
+pan >
+< span
+class
+= "nx" > jQuery < /span><span class="p">(</s
+pan > < span
+class
+= "k" > this < /span><span class="p">).</s
+pan > < span
+class
+= "nx" > wrapInner < /span><span class="p">(</s
+pan > < span
+class
+= "nx" > html < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > call < /span><span class="p">(</s
+pan > < span
+class
+= "k" > this < /span><span class="p">,</s
+pan > < span
+class
+= "nx" > i < /span><span class="p">));</s
+pan >
+< span
+class
+= "p" >
+})
+;
+<
+/span>
+< span
+class
+= "p" >
+}<
+/span>
+
+< span
+class
+= "k" >
+return
+<
+/span> <span class="k">this</s
+pan > < span
+class
+= "p" >
+.<
+/span><span class="nx">each</s
+pan > < span
+class
+= "p" > ( < /span><span class="kd">function</s
+pan > < span
+class
+= "p" > () < /span> <span class="p">{</s
+pan >
+< span
+class
+= "kd" >
+var <
+/span> <span class="nx">self</s
+pan > < span
+class
+= "o" >= < /span> <span class="nx">jQuery</s
+pan > < span
+class
+= "p" > ( < /span><span class="k">this</s
+pan > < span
+class
+= "p" >
+),<
+/span>
+< span
+class
+= "nx" > contents < /span> <span class="o">=</s
+pan > < span
+class
+= "nx" > self < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > contents < /span><span class="p">();</s
+pan >
+
+< span
+class
+= "k" >
+if<
+/span> <span class="p">(</s
+pan > < span
+class
+= "nx" > contents < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > length < /span><span class="p">)</s
+pan > < span
+class
+= "p" > { < /span>
+      < span
+class
+= "nx" > contents < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > wrapAll < /span><span class="p">(</s
+pan > < span
+class
+= "nx" > html < /span><span class="p">);</s
+pan >
+
+< span
+class
+= "p" >
+}<
+/span> <span class="k">else</s
+pan > < span
+class
+= "p" > { < /span>
+      < span
+class
+= "nx" > self < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > append < /span><span class="p">(</s
+pan > < span
+class
+= "nx" > html < /span><span class="p">);</s
+pan >
+< span
+class
+= "p" >
+}<
+/span>
+< span
+class
+= "p" >
+})
+;
+<
+/span>
+< span
+class
+= "p" >
+},<
+/span>
+
+< span
+class
+= "nx" > wrap < /span><span class="o">:</s
+pan > < span
+class
+= "kd" > function < /span><span class="p">(</s
+pan > < span
+class
+= "nx" > html < /span><span class="p">)</s
+pan > < span
+class
+= "p" > { < /span>
+      < span
+class
+= "kd" >
+var <
+/span> <span class="nx">isFunction</s
+pan > < span
+class
+= "o" >= < /span> <span class="nx">jQuery</s
+pan > < span
+class
+= "p" >
+.<
+/span><span class="nx">isFunction</s
+pan > < span
+class
+= "p" > ( < /span><span class="nx">html</s
+pan > < span
+class
+= "p" >
+)
+;
+<
+/span>
+
+< span
+class
+= "k" >
+return
+<
+/span> <span class="k">this</s
+pan > < span
+class
+= "p" >
+.<
+/span><span class="nx">each</s
+pan > < span
+class
+= "p" > ( < /span><span class="kd">function</s
+pan > < span
+class
+= "p" > ( < /span><span class="nx">i</s
+pan > < span
+class
+= "p" >
+)<
+/span> <span class="p">{</s
+pan >
+< span
+class
+= "nx" > jQuery < /span><span class="p">(</s
+pan > < span
+class
+= "k" > this < /span><span class="p">).</s
+pan > < span
+class
+= "nx" > wrapAll < /span><span class="p">(</s
+pan > < span
+class
+= "nx" > isFunction < /span> <span class="o">?</s
+pan > < span
+class
+= "nx" > html < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > call < /span><span class="p">(</s
+pan > < span
+class
+= "k" > this < /span><span class="p">,</s
+pan > < span
+class
+= "nx" > i < /span><span class="p">)</s
+pan > < span
+class
+= "o" >
+:<
+/span> <span class="nx">html</s
+pan > < span
+class
+= "p" >
+)
+;
+<
+/span>
+< span
+class
+= "p" >
+})
+;
+<
+/span>
+< span
+class
+= "p" >
+},<
+/span>
+
+< span
+class
+= "nx" > unwrap < /span><span class="o">:</s
+pan > < span
+class
+= "kd" > function < /span><span class="p">()</s
+pan > < span
+class
+= "p" > { < /span>
+      < span
+class
+= "k" >
+return
+<
+/span> <span class="k">this</s
+pan > < span
+class
+= "p" >
+.<
+/span><span class="nx">parent</s
+pan > < span
+class
+= "p" > (). < /span><span class="nx">each</s
+pan > < span
+class
+= "p" > ( < /span><span class="kd">function</s
+pan > < span
+class
+= "p" > () < /span> <span class="p">{</s
+pan >
+< span
+class
+= "k" >
+if<
+/span> <span class="p">(</s
+pan > < span
+class
+= "o" > ! < /span><span class="nx">jQuery</s
+pan > < span
+class
+= "p" >
+.<
+/span><span class="nx">nodeName</s
+pan > < span
+class
+= "p" > ( < /span><span class="k">this</s
+pan > < span
+class
+= "p" >,
+<
+/span> <span class="s2">&quot;body&quot;</s
+pan > < span
+class
+= "p" >
+))<
+/span> <span class="p">{</s
+pan >
+< span
+class
+= "nx" > jQuery < /span><span class="p">(</s
+pan > < span
+class
+= "k" > this < /span><span class="p">).</s
+pan > < span
+class
+= "nx" > replaceWith < /span><span class="p">(</s
+pan > < span
+class
+= "k" > this < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > childNodes < /span><span class="p">);</s
+pan >
+< span
+class
+= "p" >
+}<
+/span>
+< span
+class
+= "p" >
+}).<
+/span><span class="nx">end</s
+pan > < span
+class
+= "p" > ();
+<
+/span>
+< span
+class
+= "p" >
+},<
+/span>
+
+< span
+class
+= "nx" > append < /span><span class="o">:</s
+pan > < span
+class
+= "kd" > function < /span><span class="p">()</s
+pan > < span
+class
+= "p" > { < /span>
+      < span
+class
+= "k" >
+return
+<
+/span> <span class="k">this</s
+pan > < span
+class
+= "p" >
+.<
+/span><span class="nx">domManip</s
+pan > < span
+class
+= "p" > ( < /span><span class="nx">arguments</s
+pan > < span
+class
+= "p" >,
+<
+/span> <span class="kc">true</s
+pan > < span
+class
+= "p" >,
+<
+/span> <span class="kd">function</s
+pan > < span
+class
+= "p" > ( < /span><span class="nx">elem</s
+pan > < span
+class
+= "p" >
+)<
+/span> <span class="p">{</s
+pan >
+< span
+class
+= "k" >
+if<
+/span> <span class="p">(</s
+pan > < span
+class
+= "k" > this < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > nodeType < /span> <span class="o">===</s
+pan > < span
+class
+= "mi" > 1 < /span><span class="p">)</s
+pan > < span
+class
+= "p" > { < /span>
+      < span
+class
+= "k" > this < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > appendChild < /span><span class="p">(</s
+pan > < span
+class
+= "nx" > elem < /span><span class="p">);</s
+pan >
+< span
+class
+= "p" >
+}<
+/span>
+< span
+class
+= "p" >
+})
+;
+<
+/span>
+< span
+class
+= "p" >
+},<
+/span>
+
+< span
+class
+= "nx" > prepend < /span><span class="o">:</s
+pan > < span
+class
+= "kd" > function < /span><span class="p">()</s
+pan > < span
+class
+= "p" > { < /span>
+      < span
+class
+= "k" >
+return
+<
+/span> <span class="k">this</s
+pan > < span
+class
+= "p" >
+.<
+/span><span class="nx">domManip</s
+pan > < span
+class
+= "p" > ( < /span><span class="nx">arguments</s
+pan > < span
+class
+= "p" >,
+<
+/span> <span class="kc">true</s
+pan > < span
+class
+= "p" >,
+<
+/span> <span class="kd">function</s
+pan > < span
+class
+= "p" > ( < /span><span class="nx">elem</s
+pan > < span
+class
+= "p" >
+)<
+/span> <span class="p">{</s
+pan >
+< span
+class
+= "k" >
+if<
+/span> <span class="p">(</s
+pan > < span
+class
+= "k" > this < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > nodeType < /span> <span class="o">===</s
+pan > < span
+class
+= "mi" > 1 < /span><span class="p">)</s
+pan > < span
+class
+= "p" > { < /span>
+      < span
+class
+= "k" > this < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > insertBefore < /span><span class="p">(</s
+pan > < span
+class
+= "nx" > elem < /span><span class="p">,</s
+pan > < span
+class
+= "k" > this < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > firstChild < /span><span class="p">);</s
+pan >
+< span
+class
+= "p" >
+}<
+/span>
+< span
+class
+= "p" >
+})
+;
+<
+/span>
+< span
+class
+= "p" >
+},<
+/span>
+
+< span
+class
+= "nx" > before < /span><span class="o">:</s
+pan > < span
+class
+= "kd" > function < /span><span class="p">()</s
+pan > < span
+class
+= "p" > { < /span>
+      < span
+class
+= "k" >
+if<
+/span> <span class="p">(</s
+pan > < span
+class
+= "k" > this < /span><span class="p">[</span><span class="mi">0</span><span class="p">]</s
+pan > < span
+class
+= "o" > &amp;&amp;
+<
+/span> <span class="k">this</s
+pan > < span
+class
+= "p" > [ < /span><span class="mi">0</s
+pan > < span
+class
+= "p" >
+].<
+/span><span class="nx">parentNode</s
+pan > < span
+class
+= "p" >
+)<
+/span> <span class="p">{</s
+pan >
+< span
+class
+= "k" >
+return
+<
+/span> <span class="k">this</s
+pan > < span
+class
+= "p" >
+.<
+/span><span class="nx">domManip</s
+pan > < span
+class
+= "p" > ( < /span><span class="nx">arguments</s
+pan > < span
+class
+= "p" >,
+<
+/span> <span class="kc">false</s
+pan > < span
+class
+= "p" >,
+<
+/span> <span class="kd">function</s
+pan > < span
+class
+= "p" > ( < /span><span class="nx">elem</s
+pan > < span
+class
+= "p" >
+)<
+/span> <span class="p">{</s
+pan >
+< span
+class
+= "k" > this < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > parentNode < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > insertBefore < /span><span class="p">(</s
+pan > < span
+class
+= "nx" > elem < /span><span class="p">,</s
+pan > < span
+class
+= "k" > this < /span><span class="p">);</s
+pan >
+< span
+class
+= "p" >
+})
+;
+<
+/span>
+< span
+class
+= "p" >
+}<
+/span> <span class="k">else</s
+pan > < span
+class
+= "k" >
+if<
+/span> <span class="p">(</s
+pan > < span
+class
+= "nx" > arguments < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > length < /span><span class="p">)</s
+pan > < span
+class
+= "p" > { < /span>
+      < span
+class
+= "kd" >
+var <
+/span> <span class="nx">set</s
+pan > < span
+class
+= "o" >= < /span> <span class="nx">jQuery</s
+pan > < span
+class
+= "p" >
+.<
+/span><span class="nx">clean</s
+pan > < span
+class
+= "p" > ( < /span><span class="nx">arguments</s
+pan > < span
+class
+= "p" >
+)
+;
+<
+/span>
+< span
+class
+= "nx" > set < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > push < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > apply < /span><span class="p">(</s
+pan > < span
+class
+= "nx" > set < /span><span class="p">,</s
+pan > < span
+class
+= "k" > this < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > toArray < /span><span class="p">());</s
+pan >
+< span
+class
+= "k" >
+return
+<
+/span> <span class="k">this</s
+pan > < span
+class
+= "p" >
+.<
+/span><span class="nx">pushStack</s
+pan > < span
+class
+= "p" > ( < /span><span class="nx">set</s
+pan > < span
+class
+= "p" >,
+<
+/span> <span class="s2">&quot;before&quot;</s
+pan > < span
+class
+= "p" >,
+<
+/span> <span class="nx">arguments</s
+pan > < span
+class
+= "p" >
+)
+;
+<
+/span>
+< span
+class
+= "p" >
+}<
+/span>
+< span
+class
+= "p" >
+},<
+/span>
+
+< span
+class
+= "nx" > after < /span><span class="o">:</s
+pan > < span
+class
+= "kd" > function < /span><span class="p">()</s
+pan > < span
+class
+= "p" > { < /span>
+      < span
+class
+= "k" >
+if<
+/span> <span class="p">(</s
+pan > < span
+class
+= "k" > this < /span><span class="p">[</span><span class="mi">0</span><span class="p">]</s
+pan > < span
+class
+= "o" > &amp;&amp;
+<
+/span> <span class="k">this</s
+pan > < span
+class
+= "p" > [ < /span><span class="mi">0</s
+pan > < span
+class
+= "p" >
+].<
+/span><span class="nx">parentNode</s
+pan > < span
+class
+= "p" >
+)<
+/span> <span class="p">{</s
+pan >
+< span
+class
+= "k" >
+return
+<
+/span> <span class="k">this</s
+pan > < span
+class
+= "p" >
+.<
+/span><span class="nx">domManip</s
+pan > < span
+class
+= "p" > ( < /span><span class="nx">arguments</s
+pan > < span
+class
+= "p" >,
+<
+/span> <span class="kc">false</s
+pan > < span
+class
+= "p" >,
+<
+/span> <span class="kd">function</s
+pan > < span
+class
+= "p" > ( < /span><span class="nx">elem</s
+pan > < span
+class
+= "p" >
+)<
+/span> <span class="p">{</s
+pan >
+< span
+class
+= "k" > this < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > parentNode < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > insertBefore < /span><span class="p">(</s
+pan > < span
+class
+= "nx" > elem < /span><span class="p">,</s
+pan > < span
+class
+= "k" > this < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > nextSibling < /span><span class="p">);</s
+pan >
+< span
+class
+= "p" >
+})
+;
+<
+/span>
+< span
+class
+= "p" >
+}<
+/span> <span class="k">else</s
+pan > < span
+class
+= "k" >
+if<
+/span> <span class="p">(</s
+pan > < span
+class
+= "nx" > arguments < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > length < /span><span class="p">)</s
+pan > < span
+class
+= "p" > { < /span>
+      < span
+class
+= "kd" >
+var <
+/span> <span class="nx">set</s
+pan > < span
+class
+= "o" >= < /span> <span class="k">this</s
+pan > < span
+class
+= "p" >
+.<
+/span><span class="nx">pushStack</s
+pan > < span
+class
+= "p" > ( < /span><span class="k">this</s
+pan > < span
+class
+= "p" >,
+<
+/span> <span class="s2">&quot;after&quot;</s
+pan > < span
+class
+= "p" >,
+<
+/span> <span class="nx">arguments</s
+pan > < span
+class
+= "p" >
+)
+;
+<
+/span>
+< span
+class
+= "nx" > set < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > push < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > apply < /span><span class="p">(</s
+pan > < span
+class
+= "nx" > set < /span><span class="p">,</s
+pan > < span
+class
+= "nx" > jQuery < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > clean < /span><span class="p">(</s
+pan > < span
+class
+= "nx" > arguments < /span><span class="p">));</s
+pan >
+< span
+class
+= "k" >
+return
+<
+/span> <span class="nx">set</s
+pan > < span
+class
+= "p" >;
+<
+/span>
+< span
+class
+= "p" >
+}<
+/span>
+< span
+class
+= "p" >
+},<
+/span>
+
+
+< /pre></
+div > < /td>           </
+tr > < tr
+id = "section-6" > < td
+class
+= "docs" > < div
+class
+= "pilwrap" > < a
+class
+= "pilcrow"
+href = "#section-6" >
+&#182;<
+/a>               </
+div > < p > keepData
+is
+for internal use
+only--
+do not document < /p>             </
+td > < td
+class
+= "code" > < div
+class
+= "highlight" > < pre >
+      < span
+class
+= "nx" > remove < /span><span class="o">:</s
+pan > < span
+class
+= "kd" > function < /span><span class="p">(</s
+pan > < span
+class
+= "nx" > selector < /span><span class="p">,</s
+pan > < span
+class
+= "nx" > keepData < /span><span class="p">)</s
+pan > < span
+class
+= "p" > { < /span>
+      < span
+class
+= "k" >
+for<
+/span> <span class="p">(</s
+pan > < span
+class
+= "kd" >
+var <
+/span> <span class="nx">i</s
+pan > < span
+class
+= "o" >= < /span> <span class="mi">0</s
+pan > < span
+class
+= "p" >,
+<
+/span> <span class="nx">elem</s
+pan > < span
+class
+= "p" >;
+<
+/span> <span class="p">(</s
+pan > < span
+class
+= "nx" > elem < /span> <span class="o">=</s
+pan > < span
+class
+= "k" > this < /span><span class="p">[</span><span class="nx">i</span><span class="p">])</s
+pan > < span
+class
+= "o" > !=
+<
+/span> <span class="kc">null</s
+pan > < span
+class
+= "p" >;
+<
+/span> <span class="nx">i</s
+pan > < span
+class
+= "o" > ++ < /span><span class="p">)</s
+pan > < span
+class
+= "p" > { < /span>
+      < span
+class
+= "k" >
+if<
+/span> <span class="p">(</s
+pan > < span
+class
+= "o" > ! < /span><span class="nx">selector</s
+pan > < span
+class
+= "o" > ||
+<
+/span> <span class="nx">jQuery</s
+pan > < span
+class
+= "p" >
+.<
+/span><span class="nx">filter</s
+pan > < span
+class
+= "p" > ( < /span><span class="nx">selector</s
+pan > < span
+class
+= "p" >,
+<
+/span> <span class="p">[</span> <span class="nx">elem</span> <span class="p">]).</s
+pan > < span
+class
+= "nx" > length < /span><span class="p">)</s
+pan > < span
+class
+= "p" > { < /span>
+      < span
+class
+= "k" >
+if<
+/span> <span class="p">(</s
+pan > < span
+class
+= "o" > ! < /span><span class="nx">keepData</s
+pan > < span
+class
+= "o" > &amp;&amp;
+<
+/span> <span class="nx">elem</s
+pan > < span
+class
+= "p" >
+.<
+/span><span class="nx">nodeType</s
+pan > < span
+class
+= "o" >= ==
+<
+/span> <span class="mi">1</s
+pan > < span
+class
+= "p" >
+)<
+/span> <span class="p">{</s
+pan >
+< span
+class
+= "nx" > jQuery < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > cleanData < /span><span class="p">(</s
+pan > < span
+class
+= "nx" > elem < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > getElementsByTagName < /span><span class="p">(</s
+pan > < span
+class
+= "s2" > & quot;
+*&
+quot;
+<
+/span><span class="p">));</s
+pan >
+< span
+class
+= "nx" > jQuery < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > cleanData < /span><span class="p">([</span> <span class="nx">elem</span> <span class="p">]);</s
+pan >
+< span
+class
+= "p" >
+}<
+/span>
+
+< span
+class
+= "k" >
+if<
+/span> <span class="p">(</s
+pan > < span
+class
+= "nx" > elem < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > parentNode < /span><span class="p">)</s
+pan > < span
+class
+= "p" > { < /span>
+      < span
+class
+= "nx" > elem < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > parentNode < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > removeChild < /span><span class="p">(</s
+pan > < span
+class
+= "nx" > elem < /span><span class="p">);</s
+pan >
+< span
+class
+= "p" >
+}<
+/span>
+< span
+class
+= "p" >
+}<
+/span>
+< span
+class
+= "p" >
+}<
+/span>
+
+< span
+class
+= "k" >
+return
+<
+/span> <span class="k">this</s
+pan > < span
+class
+= "p" >;
+<
+/span>
+< span
+class
+= "p" >
+},<
+/span>
+
+< span
+class
+= "nx" > empty < /span><span class="o">:</s
+pan > < span
+class
+= "kd" > function < /span><span class="p">()</s
+pan > < span
+class
+= "p" > { < /span>
+      < span
+class
+= "k" >
+for<
+/span> <span class="p">(</s
+pan > < span
+class
+= "kd" >
+var <
+/span> <span class="nx">i</s
+pan > < span
+class
+= "o" >= < /span> <span class="mi">0</s
+pan > < span
+class
+= "p" >,
+<
+/span> <span class="nx">elem</s
+pan > < span
+class
+= "p" >;
+<
+/span> <span class="p">(</s
+pan > < span
+class
+= "nx" > elem < /span> <span class="o">=</s
+pan > < span
+class
+= "k" > this < /span><span class="p">[</span><span class="nx">i</span><span class="p">])</s
+pan > < span
+class
+= "o" > !=
+<
+/span> <span class="kc">null</s
+pan > < span
+class
+= "p" >;
+<
+/span> <span class="nx">i</s
+pan > < span
+class
+= "o" > ++ < /span><span class="p">)</s
+pan > < span
+class
+= "p" > { < /span>
+
+      < /pre></
+div > < /td>           </
+tr > < tr
+id = "section-7" > < td
+class
+= "docs" > < div
+class
+= "pilwrap" > < a
+class
+= "pilcrow"
+href = "#section-7" >
+&#182;<
+/a>               </
+div > < p > Remove
+element
+nodes
+and
+prevent
+memory
+leaks < /p>             </
+td > < td
+class
+= "code" > < div
+class
+= "highlight" > < pre >
+      < span
+class
+= "k" >
+if<
+/span> <span class="p">(</s
+pan > < span
+class
+= "nx" > elem < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > nodeType < /span> <span class="o">===</s
+pan > < span
+class
+= "mi" > 1 < /span><span class="p">)</s
+pan > < span
+class
+= "p" > { < /span>
+      < span
+class
+= "nx" > jQuery < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > cleanData < /span><span class="p">(</s
+pan > < span
+class
+= "nx" > elem < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > getElementsByTagName < /span><span class="p">(</s
+pan > < span
+class
+= "s2" > & quot;
+*&
+quot;
+<
+/span><span class="p">));</s
+pan >
+< span
+class
+= "p" >
+}<
+/span>
+
+
+< /pre></
+div > < /td>           </
+tr > < tr
+id = "section-8" > < td
+class
+= "docs" > < div
+class
+= "pilwrap" > < a
+class
+= "pilcrow"
+href = "#section-8" >
+&#182;<
+/a>               </
+div > < p > Remove
+any
+remaining
+nodes < /p>             </
+td > < td
+class
+= "code" > < div
+class
+= "highlight" > < pre >
+      < span
+class
+= "k" >
+while<
+/span> <span class="p">(</s
+pan > < span
+class
+= "nx" > elem < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > firstChild < /span><span class="p">)</s
+pan > < span
+class
+= "p" > { < /span>
+      < span
+class
+= "nx" > elem < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > removeChild < /span><span class="p">(</s
+pan > < span
+class
+= "nx" > elem < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > firstChild < /span><span class="p">);</s
+pan >
+< span
+class
+= "p" >
+}<
+/span>
+< span
+class
+= "p" >
+}<
+/span>
+
+< span
+class
+= "k" >
+return
+<
+/span> <span class="k">this</s
+pan > < span
+class
+= "p" >;
+<
+/span>
+< span
+class
+= "p" >
+},<
+/span>
+
+< span
+class
+= "nx" > clone < /span><span class="o">:</s
+pan > < span
+class
+= "kd" > function < /span><span class="p">(</s
+pan > < span
+class
+= "nx" > dataAndEvents < /span><span class="p">,</s
+pan > < span
+class
+= "nx" > deepDataAndEvents < /span><span class="p">)</s
+pan > < span
+class
+= "p" > { < /span>
+      < span
+class
+= "nx" > dataAndEvents < /span> <span class="o">=</s
+pan > < span
+class
+= "nx" > dataAndEvents < /span> <span class="o">==</s
+pan > < span
+class
+= "kc" > null < /span> <span class="o">?</s
+pan > < span
+class
+= "kc" > false < /span> <span class="o">:</s
+pan > < span
+class
+= "nx" > dataAndEvents < /span><span class="p">;</s
+pan >
+< span
+class
+= "nx" > deepDataAndEvents < /span> <span class="o">=</s
+pan > < span
+class
+= "nx" > deepDataAndEvents < /span> <span class="o">==</s
+pan > < span
+class
+= "kc" > null < /span> <span class="o">?</s
+pan > < span
+class
+= "nx" > dataAndEvents < /span> <span class="o">:</s
+pan > < span
+class
+= "nx" > deepDataAndEvents < /span><span class="p">;</s
+pan >
+
+< span
+class
+= "k" >
+return
+<
+/span> <span class="k">this</s
+pan > < span
+class
+= "p" >
+.<
+/span><span class="nx">map</s
+pan > < span
+class
+= "p" > ( < /span><span class="kd">function</s
+pan > < span
+class
+= "p" > () < /span> <span class="p">{</s
+pan >
+< span
+class
+= "k" >
+return
+<
+/span> <span class="nx">jQuery</s
+pan > < span
+class
+= "p" >
+.<
+/span><span class="nx">clone</s
+pan > < span
+class
+= "p" > ( < /span><span class="k">this</s
+pan > < span
+class
+= "p" >,
+<
+/span> <span class="nx">dataAndEvents</s
+pan > < span
+class
+= "p" >,
+<
+/span> <span class="nx">deepDataAndEvents</s
+pan > < span
+class
+= "p" >
+)
+;
+<
+/span>
+< span
+class
+= "p" >
+})
+;
+<
+/span>
+< span
+class
+= "p" >
+},<
+/span>
+
+< span
+class
+= "nx" > html < /span><span class="o">:</s
+pan > < span
+class
+= "kd" > function < /span><span class="p">(</s
+pan > < span
+class
+= "nx" > value < /span><span class="p">)</s
+pan > < span
+class
+= "p" > { < /span>
+      < span
+class
+= "k" >
+return
+<
+/span> <span class="nx">jQuery</s
+pan > < span
+class
+= "p" >
+.<
+/span><span class="nx">access</s
+pan > < span
+class
+= "p" > ( < /span><span class="k">this</s
+pan > < span
+class
+= "p" >,
+<
+/span> <span class="kd">function</s
+pan > < span
+class
+= "p" > ( < /span><span class="nx">value</s
+pan > < span
+class
+= "p" >
+)<
+/span> <span class="p">{</s
+pan >
+< span
+class
+= "kd" >
+var <
+/span> <span class="nx">elem</s
+pan > < span
+class
+= "o" >= < /span> <span class="k">this</s
+pan > < span
+class
+= "p" > [ < /span><span class="mi">0</s
+pan > < span
+class
+= "p" >
+]<
+/span> <span class="o">||</s
+pan > < span
+class
+= "p" > {},
+<
+/span>
+< span
+class
+= "nx" > i < /span> <span class="o">=</s
+pan > < span
+class
+= "mi" > 0 < /span><span class="p">,</s
+pan >
+< span
+class
+= "nx" > l < /span> <span class="o">=</s
+pan > < span
+class
+= "k" > this < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > length < /span><span class="p">;</s
+pan >
+
+< span
+class
+= "k" >
+if<
+/span> <span class="p">(</s
+pan > < span
+class
+= "nx" > value < /span> <span class="o">===</s
+pan > < span
+class
+= "kc" > undefined < /span><span class="p">)</s
+pan > < span
+class
+= "p" > { < /span>
+      < span
+class
+= "k" >
+return
+<
+/span> <span class="nx">elem</s
+pan > < span
+class
+= "p" >
+.<
+/span><span class="nx">nodeType</s
+pan > < span
+class
+= "o" >= ==
+<
+/span> <span class="mi">1</s
+pan > < span
+class
+= "o" > ?
+<
+/span>
+< span
+class
+= "nx" > elem < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > innerHTML < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > replace < /span><span class="p">(</s
+pan > < span
+class
+= "nx" > rinlinejQuery < /span><span class="p">,</s
+pan > < span
+class
+= "s2" > & quot;
+&
+quot;
+<
+/span><span class="p">)</s
+pan > < span
+class
+= "o" >
+:<
+/span>
+< span
+class
+= "kc" > null < /span><span class="p">;</s
+pan >
+< span
+class
+= "p" >
+}<
+/span>
+
+
+< span
+class
+= "k" >
+if<
+/span> <span class="p">(</s
+pan > < span
+class
+= "k" > typeof < /span> <span class="nx">value</s
+pan > < span
+class
+= "o" >= ==
+<
+/span> <span class="s2">&quot;string&quot;</s
+pan > < span
+class
+= "o" > &amp;&amp;
+<
+/span> <span class="o">!</s
+pan > < span
+class
+= "nx" > rnoInnerhtml < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > test < /span><span class="p">(</s
+pan > < span
+class
+= "nx" > value < /span><span class="p">)</s
+pan > < span
+class
+= "o" > &amp;&amp;
+<
+/span>
+< span
+class
+= "p" > ( < /span> <span class="nx">jQuery</s
+pan > < span
+class
+= "p" >
+.<
+/span><span class="nx">support</s
+pan > < span
+class
+= "p" >
+.<
+/span><span class="nx">leadingWhitespace</s
+pan > < span
+class
+= "o" > ||
+<
+/span> <span class="o">!</s
+pan > < span
+class
+= "nx" > rleadingWhitespace < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > test < /span><span class="p">(</s
+pan > < span
+class
+= "nx" > value < /span><span class="p">)</s
+pan > < span
+class
+= "p" >
+)<
+/span> <span class="o">&amp;&amp;</s
+pan >
+< span
+class
+= "o" > ! < /span><span class="nx">wrapMap</s
+pan > < span
+class
+= "p" > [ < /span> <span class="p">(</s
+pan > < span
+class
+= "nx" > rtagName < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > exec < /span><span class="p">(</s
+pan > < span
+class
+= "nx" > value < /span><span class="p">)</s
+pan > < span
+class
+= "o" > ||
+<
+/span> <span class="p">[</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">]</s
+pan > < span
+class
+= "p" >
+)
+[ < /span><span class="mi">1</s
+pan > < span
+class
+= "p" >
+].<
+/span><span class="nx">toLowerCase</s
+pan > < span
+class
+= "p" > () < /span> <span class="p">])</s
+pan > < span
+class
+= "p" > { < /span>
+
+      < span
+class
+= "nx" > value < /span> <span class="o">=</s
+pan > < span
+class
+= "nx" > value < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > replace < /span><span class="p">(</s
+pan > < span
+class
+= "nx" > rxhtmlTag < /span><span class="p">,</s
+pan > < span
+class
+= "s2" > & quot;
+&lt;
+$1 &gt; &lt; /$2&gt;&quot;</s
+pan > < span
+class
+= "p" >
+)
+;
+<
+/span>
+
+< span
+class
+= "k" >
+try
+<
+/span> <span class="p">{</s
+pan >
+< span
+class
+= "k" >
+for<
+/span> <span class="p">(;</s
+pan > < span
+class
+= "nx" > i < /span> <span class="o">&lt;</s
+pan > < span
+class
+= "nx" > l < /span><span class="p">;</s
+pan > < span
+class
+= "nx" > i < /span><span class="o">++</s
+pan > < span
+class
+= "p" >
+)<
+/span> <span class="p">{</s
+pan >
+
+< /pre></
+div > < /td>           </
+tr > < tr
+id = "section-9" > < td
+class
+= "docs" > < div
+class
+= "pilwrap" > < a
+class
+= "pilcrow"
+href = "#section-9" >
+&#182;<
+/a>               </
+div > < p > Remove
+element
+nodes
+and
+prevent
+memory
+leaks < /p>             </
+td > < td
+class
+= "code" > < div
+class
+= "highlight" > < pre >
+      < span
+class
+= "nx" > elem < /span> <span class="o">=</s
+pan > < span
+class
+= "k" > this < /span><span class="p">[</span><span class="nx">i</span><span class="p">]</s
+pan > < span
+class
+= "o" > ||
+<
+/span> <span class="p">{};</s
+pan >
+< span
+class
+= "k" >
+if<
+/span> <span class="p">(</s
+pan > < span
+class
+= "nx" > elem < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > nodeType < /span> <span class="o">===</s
+pan > < span
+class
+= "mi" > 1 < /span><span class="p">)</s
+pan > < span
+class
+= "p" > { < /span>
+      < span
+class
+= "nx" > jQuery < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > cleanData < /span><span class="p">(</s
+pan > < span
+class
+= "nx" > elem < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > getElementsByTagName < /span><span class="p">(</s
+pan > < span
+class
+= "s2" > & quot;
+*&
+quot;
+<
+/span><span class="p">));</s
+pan >
+< span
+class
+= "nx" > elem < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > innerHTML < /span> <span class="o">=</s
+pan > < span
+class
+= "nx" > value < /span><span class="p">;</s
+pan >
+< span
+class
+= "p" >
+}<
+/span>
+< span
+class
+= "p" >
+}<
+/span>
+
+< span
+class
+= "nx" > elem < /span> <span class="o">=</s
+pan > < span
+class
+= "mi" > 0 < /span><span class="p">;</s
+pan >
+
+
+< /pre></
+div > < /td>           </
+tr > < tr
+id = "section-10" > < td
+class
+= "docs" > < div
+class
+= "pilwrap" > < a
+class
+= "pilcrow"
+href = "#section-10" >
+&#182;<
+/a>               </
+div > < p > If
+using
+innerHTML
+throws
+an
+exception, use
+the
+fallback
+method < /p>             </
+td > < td
+class
+= "code" > < div
+class
+= "highlight" > < pre >
+      < span
+class
+= "p" >
+}<
+/span> <span class="k">catch</s
+pan > < span
+class
+= "p" > ( < /span><span class="nx">e</s
+pan > < span
+class
+= "p" >
+)<
+/span> <span class="p">{</s
+pan >
+< span
+class
+= "p" >
+}<
+/span>
+< span
+class
+= "p" >
+}<
+/span>
+
+< span
+class
+= "k" >
+if<
+/span> <span class="p">(</s
+pan > < span
+class
+= "nx" > elem < /span><span class="p">)</s
+pan > < span
+class
+= "p" > { < /span>
+      < span
+class
+= "k" > this < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > empty < /span><span class="p">().</s
+pan > < span
+class
+= "nx" > append < /span><span class="p">(</s
+pan > < span
+class
+= "nx" > value < /span><span class="p">);</s
+pan >
+< span
+class
+= "p" >
+}<
+/span>
+< span
+class
+= "p" >
+},<
+/span> <span class="kc">null</s
+pan > < span
+class
+= "p" >,
+<
+/span> <span class="nx">value</s
+pan > < span
+class
+= "p" >,
+<
+/span> <span class="nx">arguments</s
+pan > < span
+class
+= "p" >
+.<
+/span><span class="nx">length</s
+pan > < span
+class
+= "p" >
+)
+;
+<
+/span>
+< span
+class
+= "p" >
+},<
+/span>
+
+< span
+class
+= "nx" > replaceWith < /span><span class="o">:</s
+pan > < span
+class
+= "kd" > function < /span><span class="p">(</s
+pan > < span
+class
+= "nx" > value < /span><span class="p">)</s
+pan > < span
+class
+= "p" > { < /span>
+      < span
+class
+= "k" >
+if<
+/span> <span class="p">(</s
+pan > < span
+class
+= "k" > this < /span><span class="p">[</span><span class="mi">0</span><span class="p">]</s
+pan > < span
+class
+= "o" > &amp;&amp;
+<
+/span> <span class="k">this</s
+pan > < span
+class
+= "p" > [ < /span><span class="mi">0</s
+pan > < span
+class
+= "p" >
+].<
+/span><span class="nx">parentNode</s
+pan > < span
+class
+= "p" >
+)<
+/span> <span class="p">{</s
+pan >
+
+< /pre></
+div > < /td>           </
+tr > < tr
+id = "section-11" > < td
+class
+= "docs" > < div
+class
+= "pilwrap" > < a
+class
+= "pilcrow"
+href = "#section-11" >
+&#182;<
+/a>               </
+div > < p > Make
+sure
+that
+the
+elements
+are
+removed
+from
+the
+DOM
+before
+they
+are
+inserted
+this
+can
+help
+fix
+replacing
+a
+parent
+with child elements < /p>             </
+td > < td
+class
+= "code" > < div
+class
+= "highlight" > < pre >
+      < span
+class
+= "k" >
+if<
+/span> <span class="p">(</s
+pan > < span
+class
+= "nx" > jQuery < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > isFunction < /span><span class="p">(</s
+pan > < span
+class
+= "nx" > value < /span><span class="p">))</s
+pan > < span
+class
+= "p" > { < /span>
+      < span
+class
+= "k" >
+return
+<
+/span> <span class="k">this</s
+pan > < span
+class
+= "p" >
+.<
+/span><span class="nx">each</s
+pan > < span
+class
+= "p" > ( < /span><span class="kd">function</s
+pan > < span
+class
+= "p" > ( < /span><span class="nx">i</s
+pan > < span
+class
+= "p" >
+)<
+/span> <span class="p">{</s
+pan >
+< span
+class
+= "kd" >
+var <
+/span> <span class="nx">self</s
+pan > < span
+class
+= "o" >= < /span> <span class="nx">jQuery</s
+pan > < span
+class
+= "p" > ( < /span><span class="k">this</s
+pan > < span
+class
+= "p" >
+),<
+/span> <span class="nx">old</s
+pan > < span
+class
+= "o" >= < /span> <span class="nx">self</s
+pan > < span
+class
+= "p" >
+.<
+/span><span class="nx">html</s
+pan > < span
+class
+= "p" > ();
+<
+/span>
+< span
+class
+= "nx" > self < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > replaceWith < /span><span class="p">(</s
+pan > < span
+class
+= "nx" > value < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > call < /span><span class="p">(</s
+pan > < span
+class
+= "k" > this < /span><span class="p">,</s
+pan > < span
+class
+= "nx" > i < /span><span class="p">,</s
+pan > < span
+class
+= "nx" > old < /span><span class="p">));</s
+pan >
+< span
+class
+= "p" >
+})
+;
+<
+/span>
+< span
+class
+= "p" >
+}<
+/span>
+
+< span
+class
+= "k" >
+if<
+/span> <span class="p">(</s
+pan > < span
+class
+= "k" > typeof < /span> <span class="nx">value</s
+pan > < span
+class
+= "o" > !==
+<
+/span> <span class="s2">&quot;string&quot;</s
+pan > < span
+class
+= "p" >
+)<
+/span> <span class="p">{</s
+pan >
+< span
+class
+= "nx" > value < /span> <span class="o">=</s
+pan > < span
+class
+= "nx" > jQuery < /span><span class="p">(</s
+pan > < span
+class
+= "nx" > value < /span><span class="p">).</s
+pan > < span
+class
+= "nx" > detach < /span><span class="p">();</s
+pan >
+< span
+class
+= "p" >
+}<
+/span>
+
+< span
+class
+= "k" >
+return
+<
+/span> <span class="k">this</s
+pan > < span
+class
+= "p" >
+.<
+/span><span class="nx">each</s
+pan > < span
+class
+= "p" > ( < /span><span class="kd">function</s
+pan > < span
+class
+= "p" > () < /span> <span class="p">{</s
+pan >
+< span
+class
+= "kd" >
+var <
+/span> <span class="nx">next</s
+pan > < span
+class
+= "o" >= < /span> <span class="k">this</s
+pan > < span
+class
+= "p" >
+.<
+/span><span class="nx">nextSibling</s
+pan > < span
+class
+= "p" >,
+<
+/span>
+< span
+class
+= "nx" > parent < /span> <span class="o">=</s
+pan > < span
+class
+= "k" > this < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > parentNode < /span><span class="p">;</s
+pan >
+
+< span
+class
+= "nx" > jQuery < /span><span class="p">(</s
+pan > < span
+class
+= "k" > this < /span><span class="p">).</s
+pan > < span
+class
+= "nx" > remove < /span><span class="p">();</s
+pan >
+
+< span
+class
+= "k" >
+if<
+/span> <span class="p">(</s
+pan > < span
+class
+= "nx" > next < /span><span class="p">)</s
+pan > < span
+class
+= "p" > { < /span>
+      < span
+class
+= "nx" > jQuery < /span><span class="p">(</s
+pan > < span
+class
+= "nx" > next < /span><span class="p">).</s
+pan > < span
+class
+= "nx" > before < /span><span class="p">(</s
+pan > < span
+class
+= "nx" > value < /span><span class="p">);</s
+pan >
+< span
+class
+= "p" >
+}<
+/span> <span class="k">else</s
+pan > < span
+class
+= "p" > { < /span>
+      < span
+class
+= "nx" > jQuery < /span><span class="p">(</s
+pan > < span
+class
+= "nx" > parent < /span><span class="p">).</s
+pan > < span
+class
+= "nx" > append < /span><span class="p">(</s
+pan > < span
+class
+= "nx" > value < /span><span class="p">);</s
+pan >
+< span
+class
+= "p" >
+}<
+/span>
+< span
+class
+= "p" >
+})
+;
+<
+/span>
+< span
+class
+= "p" >
+}<
+/span> <span class="k">else</s
+pan > < span
+class
+= "p" > { < /span>
+      < span
+class
+= "k" >
+return
+<
+/span> <span class="k">this</s
+pan > < span
+class
+= "p" >
+.<
+/span><span class="nx">length</s
+pan > < span
+class
+= "o" > ?
+<
+/span>
+< span
+class
+= "k" > this < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > pushStack < /span><span class="p">(</s
+pan > < span
+class
+= "nx" > jQuery < /span><span class="p">(</s
+pan > < span
+class
+= "nx" > jQuery < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > isFunction < /span><span class="p">(</s
+pan > < span
+class
+= "nx" > value < /span><span class="p">)</s
+pan > < span
+class
+= "o" > ?
+<
+/span> <span class="nx">value</s
+pan > < span
+class
+= "p" > () < /span> <span class="o">:</s
+pan > < span
+class
+= "nx" > value < /span><span class="p">),</s
+pan > < span
+class
+= "s2" > & quot;
+replaceWith & quot;
+<
+/span><span class="p">,</s
+pan > < span
+class
+= "nx" > value < /span><span class="p">)</s
+pan > < span
+class
+= "o" >
+:<
+/span>
+< span
+class
+= "k" > this < /span><span class="p">;</s
+pan >
+< span
+class
+= "p" >
+}<
+/span>
+< span
+class
+= "p" >
+},<
+/span>
+
+< span
+class
+= "nx" > detach < /span><span class="o">:</s
+pan > < span
+class
+= "kd" > function < /span><span class="p">(</s
+pan > < span
+class
+= "nx" > selector < /span><span class="p">)</s
+pan > < span
+class
+= "p" > { < /span>
+      < span
+class
+= "k" >
+return
+<
+/span> <span class="k">this</s
+pan > < span
+class
+= "p" >
+.<
+/span><span class="nx">remove</s
+pan > < span
+class
+= "p" > ( < /span><span class="nx">selector</s
+pan > < span
+class
+= "p" >,
+<
+/span> <span class="kc">true</s
+pan > < span
+class
+= "p" >
+)
+;
+<
+/span>
+< span
+class
+= "p" >
+},<
+/span>
+
+< span
+class
+= "nx" > domManip < /span><span class="o">:</s
+pan > < span
+class
+= "kd" > function < /span><span class="p">(</s
+pan > < span
+class
+= "nx" > args < /span><span class="p">,</s
+pan > < span
+class
+= "nx" > table < /span><span class="p">,</s
+pan > < span
+class
+= "nx" > callback < /span><span class="p">)</s
+pan > < span
+class
+= "p" > { < /span>
+      < span
+class
+= "kd" >
+var <
+/span> <span class="nx">results</s
+pan > < span
+class
+= "p" >,
+<
+/span> <span class="nx">first</s
+pan > < span
+class
+= "p" >,
+<
+/span> <span class="nx">fragment</s
+pan > < span
+class
+= "p" >,
+<
+/span> <span class="nx">parent</s
+pan > < span
+class
+= "p" >,
+<
+/span>
+< span
+class
+= "nx" > value < /span> <span class="o">=</s
+pan > < span
+class
+= "nx" > args < /span><span class="p">[</span><span class="mi">0</span><span class="p">],</s
+pan >
+< span
+class
+= "nx" > scripts < /span> <span class="o">=</s
+pan > < span
+class
+= "p" > [];
+<
+/span>
+
+
+< /pre></
+div > < /td>           </
+tr > < tr
+id = "section-12" > < td
+class
+= "docs" > < div
+class
+= "pilwrap" > < a
+class
+= "pilcrow"
+href = "#section-12" >
+&#182;<
+/a>               </
+div > < p > We
+can
+'t cloneNode fragments that contain checked, in WebKit</p>             </td>             <td class="code">               <div class="highlight"><pre>
+< span
+class
+= "k" >
+if<
+/span> <span class="p">(</s
+pan > < span
+class
+= "o" > ! < /span><span class="nx">jQuery</s
+pan > < span
+class
+= "p" >
+.<
+/span><span class="nx">support</s
+pan > < span
+class
+= "p" >
+.<
+/span><span class="nx">checkClone</s
+pan > < span
+class
+= "o" > &amp;&amp;
+<
+/span> <span class="nx">arguments</s
+pan > < span
+class
+= "p" >
+.<
+/span><span class="nx">length</s
+pan > < span
+class
+= "o" >= ==
+<
+/span> <span class="mi">3</s
+pan > < span
+class
+= "o" > &amp;&amp;
+<
+/span> <span class="k">typeof</s
+pan > < span
+class
+= "nx" > value < /span> <span class="o">===</s
+pan > < span
+class
+= "s2" > & quot;
+string & quot;
+<
+/span> <span class="o">&amp;&amp;</s
+pan > < span
+class
+= "nx" > rchecked < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > test < /span><span class="p">(</s
+pan > < span
+class
+= "nx" > value < /span><span class="p">))</s
+pan > < span
+class
+= "p" > { < /span>
+      < span
+class
+= "k" >
+return
+<
+/span> <span class="k">this</s
+pan > < span
+class
+= "p" >
+.<
+/span><span class="nx">each</s
+pan > < span
+class
+= "p" > ( < /span><span class="kd">function</s
+pan > < span
+class
+= "p" > () < /span> <span class="p">{</s
+pan >
+< span
+class
+= "nx" > jQuery < /span><span class="p">(</s
+pan > < span
+class
+= "k" > this < /span><span class="p">).</s
+pan > < span
+class
+= "nx" > domManip < /span><span class="p">(</s
+pan > < span
+class
+= "nx" > args < /span><span class="p">,</s
+pan > < span
+class
+= "nx" > table < /span><span class="p">,</s
+pan > < span
+class
+= "nx" > callback < /span><span class="p">,</s
+pan > < span
+class
+= "kc" > true < /span><span class="p">);</s
+pan >
+< span
+class
+= "p" >
+})
+;
+<
+/span>
+< span
+class
+= "p" >
+}<
+/span>
+
+< span
+class
+= "k" >
+if<
+/span> <span class="p">(</s
+pan > < span
+class
+= "nx" > jQuery < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > isFunction < /span><span class="p">(</s
+pan > < span
+class
+= "nx" > value < /span><span class="p">))</s
+pan > < span
+class
+= "p" > { < /span>
+      < span
+class
+= "k" >
+return
+<
+/span> <span class="k">this</s
+pan > < span
+class
+= "p" >
+.<
+/span><span class="nx">each</s
+pan > < span
+class
+= "p" > ( < /span><span class="kd">function</s
+pan > < span
+class
+= "p" > ( < /span><span class="nx">i</s
+pan > < span
+class
+= "p" >
+)<
+/span> <span class="p">{</s
+pan >
+< span
+class
+= "kd" >
+var <
+/span> <span class="nx">self</s
+pan > < span
+class
+= "o" >= < /span> <span class="nx">jQuery</s
+pan > < span
+class
+= "p" > ( < /span><span class="k">this</s
+pan > < span
+class
+= "p" >
+)
+;
+<
+/span>
+< span
+class
+= "nx" > args < /span><span class="p">[</span><span class="mi">0</span><span class="p">]</s
+pan > < span
+class
+= "o" >= < /span> <span class="nx">value</s
+pan > < span
+class
+= "p" >
+.<
+/span><span class="nx">call</s
+pan > < span
+class
+= "p" > ( < /span><span class="k">this</s
+pan > < span
+class
+= "p" >,
+<
+/span> <span class="nx">i</s
+pan > < span
+class
+= "p" >,
+<
+/span> <span class="nx">table</s
+pan > < span
+class
+= "o" > ?
+<
+/span> <span class="nx">self</s
+pan > < span
+class
+= "p" >
+.<
+/span><span class="nx">html</s
+pan > < span
+class
+= "p" > () < /span> <span class="o">:</s
+pan > < span
+class
+= "kc" > undefined < /span><span class="p">);</s
+pan >
+< span
+class
+= "nx" > self < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > domManip < /span><span class="p">(</s
+pan > < span
+class
+= "nx" > args < /span><span class="p">,</s
+pan > < span
+class
+= "nx" > table < /span><span class="p">,</s
+pan > < span
+class
+= "nx" > callback < /span><span class="p">);</s
+pan >
+< span
+class
+= "p" >
+})
+;
+<
+/span>
+< span
+class
+= "p" >
+}<
+/span>
+
+< span
+class
+= "k" >
+if<
+/span> <span class="p">(</s
+pan > < span
+class
+= "k" > this < /span><span class="p">[</span><span class="mi">0</span><span class="p">])</s
+pan > < span
+class
+= "p" > { < /span>
+      < span
+class
+= "nx" > parent < /span> <span class="o">=</s
+pan > < span
+class
+= "nx" > value < /span> <span class="o">&amp;&amp;</s
+pan > < span
+class
+= "nx" > value < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > parentNode < /span><span class="p">;</s
+pan >
+
+
+< /pre></
+div > < /td>           </
+tr > < tr
+id = "section-13" > < td
+class
+= "docs" > < div
+class
+= "pilwrap" > < a
+class
+= "pilcrow"
+href = "#section-13" >
+&#182;<
+/a>               </
+div > < p > If
+we
+'re in a fragment, just use that instead of building a new one</p>             </td>             <td class="code">               <div class="highlight"><pre>
+< span
+class
+= "k" >
+if<
+/span> <span class="p">(</s
+pan > < span
+class
+= "nx" > jQuery < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > support < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > parentNode < /span> <span class="o">&amp;&amp;</s
+pan > < span
+class
+= "nx" > parent < /span> <span class="o">&amp;&amp;</s
+pan > < span
+class
+= "nx" > parent < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > nodeType < /span> <span class="o">===</s
+pan > < span
+class
+= "mi" > 11 < /span> <span class="o">&amp;&amp;</s
+pan > < span
+class
+= "nx" > parent < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > childNodes < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > length < /span> <span class="o">===</s
+pan > < span
+class
+= "k" > this < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > length < /span><span class="p">)</s
+pan > < span
+class
+= "p" > { < /span>
+      < span
+class
+= "nx" > results < /span> <span class="o">=</s
+pan > < span
+class
+= "p" > { < /span> <span class="nx">fragment</s
+pan > < span
+class
+= "o" >
+:<
+/span><span class="nx">parent</s
+pan > < span
+class
+= "p" >
+}
+;
+<
+/span>
+
+< span
+class
+= "p" >
+}<
+/span> <span class="k">else</s
+pan > < span
+class
+= "p" > { < /span>
+      < span
+class
+= "nx" > results < /span> <span class="o">=</s
+pan > < span
+class
+= "nx" > jQuery < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > buildFragment < /span><span class="p">(</s
+pan > < span
+class
+= "nx" > args < /span><span class="p">,</s
+pan > < span
+class
+= "k" > this < /span><span class="p">,</s
+pan > < span
+class
+= "nx" > scripts < /span><span class="p">);</s
+pan >
+< span
+class
+= "p" >
+}<
+/span>
+
+< span
+class
+= "nx" > fragment < /span> <span class="o">=</s
+pan > < span
+class
+= "nx" > results < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > fragment < /span><span class="p">;</s
+pan >
+
+< span
+class
+= "k" >
+if<
+/span> <span class="p">(</s
+pan > < span
+class
+= "nx" > fragment < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > childNodes < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > length < /span> <span class="o">===</s
+pan > < span
+class
+= "mi" > 1 < /span><span class="p">)</s
+pan > < span
+class
+= "p" > { < /span>
+      < span
+class
+= "nx" > first < /span> <span class="o">=</s
+pan > < span
+class
+= "nx" > fragment < /span> <span class="o">=</s
+pan > < span
+class
+= "nx" > fragment < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > firstChild < /span><span class="p">;</s
+pan >
+< span
+class
+= "p" >
+}<
+/span> <span class="k">else</s
+pan > < span
+class
+= "p" > { < /span>
+      < span
+class
+= "nx" > first < /span> <span class="o">=</s
+pan > < span
+class
+= "nx" > fragment < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > firstChild < /span><span class="p">;</s
+pan >
+< span
+class
+= "p" >
+}<
+/span>
+
+< span
+class
+= "k" >
+if<
+/span> <span class="p">(</s
+pan > < span
+class
+= "nx" > first < /span><span class="p">)</s
+pan > < span
+class
+= "p" > { < /span>
+      < span
+class
+= "nx" > table < /span> <span class="o">=</s
+pan > < span
+class
+= "nx" > table < /span> <span class="o">&amp;&amp;</s
+pan > < span
+class
+= "nx" > jQuery < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > nodeName < /span><span class="p">(</s
+pan > < span
+class
+= "nx" > first < /span><span class="p">,</s
+pan > < span
+class
+= "s2" > & quot;
+tr & quot;
+<
+/span><span class="p">);</s
+pan >
+
+< span
+class
+= "k" >
+for<
+/span> <span class="p">(</s
+pan > < span
+class
+= "kd" >
+var <
+/span> <span class="nx">i</s
+pan > < span
+class
+= "o" >= < /span> <span class="mi">0</s
+pan > < span
+class
+= "p" >,
+<
+/span> <span class="nx">l</s
+pan > < span
+class
+= "o" >= < /span> <span class="k">this</s
+pan > < span
+class
+= "p" >
+.<
+/span><span class="nx">length</s
+pan > < span
+class
+= "p" >,
+<
+/span> <span class="nx">lastIndex</s
+pan > < span
+class
+= "o" >= < /span> <span class="nx">l</s
+pan > < span
+class
+= "o" > - < /span> <span class="mi">1</s
+pan > < span
+class
+= "p" >;
+<
+/span> <span class="nx">i</s
+pan > < span
+class
+= "o" > &lt; < /span> <span class="nx">l</s
+pan > < span
+class
+= "p" >;
+<
+/span> <span class="nx">i</s
+pan > < span
+class
+= "o" > ++ < /span><span class="p">)</s
+pan > < span
+class
+= "p" > { < /span>
+      < span
+class
+= "nx" > callback < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > call < /span><span class="p">(</s
+pan >
+< span
+class
+= "nx" > table < /span> <span class="o">?</s
+pan >
+< span
+class
+= "nx" > root < /span><span class="p">(</s
+pan > < span
+class
+= "k" > this < /span><span class="p">[</span><span class="nx">i</span><span class="p">],</s
+pan > < span
+class
+= "nx" > first < /span><span class="p">)</s
+pan > < span
+class
+= "o" >
+:<
+/span>
+< span
+class
+= "k" > this < /span><span class="p">[</span><span class="nx">i</span><span class="p">],</s
+pan >
+
+< /pre></
+div > < /td>           </
+tr > < tr
+id = "section-14" > < td
+class
+= "docs" > < div
+class
+= "pilwrap" > < a
+class
+= "pilcrow"
+href = "#section-14" >
+&#182;<
+/a>               </
+div > < p > Make
+sure
+that
+we
+do not leak
+memory
+by
+inadvertently
+discarding
+the
+original
+fragment(which
+might
+have
+attached
+data
+)
+instead
+of
+using
+it;
+in
+addition, use
+the
+original
+fragment
+object
+for the last
+item
+instead
+of
+first
+because
+it
+can
+end
+up
+being
+emptied
+incorrectly
+in certain
+situations(Bug
+#
+8070
+).
+Fragments
+from
+the
+fragment
+cache
+must
+always
+be
+cloned
+and
+never
+used
+      in place. < /p>             </
+td > < td
+class
+= "code" > < div
+class
+= "highlight" > < pre >
+      < span
+class
+= "nx" > results < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > cacheable < /span> <span class="o">||</s
+pan > < span
+class
+= "p" > ( < /span> <span class="nx">l</s
+pan > < span
+class
+= "o" > &gt; < /span> <span class="mi">1</s
+pan > < span
+class
+= "o" > &amp;&amp;
+<
+/span> <span class="nx">i</s
+pan > < span
+class
+= "o" > &lt; < /span> <span class="nx">lastIndex</s
+pan > < span
+class
+= "p" >
+)<
+/span> <span class="o">?</s
+pan >
+< span
+class
+= "nx" > jQuery < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > clone < /span><span class="p">(</s
+pan > < span
+class
+= "nx" > fragment < /span><span class="p">,</s
+pan > < span
+class
+= "kc" > true < /span><span class="p">,</s
+pan > < span
+class
+= "kc" > true < /span><span class="p">)</s
+pan > < span
+class
+= "o" >
+:<
+/span>
+< span
+class
+= "nx" > fragment < /span>
+      < span
+class
+= "p" >
+)
+;
+<
+/span>
+< span
+class
+= "p" >
+}<
+/span>
+< span
+class
+= "p" >
+}<
+/span>
+
+< span
+class
+= "k" >
+if<
+/span> <span class="p">(</s
+pan > < span
+class
+= "nx" > scripts < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > length < /span><span class="p">)</s
+pan > < span
+class
+= "p" > { < /span>
+      < span
+class
+= "nx" > jQuery < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > each < /span><span class="p">(</s
+pan > < span
+class
+= "nx" > scripts < /span><span class="p">,</s
+pan > < span
+class
+= "kd" > function < /span><span class="p">(</s
+pan > < span
+class
+= "nx" > i < /span><span class="p">,</s
+pan > < span
+class
+= "nx" > elem < /span><span class="p">)</s
+pan > < span
+class
+= "p" > { < /span>
+      < span
+class
+= "k" >
+if<
+/span> <span class="p">(</s
+pan > < span
+class
+= "nx" > elem < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > src < /span><span class="p">)</s
+pan > < span
+class
+= "p" > { < /span>
+      < span
+class
+= "nx" > jQuery < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > ajax < /span><span class="p">({</s
+pan >
+< span
+class
+= "nx" > type < /span><span class="o">:</s
+pan > < span
+class
+= "s2" > & quot;
+GET & quot;
+<
+/span><span class="p">,</s
+pan >
+< span
+class
+= "nx" > global < /span><span class="o">:</s
+pan > < span
+class
+= "kc" > false < /span><span class="p">,</s
+pan >
+< span
+class
+= "nx" > url < /span><span class="o">:</s
+pan > < span
+class
+= "nx" > elem < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > src < /span><span class="p">,</s
+pan >
+< span
+class
+= "nx" > async < /span><span class="o">:</s
+pan > < span
+class
+= "kc" > false < /span><span class="p">,</s
+pan >
+< span
+class
+= "nx" > dataType < /span><span class="o">:</s
+pan > < span
+class
+= "s2" > & quot;
+script & quot;
+<
+/span>
+< span
+class
+= "p" >
+})
+;
+<
+/span>
+< span
+class
+= "p" >
+}<
+/span> <span class="k">else</s
+pan > < span
+class
+= "p" > { < /span>
+      < span
+class
+= "nx" > jQuery < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > globalEval < /span><span class="p">((</s
+pan > < span
+class
+= "nx" > elem < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > text < /span> <span class="o">||</s
+pan > < span
+class
+= "nx" > elem < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > textContent < /span> <span class="o">||</s
+pan > < span
+class
+= "nx" > elem < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > innerHTML < /span> <span class="o">||</s
+pan > < span
+class
+= "s2" > & quot;
+&
+quot;
+<
+/span> <span class="p">).</s
+pan > < span
+class
+= "nx" > replace < /span><span class="p">(</s
+pan > < span
+class
+= "nx" > rcleanScript < /span><span class="p">,</s
+pan > < span
+class
+= "s2" > & quot;
+/*$0*/&
+quot;
+<
+/span><span class="p">));</s
+pan >
+< span
+class
+= "p" >
+}<
+/span>
+
+< span
+class
+= "k" >
+if<
+/span> <span class="p">(</s
+pan > < span
+class
+= "nx" > elem < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > parentNode < /span><span class="p">)</s
+pan > < span
+class
+= "p" > { < /span>
+      < span
+class
+= "nx" > elem < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > parentNode < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > removeChild < /span><span class="p">(</s
+pan > < span
+class
+= "nx" > elem < /span><span class="p">);</s
+pan >
+< span
+class
+= "p" >
+}<
+/span>
+< span
+class
+= "p" >
+})
+;
+<
+/span>
+< span
+class
+= "p" >
+}<
+/span>
+< span
+class
+= "p" >
+}<
+/span>
+
+< span
+class
+= "k" >
+return
+<
+/span> <span class="k">this</s
+pan > < span
+class
+= "p" >;
+<
+/span>
+< span
+class
+= "p" >
+}<
+/span>
+< span
+class
+= "p" >
+})
+;
+<
+/span>
+
+< span
+class
+= "kd" > function < /span> <span class="nx">root</s
+pan > < span
+class
+= "p" > ( < /span><span class="nx">elem</s
+pan > < span
+class
+= "p" >,
+<
+/span> <span class="nx">cur</s
+pan > < span
+class
+= "p" >
+)<
+/span> <span class="p">{</s
+pan >
+< span
+class
+= "k" >
+return
+<
+/span> <span class="nx">jQuery</s
+pan > < span
+class
+= "p" >
+.<
+/span><span class="nx">nodeName</s
+pan > < span
+class
+= "p" > ( < /span><span class="nx">elem</s
+pan > < span
+class
+= "p" >,
+<
+/span> <span class="s2">&quot;table&quot;</s
+pan > < span
+class
+= "p" >
+)<
+/span> <span class="o">?</s
+pan >
+< span
+class
+= "p" > ( < /span><span class="nx">elem</s
+pan > < span
+class
+= "p" >
+.<
+/span><span class="nx">getElementsByTagName</s
+pan > < span
+class
+= "p" > ( < /span><span class="s2">&quot;tbody&quot;</s
+pan > < span
+class
+= "p" >
+)
+[ < /span><span class="mi">0</s
+pan > < span
+class
+= "p" >
+]<
+/span> <span class="o">||</s
+pan >
+< span
+class
+= "nx" > elem < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > appendChild < /span><span class="p">(</s
+pan > < span
+class
+= "nx" > elem < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > ownerDocument < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > createElement < /span><span class="p">(</s
+pan > < span
+class
+= "s2" > & quot;
+tbody & quot;
+<
+/span><span class="p">)))</s
+pan > < span
+class
+= "o" >
+:<
+/span>
+< span
+class
+= "nx" > elem < /span><span class="p">;</s
+pan >
+< span
+class
+= "p" >
+}<
+/span>
+
+< span
+class
+= "kd" > function < /span> <span class="nx">cloneCopyEvent</s
+pan > < span
+class
+= "p" > ( < /span><span class="nx">src</s
+pan > < span
+class
+= "p" >,
+<
+/span> <span class="nx">dest</s
+pan > < span
+class
+= "p" >
+)<
+/span> <span class="p">{</s
+pan >
+
+< span
+class
+= "k" >
+if<
+/span> <span class="p">(</s
+pan > < span
+class
+= "nx" > dest < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > nodeType < /span> <span class="o">!==</s
+pan > < span
+class
+= "mi" > 1 < /span> <span class="o">||</s
+pan > < span
+class
+= "o" > ! < /span><span class="nx">jQuery</s
+pan > < span
+class
+= "p" >
+.<
+/span><span class="nx">hasData</s
+pan > < span
+class
+= "p" > ( < /span><span class="nx">src</s
+pan > < span
+class
+= "p" >
+))<
+/span> <span class="p">{</s
+pan >
+< span
+class
+= "k" >
+return
+<
+/span><span class="p">;</s
+pan >
+< span
+class
+= "p" >
+}<
+/span>
+
+< span
+class
+= "kd" >
+var <
+/span> <span class="nx">type</s
+pan > < span
+class
+= "p" >,
+<
+/span> <span class="nx">i</s
+pan > < span
+class
+= "p" >,
+<
+/span> <span class="nx">l</s
+pan > < span
+class
+= "p" >,
+<
+/span>
+< span
+class
+= "nx" > oldData < /span> <span class="o">=</s
+pan > < span
+class
+= "nx" > jQuery < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > _data < /span><span class="p">(</s
+pan > < span
+class
+= "nx" > src < /span><span class="p">),</s
+pan >
+< span
+class
+= "nx" > curData < /span> <span class="o">=</s
+pan > < span
+class
+= "nx" > jQuery < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > _data < /span><span class="p">(</s
+pan > < span
+class
+= "nx" > dest < /span><span class="p">,</s
+pan > < span
+class
+= "nx" > oldData < /span><span class="p">),</s
+pan >
+< span
+class
+= "nx" > events < /span> <span class="o">=</s
+pan > < span
+class
+= "nx" > oldData < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > events < /span><span class="p">;</s
+pan >
+
+< span
+class
+= "k" >
+if<
+/span> <span class="p">(</s
+pan > < span
+class
+= "nx" > events < /span><span class="p">)</s
+pan > < span
+class
+= "p" > { < /span>
+      < span
+class
+= "k" > delete < /span> <span class="nx">curData</s
+pan > < span
+class
+= "p" >
+.<
+/span><span class="nx">handle</s
+pan > < span
+class
+= "p" >;
+<
+/span>
+< span
+class
+= "nx" > curData < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > events < /span> <span class="o">=</s
+pan > < span
+class
+= "p" > {};
+<
+/span>
+
+< span
+class
+= "k" >
+for<
+/span> <span class="p">(</s
+pan > < span
+class
+= "nx" > type < /span> <span class="k">in</s
+pan > < span
+class
+= "nx" > events < /span><span class="p">)</s
+pan > < span
+class
+= "p" > { < /span>
+      < span
+class
+= "k" >
+for<
+/span> <span class="p">(</s
+pan > < span
+class
+= "nx" > i < /span> <span class="o">=</s
+pan > < span
+class
+= "mi" > 0 < /span><span class="p">,</s
+pan > < span
+class
+= "nx" > l < /span> <span class="o">=</s
+pan > < span
+class
+= "nx" > events < /span><span class="p">[</span> <span class="nx">type</span> <span class="p">].</s
+pan > < span
+class
+= "nx" > length < /span><span class="p">;</s
+pan > < span
+class
+= "nx" > i < /span> <span class="o">&lt;</s
+pan > < span
+class
+= "nx" > l < /span><span class="p">;</s
+pan > < span
+class
+= "nx" > i < /span><span class="o">++</s
+pan > < span
+class
+= "p" >
+)<
+/span> <span class="p">{</s
+pan >
+< span
+class
+= "nx" > jQuery < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > event < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > add < /span><span class="p">(</s
+pan > < span
+class
+= "nx" > dest < /span><span class="p">,</s
+pan > < span
+class
+= "nx" > type < /span><span class="p">,</s
+pan > < span
+class
+= "nx" > events < /span><span class="p">[</span> <span class="nx">type</span> <span class="p">][</span> <span class="nx">i</span> <span class="p">]);</s
+pan >
+< span
+class
+= "p" >
+}<
+/span>
+< span
+class
+= "p" >
+}<
+/span>
+< span
+class
+= "p" >
+}<
+/span>
+
+
+< /pre></
+div > < /td>           </
+tr > < tr
+id = "section-15" > < td
+class
+= "docs" > < div
+class
+= "pilwrap" > < a
+class
+= "pilcrow"
+href = "#section-15" >
+&#182;<
+/a>               </
+div > < p > make
+the
+cloned
+public
+data
+object
+a
+copy
+from
+the
+original < /p>             </
+td > < td
+class
+= "code" > < div
+class
+= "highlight" > < pre >
+      < span
+class
+= "k" >
+if<
+/span> <span class="p">(</s
+pan > < span
+class
+= "nx" > curData < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > data < /span><span class="p">)</s
+pan > < span
+class
+= "p" > { < /span>
+      < span
+class
+= "nx" > curData < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > data < /span> <span class="o">=</s
+pan > < span
+class
+= "nx" > jQuery < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > extend < /span><span class="p">({},</s
+pan > < span
+class
+= "nx" > curData < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > data < /span><span class="p">);</s
+pan >
+< span
+class
+= "p" >
+}<
+/span>
+< span
+class
+= "p" >
+}<
+/span>
+
+< span
+class
+= "kd" > function < /span> <span class="nx">cloneFixAttributes</s
+pan > < span
+class
+= "p" > ( < /span><span class="nx">src</s
+pan > < span
+class
+= "p" >,
+<
+/span> <span class="nx">dest</s
+pan > < span
+class
+= "p" >
+)<
+/span> <span class="p">{</s
+pan >
+< span
+class
+= "kd" >
+var <
+/span> <span class="nx">nodeName</s
+pan > < span
+class
+= "p" >;
+<
+/span>
+
+
+< /pre></
+div > < /td>           </
+tr > < tr
+id = "section-16" > < td
+class
+= "docs" > < div
+class
+= "pilwrap" > < a
+class
+= "pilcrow"
+href = "#section-16" >
+&#182;<
+/a>               </
+div > < p > We
+do not need
+to
+do anything
+for non - Elements < /p>             </td > < td
+class
+= "code" > < div
+class
+= "highlight" > < pre >
+      < span
+class
+= "k" >
+if<
+/span> <span class="p">(</s
+pan > < span
+class
+= "nx" > dest < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > nodeType < /span> <span class="o">!==</s
+pan > < span
+class
+= "mi" > 1 < /span><span class="p">)</s
+pan > < span
+class
+= "p" > { < /span>
+      < span
+class
+= "k" >
+return
+<
+/span><span class="p">;</s
+pan >
+< span
+class
+= "p" >
+}<
+/span>
+
+
+< /pre></
+div > < /td>           </
+tr > < tr
+id = "section-17" > < td
+class
+= "docs" > < div
+class
+= "pilwrap" > < a
+class
+= "pilcrow"
+href = "#section-17" >
+&#182;<
+/a>               </
+div > < p > clearAttributes
+removes
+the
+attributes, which
+we
+don
+'t want,
+but
+also
+removes
+the
+attachEvent
+events, which
+we < em >
+do</em> want</
+p > < /td>             <td class="code">               <div class="highlight"><pre>
+< span
+class
+= "k" >
+if<
+/span> <span class="p">(</s
+pan > < span
+class
+= "nx" > dest < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > clearAttributes < /span><span class="p">)</s
+pan > < span
+class
+= "p" > { < /span>
+      < span
+class
+= "nx" > dest < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > clearAttributes < /span><span class="p">();</s
+pan >
+< span
+class
+= "p" >
+}<
+/span>
+
+
+< /pre></
+div > < /td>           </
+tr > < tr
+id = "section-18" > < td
+class
+= "docs" > < div
+class
+= "pilwrap" > < a
+class
+= "pilcrow"
+href = "#section-18" >
+&#182;<
+/a>               </
+div > < p > mergeAttributes,
+in
+contrast, only
+merges
+back
+on
+the
+original
+attributes, not
+the
+events < /p>             </
+td > < td
+class
+= "code" > < div
+class
+= "highlight" > < pre >
+      < span
+class
+= "k" >
+if<
+/span> <span class="p">(</s
+pan > < span
+class
+= "nx" > dest < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > mergeAttributes < /span><span class="p">)</s
+pan > < span
+class
+= "p" > { < /span>
+      < span
+class
+= "nx" > dest < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > mergeAttributes < /span><span class="p">(</s
+pan > < span
+class
+= "nx" > src < /span><span class="p">);</s
+pan >
+< span
+class
+= "p" >
+}<
+/span>
+
+< span
+class
+= "nx" > nodeName < /span> <span class="o">=</s
+pan > < span
+class
+= "nx" > dest < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > nodeName < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > toLowerCase < /span><span class="p">();</s
+pan >
+
+
+< /pre></
+div > < /td>           </
+tr > < tr
+id = "section-19" > < td
+class
+= "docs" > < div
+class
+= "pilwrap" > < a
+class
+= "pilcrow"
+href = "#section-19" >
+&#182;<
+/a>               </
+div > < p > IE6 - 8
+fail
+to
+clone
+children
+inside
+object
+elements
+that
+use
+the
+proprietary
+classid
+attribute
+value(rather
+than
+the
+type
+attribute
+)
+to
+identify
+the
+type
+of
+content
+to
+display < /p>             </
+td > < td
+class
+= "code" > < div
+class
+= "highlight" > < pre >
+      < span
+class
+= "k" >
+if<
+/span> <span class="p">(</s
+pan > < span
+class
+= "nx" > nodeName < /span> <span class="o">===</s
+pan > < span
+class
+= "s2" > & quot;
+object & quot;
+<
+/span><span class="p">)</s
+pan > < span
+class
+= "p" > { < /span>
+      < span
+class
+= "nx" > dest < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > outerHTML < /span> <span class="o">=</s
+pan > < span
+class
+= "nx" > src < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > outerHTML < /span><span class="p">;</s
+pan >
+
+< span
+class
+= "p" >
+}<
+/span> <span class="k">else</s
+pan > < span
+class
+= "k" >
+if<
+/span> <span class="p">(</s
+pan > < span
+class
+= "nx" > nodeName < /span> <span class="o">===</s
+pan > < span
+class
+= "s2" > & quot;
+input & quot;
+<
+/span> <span class="o">&amp;&amp;</s
+pan > < span
+class
+= "p" > ( < /span><span class="nx">src</s
+pan > < span
+class
+= "p" >
+.<
+/span><span class="nx">type</s
+pan > < span
+class
+= "o" >= ==
+<
+/span> <span class="s2">&quot;checkbox&quot;</s
+pan > < span
+class
+= "o" > ||
+<
+/span> <span class="nx">src</s
+pan > < span
+class
+= "p" >
+.<
+/span><span class="nx">type</s
+pan > < span
+class
+= "o" >= ==
+<
+/span> <span class="s2">&quot;radio&quot;</s
+pan > < span
+class
+= "p" >
+))<
+/span> <span class="p">{</s
+pan >
+
+< /pre></
+div > < /td>           </
+tr > < tr
+id = "section-20" > < td
+class
+= "docs" > < div
+class
+= "pilwrap" > < a
+class
+= "pilcrow"
+href = "#section-20" >
+&#182;<
+/a>               </
+div > < p > IE6 - 8
+fails
+to
+persist
+the
+checked
+state
+of
+a
+cloned
+checkbox
+or
+radio
+button.Worse, IE6 - 7
+fail
+to
+give
+the
+cloned
+element
+a
+checked
+appearance
+if the defaultChecked
+value
+isn
+'t also set</p>             </td>             <td class="code">               <div class="highlight"><pre>
+< span
+class
+= "k" >
+if<
+/span> <span class="p">(</s
+pan > < span
+class
+= "nx" > src < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > checked < /span><span class="p">)</s
+pan > < span
+class
+= "p" > { < /span>
+      < span
+class
+= "nx" > dest < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > defaultChecked < /span> <span class="o">=</s
+pan > < span
+class
+= "nx" > dest < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > checked < /span> <span class="o">=</s
+pan > < span
+class
+= "nx" > src < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > checked < /span><span class="p">;</s
+pan >
+< span
+class
+= "p" >
+}<
+/span>
+
+
+< /pre></
+div > < /td>           </
+tr > < tr
+id = "section-21" > < td
+class
+= "docs" > < div
+class
+= "pilwrap" > < a
+class
+= "pilcrow"
+href = "#section-21" >
+&#182;<
+/a>               </
+div > < p > IE6 - 7
+get
+confused
+and
+end
+up
+setting
+the
+value
+of
+a
+cloned
+checkbox / radio
+button
+to
+an
+empty
+string
+instead
+of
+"on" < /p>             </
+td > < td
+class
+= "code" > < div
+class
+= "highlight" > < pre >
+      < span
+class
+= "k" >
+if<
+/span> <span class="p">(</s
+pan > < span
+class
+= "nx" > dest < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > value < /span> <span class="o">!==</s
+pan > < span
+class
+= "nx" > src < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > value < /span><span class="p">)</s
+pan > < span
+class
+= "p" > { < /span>
+      < span
+class
+= "nx" > dest < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > value < /span> <span class="o">=</s
+pan > < span
+class
+= "nx" > src < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > value < /span><span class="p">;</s
+pan >
+< span
+class
+= "p" >
+}<
+/span>
+
+
+< /pre></
+div > < /td>           </
+tr > < tr
+id = "section-22" > < td
+class
+= "docs" > < div
+class
+= "pilwrap" > < a
+class
+= "pilcrow"
+href = "#section-22" >
+&#182;<
+/a>               </
+div > < p > IE6 - 8
+fails
+to
+return the
+selected
+option
+to
+the
+default
+selected
+state
+when
+cloning
+options < /p>             </
+td > < td
+class
+= "code" > < div
+class
+= "highlight" > < pre >
+      < span
+class
+= "p" >
+}<
+/span> <span class="k">else</s
+pan > < span
+class
+= "k" >
+if<
+/span> <span class="p">(</s
+pan > < span
+class
+= "nx" > nodeName < /span> <span class="o">===</s
+pan > < span
+class
+= "s2" > & quot;
+option & quot;
+<
+/span><span class="p">)</s
+pan > < span
+class
+= "p" > { < /span>
+      < span
+class
+= "nx" > dest < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > selected < /span> <span class="o">=</s
+pan > < span
+class
+= "nx" > src < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > defaultSelected < /span><span class="p">;</s
+pan >
+
+
+< /pre></
+div > < /td>           </
+tr > < tr
+id = "section-23" > < td
+class
+= "docs" > < div
+class
+= "pilwrap" > < a
+class
+= "pilcrow"
+href = "#section-23" >
+&#182;<
+/a>               </
+div > < p > IE6 - 8
+fails
+to
+set
+the
+defaultValue
+to
+the
+correct
+value
+when
+cloning
+other
+types
+of
+input
+fields < /p>             </
+td > < td
+class
+= "code" > < div
+class
+= "highlight" > < pre >
+      < span
+class
+= "p" >
+}<
+/span> <span class="k">else</s
+pan > < span
+class
+= "k" >
+if<
+/span> <span class="p">(</s
+pan > < span
+class
+= "nx" > nodeName < /span> <span class="o">===</s
+pan > < span
+class
+= "s2" > & quot;
+input & quot;
+<
+/span> <span class="o">||</s
+pan > < span
+class
+= "nx" > nodeName < /span> <span class="o">===</s
+pan > < span
+class
+= "s2" > & quot;
+textarea & quot;
+<
+/span><span class="p">)</s
+pan > < span
+class
+= "p" > { < /span>
+      < span
+class
+= "nx" > dest < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > defaultValue < /span> <span class="o">=</s
+pan > < span
+class
+= "nx" > src < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > defaultValue < /span><span class="p">;</s
+pan >
+
+
+< /pre></
+div > < /td>           </
+tr > < tr
+id = "section-24" > < td
+class
+= "docs" > < div
+class
+= "pilwrap" > < a
+class
+= "pilcrow"
+href = "#section-24" >
+&#182;<
+/a>               </
+div > < p > IE
+blanks
+contents
+when
+cloning
+scripts < /p>             </
+td > < td
+class
+= "code" > < div
+class
+= "highlight" > < pre >
+      < span
+class
+= "p" >
+}<
+/span> <span class="k">else</s
+pan > < span
+class
+= "k" >
+if<
+/span> <span class="p">(</s
+pan > < span
+class
+= "nx" > nodeName < /span> <span class="o">===</s
+pan > < span
+class
+= "s2" > & quot;
+script & quot;
+<
+/span> <span class="o">&amp;&amp;</s
+pan > < span
+class
+= "nx" > dest < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > text < /span> <span class="o">!==</s
+pan > < span
+class
+= "nx" > src < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > text < /span><span class="p">)</s
+pan > < span
+class
+= "p" > { < /span>
+      < span
+class
+= "nx" > dest < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > text < /span> <span class="o">=</s
+pan > < span
+class
+= "nx" > src < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > text < /span><span class="p">;</s
+pan >
+< span
+class
+= "p" >
+}<
+/span>
+
+
+< /pre></
+div > < /td>           </
+tr > < tr
+id = "section-25" > < td
+class
+= "docs" > < div
+class
+= "pilwrap" > < a
+class
+= "pilcrow"
+href = "#section-25" >
+&#182;<
+/a>               </
+div > < p > Event
+data
+gets
+referenced
+instead
+of
+copied
+if the expando
+gets
+copied
+too < /p>             </
+td > < td
+class
+= "code" > < div
+class
+= "highlight" > < pre >
+      < span
+class
+= "nx" > dest < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > removeAttribute < /span><span class="p">(</s
+pan > < span
+class
+= "nx" > jQuery < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > expando < /span><span class="p">);</s
+pan >
+
+
+< /pre></
+div > < /td>           </
+tr > < tr
+id = "section-26" > < td
+class
+= "docs" > < div
+class
+= "pilwrap" > < a
+class
+= "pilcrow"
+href = "#section-26" >
+&#182;<
+/a>               </
+div > < p > Clear
+flags
+for bubbling special
+change / submit
+events, they
+must
+be
+reattached
+when
+the
+newly
+cloned
+events
+are
+first
+activated < /p>             </
+td > < td
+class
+= "code" > < div
+class
+= "highlight" > < pre >
+      < span
+class
+= "nx" > dest < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > removeAttribute < /span><span class="p">(</s
+pan > < span
+class
+= "s2" > & quot;
+_submit_attached & quot;
+<
+/span><span class="p">);</s
+pan >
+< span
+class
+= "nx" > dest < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > removeAttribute < /span><span class="p">(</s
+pan > < span
+class
+= "s2" > & quot;
+_change_attached & quot;
+<
+/span><span class="p">);</s
+pan >
+< span
+class
+= "p" >
+}<
+/span>
+
+< span
+class
+= "nx" > jQuery < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > buildFragment < /span> <span class="o">=</s
+pan > < span
+class
+= "kd" > function < /span><span class="p">(</s
+pan > < span
+class
+= "nx" > args < /span><span class="p">,</s
+pan > < span
+class
+= "nx" > nodes < /span><span class="p">,</s
+pan > < span
+class
+= "nx" > scripts < /span><span class="p">)</s
+pan > < span
+class
+= "p" > { < /span>
+      < span
+class
+= "kd" >
+var <
+/span> <span class="nx">fragment</s
+pan > < span
+class
+= "p" >,
+<
+/span> <span class="nx">cacheable</s
+pan > < span
+class
+= "p" >,
+<
+/span> <span class="nx">cacheresults</s
+pan > < span
+class
+= "p" >,
+<
+/span> <span class="nx">doc</s
+pan > < span
+class
+= "p" >,
+<
+/span>
+< span
+class
+= "nx" > first < /span> <span class="o">=</s
+pan > < span
+class
+= "nx" > args < /span><span class="p">[</span> <span class="mi">0</span> <span class="p">];</s
+pan >
+
+
+< /pre></
+div > < /td>           </
+tr > < tr
+id = "section-27" > < td
+class
+= "docs" > < div
+class
+= "pilwrap" > < a
+class
+= "pilcrow"
+href = "#section-27" >
+&#182;<
+/a>               </
+div > < p > nodes
+may
+contain
+either
+an
+explicit
+document
+object,
+      a
+jQuery
+collection
+or
+context
+object.
+      If
+nodes[0]
+contains
+a
+valid
+object
+to
+assign
+to
+doc < /p>             </
+td > < td
+class
+= "code" > < div
+class
+= "highlight" > < pre >
+      < span
+class
+= "k" >
+if<
+/span> <span class="p">(</s
+pan > < span
+class
+= "nx" > nodes < /span> <span class="o">&amp;&amp;</s
+pan > < span
+class
+= "nx" > nodes < /span><span class="p">[</span><span class="mi">0</span><span class="p">])</s
+pan > < span
+class
+= "p" > { < /span>
+      < span
+class
+= "nx" > doc < /span> <span class="o">=</s
+pan > < span
+class
+= "nx" > nodes < /span><span class="p">[</span><span class="mi">0</span><span class="p">].</s
+pan > < span
+class
+= "nx" > ownerDocument < /span> <span class="o">||</s
+pan > < span
+class
+= "nx" > nodes < /span><span class="p">[</span><span class="mi">0</span><span class="p">];</s
+pan >
+< span
+class
+= "p" >
+}<
+/span>
+
+
+< /pre></
+div > < /td>           </
+tr > < tr
+id = "section-28" > < td
+class
+= "docs" > < div
+class
+= "pilwrap" > < a
+class
+= "pilcrow"
+href = "#section-28" >
+&#182;<
+/a>               </
+div > < p > Ensure
+that
+an
+attr
+object
+doesn
+'t incorrectly stand in as a document object
+Chrome
+and
+Firefox
+seem
+to
+allow
+this
+to
+occur
+and
+will
+throw exception
+Fixes
+#
+8950 < /p>             </
+td > < td
+class
+= "code" > < div
+class
+= "highlight" > < pre >
+      < span
+class
+= "k" >
+if<
+/span> <span class="p">(</s
+pan > < span
+class
+= "o" > ! < /span><span class="nx">doc</s
+pan > < span
+class
+= "p" >
+.<
+/span><span class="nx">createDocumentFragment</s
+pan > < span
+class
+= "p" >
+)<
+/span> <span class="p">{</s
+pan >
+< span
+class
+= "nx" > doc < /span> <span class="o">=</s
+pan > < span
+class
+= "nb" > document < /span><span class="p">;</s
+pan >
+< span
+class
+= "p" >
+}<
+/span>
+
+
+< /pre></
+div > < /td>           </
+tr > < tr
+id = "section-29" > < td
+class
+= "docs" > < div
+class
+= "pilwrap" > < a
+class
+= "pilcrow"
+href = "#section-29" >
+&#182;<
+/a>               </
+div > < p > Only
+cache
+"small"(1 / 2
+KB
+)
+HTML
+strings
+that
+are
+associated
+with the main
+document
+Cloning
+options
+loses
+the
+selected
+state, so
+don
+'t cache them
+IE
+6
+doesn
+'t like it when you put <object> or <embed> elements in a fragment
+Also, WebKit
+does
+not
+clone
+'checked'
+attributes
+on
+cloneNode, so
+don
+'t cache
+Lastly, IE6, 7, 8
+will
+not
+correctly
+reuse
+cached
+fragments
+that
+were
+created
+from
+unknown
+elems
+#
+10501 < /p>             </
+td > < td
+class
+= "code" > < div
+class
+= "highlight" > < pre >
+      < span
+class
+= "k" >
+if<
+/span> <span class="p">(</s
+pan > < span
+class
+= "nx" > args < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > length < /span> <span class="o">===</s
+pan > < span
+class
+= "mi" > 1 < /span> <span class="o">&amp;&amp;</s
+pan > < span
+class
+= "k" > typeof < /span> <span class="nx">first</s
+pan > < span
+class
+= "o" >= ==
+<
+/span> <span class="s2">&quot;string&quot;</s
+pan > < span
+class
+= "o" > &amp;&amp;
+<
+/span> <span class="nx">first</s
+pan > < span
+class
+= "p" >
+.<
+/span><span class="nx">length</s
+pan > < span
+class
+= "o" > &lt; < /span> <span class="mi">512</s
+pan > < span
+class
+= "o" > &amp;&amp;
+<
+/span> <span class="nx">doc</s
+pan > < span
+class
+= "o" >= ==
+<
+/span> <span class="nb">document</s
+pan > < span
+class
+= "o" > &amp;&amp;
+<
+/span>
+< span
+class
+= "nx" > first < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > charAt < /span><span class="p">(</s
+pan > < span
+class
+= "mi" > 0 < /span><span class="p">)</s
+pan > < span
+class
+= "o" >= ==
+<
+/span> <span class="s2">&quot;&lt;&quot;</s
+pan > < span
+class
+= "o" > &amp;&amp;
+<
+/span> <span class="o">!</s
+pan > < span
+class
+= "nx" > rnocache < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > test < /span><span class="p">(</s
+pan > < span
+class
+= "nx" > first < /span><span class="p">)</s
+pan > < span
+class
+= "o" > &amp;&amp;
+<
+/span>
+< span
+class
+= "p" > ( < /span><span class="nx">jQuery</s
+pan > < span
+class
+= "p" >
+.<
+/span><span class="nx">support</s
+pan > < span
+class
+= "p" >
+.<
+/span><span class="nx">checkClone</s
+pan > < span
+class
+= "o" > ||
+<
+/span> <span class="o">!</s
+pan > < span
+class
+= "nx" > rchecked < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > test < /span><span class="p">(</s
+pan > < span
+class
+= "nx" > first < /span><span class="p">))</s
+pan > < span
+class
+= "o" > &amp;&amp;
+<
+/span>
+< span
+class
+= "p" > ( < /span><span class="nx">jQuery</s
+pan > < span
+class
+= "p" >
+.<
+/span><span class="nx">support</s
+pan > < span
+class
+= "p" >
+.<
+/span><span class="nx">html5Clone</s
+pan > < span
+class
+= "o" > ||
+<
+/span> <span class="o">!</s
+pan > < span
+class
+= "nx" > rnoshimcache < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > test < /span><span class="p">(</s
+pan > < span
+class
+= "nx" > first < /span><span class="p">)))</s
+pan > < span
+class
+= "p" > { < /span>
+
+      < span
+class
+= "nx" > cacheable < /span> <span class="o">=</s
+pan > < span
+class
+= "kc" > true < /span><span class="p">;</s
+pan >
+
+< span
+class
+= "nx" > cacheresults < /span> <span class="o">=</s
+pan > < span
+class
+= "nx" > jQuery < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > fragments < /span><span class="p">[</span> <span class="nx">first</span> <span class="p">];</s
+pan >
+< span
+class
+= "k" >
+if<
+/span> <span class="p">(</s
+pan > < span
+class
+= "nx" > cacheresults < /span> <span class="o">&amp;&amp;</s
+pan > < span
+class
+= "nx" > cacheresults < /span> <span class="o">!==</s
+pan > < span
+class
+= "mi" > 1 < /span><span class="p">)</s
+pan > < span
+class
+= "p" > { < /span>
+      < span
+class
+= "nx" > fragment < /span> <span class="o">=</s
+pan > < span
+class
+= "nx" > cacheresults < /span><span class="p">;</s
+pan >
+< span
+class
+= "p" >
+}<
+/span>
+< span
+class
+= "p" >
+}<
+/span>
+
+< span
+class
+= "k" >
+if<
+/span> <span class="p">(</s
+pan > < span
+class
+= "o" > ! < /span><span class="nx">fragment</s
+pan > < span
+class
+= "p" >
+)<
+/span> <span class="p">{</s
+pan >
+< span
+class
+= "nx" > fragment < /span> <span class="o">=</s
+pan > < span
+class
+= "nx" > doc < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > createDocumentFragment < /span><span class="p">();</s
+pan >
+< span
+class
+= "nx" > jQuery < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > clean < /span><span class="p">(</s
+pan > < span
+class
+= "nx" > args < /span><span class="p">,</s
+pan > < span
+class
+= "nx" > doc < /span><span class="p">,</s
+pan > < span
+class
+= "nx" > fragment < /span><span class="p">,</s
+pan > < span
+class
+= "nx" > scripts < /span><span class="p">);</s
+pan >
+< span
+class
+= "p" >
+}<
+/span>
+
+< span
+class
+= "k" >
+if<
+/span> <span class="p">(</s
+pan > < span
+class
+= "nx" > cacheable < /span><span class="p">)</s
+pan > < span
+class
+= "p" > { < /span>
+      < span
+class
+= "nx" > jQuery < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > fragments < /span><span class="p">[</span> <span class="nx">first</span> <span class="p">]</s
+pan > < span
+class
+= "o" >= < /span> <span class="nx">cacheresults</s
+pan > < span
+class
+= "o" > ?
+<
+/span> <span class="nx">fragment</s
+pan > < span
+class
+= "o" >
+:<
+/span> <span class="mi">1</s
+pan > < span
+class
+= "p" >;
+<
+/span>
+< span
+class
+= "p" >
+}<
+/span>
+
+< span
+class
+= "k" >
+return
+<
+/span> <span class="p">{</s
+pan > < span
+class
+= "nx" > fragment < /span><span class="o">:</s
+pan > < span
+class
+= "nx" > fragment < /span><span class="p">,</s
+pan > < span
+class
+= "nx" > cacheable < /span><span class="o">:</s
+pan > < span
+class
+= "nx" > cacheable < /span> <span class="p">};</s
+pan >
+< span
+class
+= "p" >
+}
+;
+<
+/span>
+
+< span
+class
+= "nx" > jQuery < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > fragments < /span> <span class="o">=</s
+pan > < span
+class
+= "p" > {};
+<
+/span>
+
+< span
+class
+= "nx" > jQuery < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > each < /span><span class="p">({</s
+pan >
+< span
+class
+= "nx" > appendTo < /span><span class="o">:</s
+pan > < span
+class
+= "s2" > & quot;
+append & quot;
+<
+/span><span class="p">,</s
+pan >
+< span
+class
+= "nx" > prependTo < /span><span class="o">:</s
+pan > < span
+class
+= "s2" > & quot;
+prepend & quot;
+<
+/span><span class="p">,</s
+pan >
+< span
+class
+= "nx" > insertBefore < /span><span class="o">:</s
+pan > < span
+class
+= "s2" > & quot;
+before & quot;
+<
+/span><span class="p">,</s
+pan >
+< span
+class
+= "nx" > insertAfter < /span><span class="o">:</s
+pan > < span
+class
+= "s2" > & quot;
+after & quot;
+<
+/span><span class="p">,</s
+pan >
+< span
+class
+= "nx" > replaceAll < /span><span class="o">:</s
+pan > < span
+class
+= "s2" > & quot;
+replaceWith & quot;
+<
+/span>
+< span
+class
+= "p" >
+},<
+/span> <span class="kd">function</s
+pan > < span
+class
+= "p" > ( < /span><span class="nx">name</s
+pan > < span
+class
+= "p" >,
+<
+/span> <span class="nx">original</s
+pan > < span
+class
+= "p" >
+)<
+/span> <span class="p">{</s
+pan >
+< span
+class
+= "nx" > jQuery < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > fn < /span><span class="p">[</span> <span class="nx">name</span> <span class="p">]</s
+pan > < span
+class
+= "o" >= < /span> <span class="kd">function</s
+pan > < span
+class
+= "p" > ( < /span><span class="nx">selector</s
+pan > < span
+class
+= "p" >
+)<
+/span> <span class="p">{</s
+pan >
+< span
+class
+= "kd" >
+var <
+/span> <span class="nx">ret</s
+pan > < span
+class
+= "o" >= < /span> <span class="p">[],</s
+pan >
+< span
+class
+= "nx" > insert < /span> <span class="o">=</s
+pan > < span
+class
+= "nx" > jQuery < /span><span class="p">(</s
+pan > < span
+class
+= "nx" > selector < /span><span class="p">),</s
+pan >
+< span
+class
+= "nx" > parent < /span> <span class="o">=</s
+pan > < span
+class
+= "k" > this < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > length < /span> <span class="o">===</s
+pan > < span
+class
+= "mi" > 1 < /span> <span class="o">&amp;&amp;</s
+pan > < span
+class
+= "k" > this < /span><span class="p">[</span><span class="mi">0</span><span class="p">].</s
+pan > < span
+class
+= "nx" > parentNode < /span><span class="p">;</s
+pan >
+
+< span
+class
+= "k" >
+if<
+/span> <span class="p">(</s
+pan > < span
+class
+= "nx" > parent < /span> <span class="o">&amp;&amp;</s
+pan > < span
+class
+= "nx" > parent < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > nodeType < /span> <span class="o">===</s
+pan > < span
+class
+= "mi" > 11 < /span> <span class="o">&amp;&amp;</s
+pan > < span
+class
+= "nx" > parent < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > childNodes < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > length < /span> <span class="o">===</s
+pan > < span
+class
+= "mi" > 1 < /span> <span class="o">&amp;&amp;</s
+pan > < span
+class
+= "nx" > insert < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > length < /span> <span class="o">===</s
+pan > < span
+class
+= "mi" > 1 < /span><span class="p">)</s
+pan > < span
+class
+= "p" > { < /span>
+      < span
+class
+= "nx" > insert < /span><span class="p">[</span> <span class="nx">original</span> <span class="p">](</s
+pan > < span
+class
+= "k" > this < /span><span class="p">[</span><span class="mi">0</span><span class="p">]);</s
+pan >
+< span
+class
+= "k" >
+return
+<
+/span> <span class="k">this</s
+pan > < span
+class
+= "p" >;
+<
+/span>
+
+< span
+class
+= "p" >
+}<
+/span> <span class="k">else</s
+pan > < span
+class
+= "p" > { < /span>
+      < span
+class
+= "k" >
+for<
+/span> <span class="p">(</s
+pan > < span
+class
+= "kd" >
+var <
+/span> <span class="nx">i</s
+pan > < span
+class
+= "o" >= < /span> <span class="mi">0</s
+pan > < span
+class
+= "p" >,
+<
+/span> <span class="nx">l</s
+pan > < span
+class
+= "o" >= < /span> <span class="nx">insert</s
+pan > < span
+class
+= "p" >
+.<
+/span><span class="nx">length</s
+pan > < span
+class
+= "p" >;
+<
+/span> <span class="nx">i</s
+pan > < span
+class
+= "o" > &lt; < /span> <span class="nx">l</s
+pan > < span
+class
+= "p" >;
+<
+/span> <span class="nx">i</s
+pan > < span
+class
+= "o" > ++ < /span><span class="p">)</s
+pan > < span
+class
+= "p" > { < /span>
+      < span
+class
+= "kd" >
+var <
+/span> <span class="nx">elems</s
+pan > < span
+class
+= "o" >= < /span> <span class="p">(</s
+pan > < span
+class
+= "nx" > i < /span> <span class="o">&gt;</s
+pan > < span
+class
+= "mi" > 0 < /span> <span class="o">?</s
+pan > < span
+class
+= "k" > this < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > clone < /span><span class="p">(</s
+pan > < span
+class
+= "kc" > true < /span><span class="p">)</s
+pan > < span
+class
+= "o" >
+:<
+/span> <span class="k">this</s
+pan > < span
+class
+= "p" >
+).<
+/span><span class="nx">get</s
+pan > < span
+class
+= "p" > ();
+<
+/span>
+< span
+class
+= "nx" > jQuery < /span><span class="p">(</s
+pan > < span
+class
+= "nx" > insert < /span><span class="p">[</span><span class="nx">i</span><span class="p">])[</span> <span class="nx">original</span> <span class="p">](</s
+pan > < span
+class
+= "nx" > elems < /span><span class="p">);</s
+pan >
+< span
+class
+= "nx" > ret < /span> <span class="o">=</s
+pan > < span
+class
+= "nx" > ret < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > concat < /span><span class="p">(</s
+pan > < span
+class
+= "nx" > elems < /span><span class="p">);</s
+pan >
+< span
+class
+= "p" >
+}<
+/span>
+
+< span
+class
+= "k" >
+return
+<
+/span> <span class="k">this</s
+pan > < span
+class
+= "p" >
+.<
+/span><span class="nx">pushStack</s
+pan > < span
+class
+= "p" > ( < /span><span class="nx">ret</s
+pan > < span
+class
+= "p" >,
+<
+/span> <span class="nx">name</s
+pan > < span
+class
+= "p" >,
+<
+/span> <span class="nx">insert</s
+pan > < span
+class
+= "p" >
+.<
+/span><span class="nx">selector</s
+pan > < span
+class
+= "p" >
+)
+;
+<
+/span>
+< span
+class
+= "p" >
+}<
+/span>
+< span
+class
+= "p" >
+}
+;
+<
+/span>
+< span
+class
+= "p" >
+})
+;
+<
+/span>
+
+< span
+class
+= "kd" > function < /span> <span class="nx">getAll</s
+pan > < span
+class
+= "p" > ( < /span><span class="nx">elem</s
+pan > < span
+class
+= "p" >
+)<
+/span> <span class="p">{</s
+pan >
+< span
+class
+= "k" >
+if<
+/span> <span class="p">(</s
+pan > < span
+class
+= "k" > typeof < /span> <span class="nx">elem</s
+pan > < span
+class
+= "p" >
+.<
+/span><span class="nx">getElementsByTagName</s
+pan > < span
+class
+= "o" > !==
+<
+/span> <span class="s2">&quot;undefined&quot;</s
+pan > < span
+class
+= "p" >
+)<
+/span> <span class="p">{</s
+pan >
+< span
+class
+= "k" >
+return
+<
+/span> <span class="nx">elem</s
+pan > < span
+class
+= "p" >
+.<
+/span><span class="nx">getElementsByTagName</s
+pan > < span
+class
+= "p" > ( < /span><span class="s2">&quot;*&quot;</s
+pan > < span
+class
+= "p" >
+)
+;
+<
+/span>
+
+< span
+class
+= "p" >
+}<
+/span> <span class="k">else</s
+pan > < span
+class
+= "k" >
+if<
+/span> <span class="p">(</s
+pan > < span
+class
+= "k" > typeof < /span> <span class="nx">elem</s
+pan > < span
+class
+= "p" >
+.<
+/span><span class="nx">querySelectorAll</s
+pan > < span
+class
+= "o" > !==
+<
+/span> <span class="s2">&quot;undefined&quot;</s
+pan > < span
+class
+= "p" >
+)<
+/span> <span class="p">{</s
+pan >
+< span
+class
+= "k" >
+return
+<
+/span> <span class="nx">elem</s
+pan > < span
+class
+= "p" >
+.<
+/span><span class="nx">querySelectorAll</s
+pan > < span
+class
+= "p" > ( < /span><span class="s2">&quot;*&quot;</s
+pan > < span
+class
+= "p" >
+)
+;
+<
+/span>
+
+< span
+class
+= "p" >
+}<
+/span> <span class="k">else</s
+pan > < span
+class
+= "p" > { < /span>
+      < span
+class
+= "k" >
+return
+<
+/span> <span class="p">[];</s
+pan >
+< span
+class
+= "p" >
+}<
+/span>
+< span
+class
+= "p" >
+}<
+/span>
+
+
+< /pre></
+div > < /td>           </
+tr > < tr
+id = "section-30" > < td
+class
+= "docs" > < div
+class
+= "pilwrap" > < a
+class
+= "pilcrow"
+href = "#section-30" >
+&#182;<
+/a>               </
+div > < p > Used in clean, fixes
+the
+defaultChecked
+property < /p>             </
+td > < td
+class
+= "code" > < div
+class
+= "highlight" > < pre >
+      < span
+class
+= "kd" > function < /span> <span class="nx">fixDefaultChecked</s
+pan > < span
+class
+= "p" > ( < /span><span class="nx">elem</s
+pan > < span
+class
+= "p" >
+)<
+/span> <span class="p">{</s
+pan >
+< span
+class
+= "k" >
+if<
+/span> <span class="p">(</s
+pan > < span
+class
+= "nx" > elem < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > type < /span> <span class="o">===</s
+pan > < span
+class
+= "s2" > & quot;
+checkbox & quot;
+<
+/span> <span class="o">||</s
+pan > < span
+class
+= "nx" > elem < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > type < /span> <span class="o">===</s
+pan > < span
+class
+= "s2" > & quot;
+radio & quot;
+<
+/span><span class="p">)</s
+pan > < span
+class
+= "p" > { < /span>
+      < span
+class
+= "nx" > elem < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > defaultChecked < /span> <span class="o">=</s
+pan > < span
+class
+= "nx" > elem < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > checked < /span><span class="p">;</s
+pan >
+< span
+class
+= "p" >
+}<
+/span>
+< span
+class
+= "p" >
+}<
+/span>
+
+
+< /pre></
+div > < /td>           </
+tr > < tr
+id = "section-31" > < td
+class
+= "docs" > < div
+class
+= "pilwrap" > < a
+class
+= "pilcrow"
+href = "#section-31" >
+&#182;<
+/a>               </
+div > < p > Finds
+all
+inputs
+and
+passes
+them
+to
+fixDefaultChecked < /p>             </
+td > < td
+class
+= "code" > < div
+class
+= "highlight" > < pre >
+      < span
+class
+= "kd" > function < /span> <span class="nx">findInputs</s
+pan > < span
+class
+= "p" > ( < /span><span class="nx">elem</s
+pan > < span
+class
+= "p" >
+)<
+/span> <span class="p">{</s
+pan >
+< span
+class
+= "kd" >
+var <
+/span> <span class="nx">nodeName</s
+pan > < span
+class
+= "o" >= < /span> <span class="p">(</s
+pan > < span
+class
+= "nx" > elem < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > nodeName < /span> <span class="o">||</s
+pan > < span
+class
+= "s2" > & quot;
+&
+quot;
+<
+/span> <span class="p">).</s
+pan > < span
+class
+= "nx" > toLowerCase < /span><span class="p">();</s
+pan >
+< span
+class
+= "k" >
+if<
+/span> <span class="p">(</s
+pan > < span
+class
+= "nx" > nodeName < /span> <span class="o">===</s
+pan > < span
+class
+= "s2" > & quot;
+input & quot;
+<
+/span><span class="p">)</s
+pan > < span
+class
+= "p" > { < /span>
+      < span
+class
+= "nx" > fixDefaultChecked < /span><span class="p">(</s
+pan > < span
+class
+= "nx" > elem < /span><span class="p">);</s
+pan >
+
+< /pre></
+div > < /td>           </
+tr > < tr
+id = "section-32" > < td
+class
+= "docs" > < div
+class
+= "pilwrap" > < a
+class
+= "pilcrow"
+href = "#section-32" >
+&#182;<
+/a>               </
+div > < p > Skip
+scripts, get
+other
+children < /p>             </
+td > < td
+class
+= "code" > < div
+class
+= "highlight" > < pre >
+      < span
+class
+= "p" >
+}<
+/span> <span class="k">else</s
+pan > < span
+class
+= "k" >
+if<
+/span> <span class="p">(</s
+pan > < span
+class
+= "nx" > nodeName < /span> <span class="o">!==</s
+pan > < span
+class
+= "s2" > & quot;
+script & quot;
+<
+/span> <span class="o">&amp;&amp;</s
+pan > < span
+class
+= "k" > typeof < /span> <span class="nx">elem</s
+pan > < span
+class
+= "p" >
+.<
+/span><span class="nx">getElementsByTagName</s
+pan > < span
+class
+= "o" > !==
+<
+/span> <span class="s2">&quot;undefined&quot;</s
+pan > < span
+class
+= "p" >
+)<
+/span> <span class="p">{</s
+pan >
+< span
+class
+= "nx" > jQuery < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > grep < /span><span class="p">(</s
+pan > < span
+class
+= "nx" > elem < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > getElementsByTagName < /span><span class="p">(</s
+pan > < span
+class
+= "s2" > & quot;
+input & quot;
+<
+/span><span class="p">),</s
+pan > < span
+class
+= "nx" > fixDefaultChecked < /span><span class="p">);</s
+pan >
+< span
+class
+= "p" >
+}<
+/span>
+< span
+class
+= "p" >
+}<
+/span>
+
+
+< /pre></
+div > < /td>           </
+tr > < tr
+id = "section-33" > < td
+class
+= "docs" > < div
+class
+= "pilwrap" > < a
+class
+= "pilcrow"
+href = "#section-33" >
+&#182;<
+/a>               </
+div > < p > Derived
+From: http://www.iecss.com/shimprove/javascript/shimprove.1-0-1.js</p>             </td>             <td class="code">               <div class="highlight"><pre>
+      <
+span
+class
+= "kd" > function < /span> <span class="nx">shimCloneNode</s
+pan > < span
+class
+= "p" > ( < /span><span class="nx">elem</s
+pan > < span
+class
+= "p" >
+)<
+/span> <span class="p">{</s
+pan >
+< span
+class
+= "kd" >
+var <
+/span> <span class="nx">div</s
+pan > < span
+class
+= "o" >= < /span> <span class="nb">document</s
+pan > < span
+class
+= "p" >
+.<
+/span><span class="nx">createElement</s
+pan > < span
+class
+= "p" > ( < /span><span class="s2">&quot;div&quot;</s
+pan > < span
+class
+= "p" >
+)
+;
+<
+/span>
+< span
+class
+= "nx" > safeFragment < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > appendChild < /span><span class="p">(</s
+pan > < span
+class
+= "nx" > div < /span><span class="p">);</s
+pan >
+
+< span
+class
+= "nx" > div < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > innerHTML < /span> <span class="o">=</s
+pan > < span
+class
+= "nx" > elem < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > outerHTML < /span><span class="p">;</s
+pan >
+< span
+class
+= "k" >
+return
+<
+/span> <span class="nx">div</s
+pan > < span
+class
+= "p" >
+.<
+/span><span class="nx">firstChild</s
+pan > < span
+class
+= "p" >;
+<
+/span>
+< span
+class
+= "p" >
+}<
+/span>
+
+< span
+class
+= "nx" > jQuery < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > extend < /span><span class="p">({</s
+pan >
+< span
+class
+= "nx" > clone < /span><span class="o">:</s
+pan > < span
+class
+= "kd" > function < /span><span class="p">(</s
+pan > < span
+class
+= "nx" > elem < /span><span class="p">,</s
+pan > < span
+class
+= "nx" > dataAndEvents < /span><span class="p">,</s
+pan > < span
+class
+= "nx" > deepDataAndEvents < /span><span class="p">)</s
+pan > < span
+class
+= "p" > { < /span>
+      < span
+class
+= "kd" >
+var <
+/span> <span class="nx">srcElements</s
+pan > < span
+class
+= "p" >,
+<
+/span>
+< span
+class
+= "nx" > destElements < /span><span class="p">,</s
+pan >
+< span
+class
+= "nx" > i < /span><span class="p">,</s
+pan >
+
+< /pre></
+div > < /td>           </
+tr > < tr
+id = "section-34" > < td
+class
+= "docs" > < div
+class
+= "pilwrap" > < a
+class
+= "pilcrow"
+href = "#section-34" >
+&#182;<
+/a>               </
+div > < p > IE &lt;= 8
+does
+not
+properly
+clone
+detached, unknown
+element
+nodes < /p>             </
+td > < td
+class
+= "code" > < div
+class
+= "highlight" > < pre >
+      < span
+class
+= "nx" > clone < /span> <span class="o">=</s
+pan > < span
+class
+= "nx" > jQuery < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > support < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > html5Clone < /span> <span class="o">||</s
+pan > < span
+class
+= "nx" > jQuery < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > isXMLDoc < /span><span class="p">(</s
+pan > < span
+class
+= "nx" > elem < /span><span class="p">)</s
+pan > < span
+class
+= "o" > ||
+<
+/span> <span class="o">!</s
+pan > < span
+class
+= "nx" > rnoshimcache < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > test < /span><span class="p">(</s
+pan > < span
+class
+= "s2" > & quot;
+&lt;&
+quot;
+<
+/span> <span class="o">+</s
+pan > < span
+class
+= "nx" > elem < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > nodeName < /span> <span class="o">+</s
+pan > < span
+class
+= "s2" > & quot;
+&gt;&
+quot;
+<
+/span><span class="p">)</s
+pan > < span
+class
+= "o" > ?
+<
+/span>
+< span
+class
+= "nx" > elem < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > cloneNode < /span><span class="p">(</s
+pan > < span
+class
+= "kc" > true < /span><span class="p">)</s
+pan > < span
+class
+= "o" >
+:<
+/span>
+< span
+class
+= "nx" > shimCloneNode < /span><span class="p">(</s
+pan > < span
+class
+= "nx" > elem < /span><span class="p">);</s
+pan >
+
+< span
+class
+= "k" >
+if<
+/span> <span class="p">((</s
+pan > < span
+class
+= "o" > ! < /span><span class="nx">jQuery</s
+pan > < span
+class
+= "p" >
+.<
+/span><span class="nx">support</s
+pan > < span
+class
+= "p" >
+.<
+/span><span class="nx">noCloneEvent</s
+pan > < span
+class
+= "o" > ||
+<
+/span> <span class="o">!</s
+pan > < span
+class
+= "nx" > jQuery < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > support < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > noCloneChecked < /span><span class="p">)</s
+pan > < span
+class
+= "o" > &amp;&amp;
+<
+/span>
+< span
+class
+= "p" > ( < /span><span class="nx">elem</s
+pan > < span
+class
+= "p" >
+.<
+/span><span class="nx">nodeType</s
+pan > < span
+class
+= "o" >= ==
+<
+/span> <span class="mi">1</s
+pan > < span
+class
+= "o" > ||
+<
+/span> <span class="nx">elem</s
+pan > < span
+class
+= "p" >
+.<
+/span><span class="nx">nodeType</s
+pan > < span
+class
+= "o" >= ==
+<
+/span> <span class="mi">11</s
+pan > < span
+class
+= "p" >
+)<
+/span> <span class="o">&amp;&amp;</s
+pan > < span
+class
+= "o" > ! < /span><span class="nx">jQuery</s
+pan > < span
+class
+= "p" >
+.<
+/span><span class="nx">isXMLDoc</s
+pan > < span
+class
+= "p" > ( < /span><span class="nx">elem</s
+pan > < span
+class
+= "p" >
+))<
+/span> <span class="p">{</s
+pan >
+
+< /pre></
+div > < /td>           </
+tr > < tr
+id = "section-35" > < td
+class
+= "docs" > < div
+class
+= "pilwrap" > < a
+class
+= "pilcrow"
+href = "#section-35" >
+&#182;<
+/a>               </
+div > < p > IE
+copies
+events
+bound
+via
+attachEvent
+when
+using
+cloneNode.
+      Calling
+detachEvent
+on
+the
+clone
+will
+also
+remove
+the
+events
+from
+the
+original.In
+order
+to
+get
+around
+this, we
+use
+some
+proprietary
+methods
+to
+clear
+the
+events.Thanks
+to
+MooTools
+guys
+for this hotness. < /p>             </
+td > < td
+class
+= "code" > < div
+class
+= "highlight" > < pre >
+
+      < span
+class
+= "nx" > cloneFixAttributes < /span><span class="p">(</s
+pan > < span
+class
+= "nx" > elem < /span><span class="p">,</s
+pan > < span
+class
+= "nx" > clone < /span><span class="p">);</s
+pan >
+
+
+< /pre></
+div > < /td>           </
+tr > < tr
+id = "section-36" > < td
+class
+= "docs" > < div
+class
+= "pilwrap" > < a
+class
+= "pilcrow"
+href = "#section-36" >
+&#182;<
+/a>               </
+div > < p > Using
+Sizzle
+here
+is
+crazy
+slow, so
+we
+use
+getElementsByTagName
+instead < /p>             </
+td > < td
+class
+= "code" > < div
+class
+= "highlight" > < pre >
+      < span
+class
+= "nx" > srcElements < /span> <span class="o">=</s
+pan > < span
+class
+= "nx" > getAll < /span><span class="p">(</s
+pan > < span
+class
+= "nx" > elem < /span><span class="p">);</s
+pan >
+< span
+class
+= "nx" > destElements < /span> <span class="o">=</s
+pan > < span
+class
+= "nx" > getAll < /span><span class="p">(</s
+pan > < span
+class
+= "nx" > clone < /span><span class="p">);</s
+pan >
+
+
+< /pre></
+div > < /td>           </
+tr > < tr
+id = "section-37" > < td
+class
+= "docs" > < div
+class
+= "pilwrap" > < a
+class
+= "pilcrow"
+href = "#section-37" >
+&#182;<
+/a>               </
+div > < p > Weird
+iteration
+because
+IE
+will
+replace
+the
+length
+property
+with an element
+if you are
+cloning
+the
+body
+and
+one
+of
+the
+elements
+on
+the
+page
+has
+a
+name
+or
+id
+of
+"length" < /p>             </
+td > < td
+class
+= "code" > < div
+class
+= "highlight" > < pre >
+      < span
+class
+= "k" >
+for<
+/span> <span class="p">(</s
+pan > < span
+class
+= "nx" > i < /span> <span class="o">=</s
+pan > < span
+class
+= "mi" > 0 < /span><span class="p">;</s
+pan > < span
+class
+= "nx" > srcElements < /span><span class="p">[</span><span class="nx">i</span><span class="p">];</s
+pan > < span
+class
+= "o" > ++ < /span><span class="nx">i</s
+pan > < span
+class
+= "p" >
+)<
+/span> <span class="p">{</s
+pan >
+
+< /pre></
+div > < /td>           </
+tr > < tr
+id = "section-38" > < td
+class
+= "docs" > < div
+class
+= "pilwrap" > < a
+class
+= "pilcrow"
+href = "#section-38" >
+&#182;<
+/a>               </
+div > < p > Ensure
+that
+the
+destination
+node
+is
+not
+null;
+Fixes
+#
+9587 < /p>             </
+td > < td
+class
+= "code" > < div
+class
+= "highlight" > < pre >
+      < span
+class
+= "k" >
+if<
+/span> <span class="p">(</s
+pan > < span
+class
+= "nx" > destElements < /span><span class="p">[</span><span class="nx">i</span><span class="p">])</s
+pan > < span
+class
+= "p" > { < /span>
+      < span
+class
+= "nx" > cloneFixAttributes < /span><span class="p">(</s
+pan > < span
+class
+= "nx" > srcElements < /span><span class="p">[</span><span class="nx">i</span><span class="p">],</s
+pan > < span
+class
+= "nx" > destElements < /span><span class="p">[</span><span class="nx">i</span><span class="p">]);</s
+pan >
+< span
+class
+= "p" >
+}<
+/span>
+< span
+class
+= "p" >
+}<
+/span>
+< span
+class
+= "p" >
+}<
+/span>
+
+
+< /pre></
+div > < /td>           </
+tr > < tr
+id = "section-39" > < td
+class
+= "docs" > < div
+class
+= "pilwrap" > < a
+class
+= "pilcrow"
+href = "#section-39" >
+&#182;<
+/a>               </
+div > < p > Copy
+the
+events
+from
+the
+original
+to
+the
+clone < /p>             </
+td > < td
+class
+= "code" > < div
+class
+= "highlight" > < pre >
+      < span
+class
+= "k" >
+if<
+/span> <span class="p">(</s
+pan > < span
+class
+= "nx" > dataAndEvents < /span><span class="p">)</s
+pan > < span
+class
+= "p" > { < /span>
+      < span
+class
+= "nx" > cloneCopyEvent < /span><span class="p">(</s
+pan > < span
+class
+= "nx" > elem < /span><span class="p">,</s
+pan > < span
+class
+= "nx" > clone < /span><span class="p">);</s
+pan >
+
+< span
+class
+= "k" >
+if<
+/span> <span class="p">(</s
+pan > < span
+class
+= "nx" > deepDataAndEvents < /span><span class="p">)</s
+pan > < span
+class
+= "p" > { < /span>
+      < span
+class
+= "nx" > srcElements < /span> <span class="o">=</s
+pan > < span
+class
+= "nx" > getAll < /span><span class="p">(</s
+pan > < span
+class
+= "nx" > elem < /span><span class="p">);</s
+pan >
+< span
+class
+= "nx" > destElements < /span> <span class="o">=</s
+pan > < span
+class
+= "nx" > getAll < /span><span class="p">(</s
+pan > < span
+class
+= "nx" > clone < /span><span class="p">);</s
+pan >
+
+< span
+class
+= "k" >
+for<
+/span> <span class="p">(</s
+pan > < span
+class
+= "nx" > i < /span> <span class="o">=</s
+pan > < span
+class
+= "mi" > 0 < /span><span class="p">;</s
+pan > < span
+class
+= "nx" > srcElements < /span><span class="p">[</span><span class="nx">i</span><span class="p">];</s
+pan > < span
+class
+= "o" > ++ < /span><span class="nx">i</s
+pan > < span
+class
+= "p" >
+)<
+/span> <span class="p">{</s
+pan >
+< span
+class
+= "nx" > cloneCopyEvent < /span><span class="p">(</s
+pan > < span
+class
+= "nx" > srcElements < /span><span class="p">[</span><span class="nx">i</span><span class="p">],</s
+pan > < span
+class
+= "nx" > destElements < /span><span class="p">[</span><span class="nx">i</span><span class="p">]);</s
+pan >
+< span
+class
+= "p" >
+}<
+/span>
+< span
+class
+= "p" >
+}<
+/span>
+< span
+class
+= "p" >
+}<
+/span>
+
+< span
+class
+= "nx" > srcElements < /span> <span class="o">=</s
+pan > < span
+class
+= "nx" > destElements < /span> <span class="o">=</s
+pan > < span
+class
+= "kc" > null < /span><span class="p">;</s
+pan >
+
+
+< /pre></
+div > < /td>           </
+tr > < tr
+id = "section-40" > < td
+class
+= "docs" > < div
+class
+= "pilwrap" > < a
+class
+= "pilcrow"
+href = "#section-40" >
+&#182;<
+/a>               </
+div > < p > Return
+the
+cloned
+set < /p>             </
+td > < td
+class
+= "code" > < div
+class
+= "highlight" > < pre >
+      < span
+class
+= "k" >
+return
+<
+/span> <span class="nx">clone</s
+pan > < span
+class
+= "p" >;
+<
+/span>
+< span
+class
+= "p" >
+},<
+/span>
+
+< span
+class
+= "nx" > clean < /span><span class="o">:</s
+pan > < span
+class
+= "kd" > function < /span><span class="p">(</s
+pan > < span
+class
+= "nx" > elems < /span><span class="p">,</s
+pan > < span
+class
+= "nx" > context < /span><span class="p">,</s
+pan > < span
+class
+= "nx" > fragment < /span><span class="p">,</s
+pan > < span
+class
+= "nx" > scripts < /span><span class="p">)</s
+pan > < span
+class
+= "p" > { < /span>
+      < span
+class
+= "kd" >
+var <
+/span> <span class="nx">checkScriptType</s
+pan > < span
+class
+= "p" >,
+<
+/span> <span class="nx">script</s
+pan > < span
+class
+= "p" >,
+<
+/span> <span class="nx">j</s
+pan > < span
+class
+= "p" >,
+<
+/span>
+< span
+class
+= "nx" > ret < /span> <span class="o">=</s
+pan > < span
+class
+= "p" > [];
+<
+/span>
+
+< span
+class
+= "nx" > context < /span> <span class="o">=</s
+pan > < span
+class
+= "nx" > context < /span> <span class="o">||</s
+pan > < span
+class
+= "nb" > document < /span><span class="p">;</s
+pan >
+
+
+< /pre></
+div > < /td>           </
+tr > < tr
+id = "section-41" > < td
+class
+= "docs" > < div
+class
+= "pilwrap" > < a
+class
+= "pilcrow"
+href = "#section-41" >
+&#182;<
+/a>               </
+div > < p > !context.createElement
+fails in IE
+with an error
+but
+returns
+typeof 'object' < /p>             </
+td > < td
+class
+= "code" > < div
+class
+= "highlight" > < pre >
+      < span
+class
+= "k" >
+if<
+/span> <span class="p">(</s
+pan > < span
+class
+= "k" > typeof < /span> <span class="nx">context</s
+pan > < span
+class
+= "p" >
+.<
+/span><span class="nx">createElement</s
+pan > < span
+class
+= "o" >= ==
+<
+/span> <span class="s2">&quot;undefined&quot;</s
+pan > < span
+class
+= "p" >
+)<
+/span> <span class="p">{</s
+pan >
+< span
+class
+= "nx" > context < /span> <span class="o">=</s
+pan > < span
+class
+= "nx" > context < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > ownerDocument < /span> <span class="o">||</s
+pan > < span
+class
+= "nx" > context < /span><span class="p">[</span><span class="mi">0</span><span class="p">]</s
+pan > < span
+class
+= "o" > &amp;&amp;
+<
+/span> <span class="nx">context</s
+pan > < span
+class
+= "p" > [ < /span><span class="mi">0</s
+pan > < span
+class
+= "p" >
+].<
+/span><span class="nx">ownerDocument</s
+pan > < span
+class
+= "o" > ||
+<
+/span> <span class="nb">document</s
+pan > < span
+class
+= "p" >;
+<
+/span>
+< span
+class
+= "p" >
+}<
+/span>
+
+< span
+class
+= "k" >
+for<
+/span> <span class="p">(</s
+pan > < span
+class
+= "kd" >
+var <
+/span> <span class="nx">i</s
+pan > < span
+class
+= "o" >= < /span> <span class="mi">0</s
+pan > < span
+class
+= "p" >,
+<
+/span> <span class="nx">elem</s
+pan > < span
+class
+= "p" >;
+<
+/span> <span class="p">(</s
+pan > < span
+class
+= "nx" > elem < /span> <span class="o">=</s
+pan > < span
+class
+= "nx" > elems < /span><span class="p">[</span><span class="nx">i</span><span class="p">])</s
+pan > < span
+class
+= "o" > !=
+<
+/span> <span class="kc">null</s
+pan > < span
+class
+= "p" >;
+<
+/span> <span class="nx">i</s
+pan > < span
+class
+= "o" > ++ < /span><span class="p">)</s
+pan > < span
+class
+= "p" > { < /span>
+      < span
+class
+= "k" >
+if<
+/span> <span class="p">(</s
+pan > < span
+class
+= "k" > typeof < /span> <span class="nx">elem</s
+pan > < span
+class
+= "o" >= ==
+<
+/span> <span class="s2">&quot;number&quot;</s
+pan > < span
+class
+= "p" >
+)<
+/span> <span class="p">{</s
+pan >
+< span
+class
+= "nx" > elem < /span> <span class="o">+=</s
+pan > < span
+class
+= "s2" > & quot;
+&
+quot;
+<
+/span><span class="p">;</s
+pan >
+< span
+class
+= "p" >
+}<
+/span>
+
+< span
+class
+= "k" >
+if<
+/span> <span class="p">(</s
+pan > < span
+class
+= "o" > ! < /span><span class="nx">elem</s
+pan > < span
+class
+= "p" >
+)<
+/span> <span class="p">{</s
+pan >
+< span
+class
+= "k" >
+continue
+<
+/span><span class="p">;</s
+pan >
+< span
+class
+= "p" >
+}<
+/span>
+
+
+< /pre></
+div > < /td>           </
+tr > < tr
+id = "section-42" > < td
+class
+= "docs" > < div
+class
+= "pilwrap" > < a
+class
+= "pilcrow"
+href = "#section-42" >
+&#182;<
+/a>               </
+div > < p > Convert
+html
+string
+into
+DOM
+nodes < /p>             </
+td > < td
+class
+= "code" > < div
+class
+= "highlight" > < pre >
+      < span
+class
+= "k" >
+if<
+/span> <span class="p">(</s
+pan > < span
+class
+= "k" > typeof < /span> <span class="nx">elem</s
+pan > < span
+class
+= "o" >= ==
+<
+/span> <span class="s2">&quot;string&quot;</s
+pan > < span
+class
+= "p" >
+)<
+/span> <span class="p">{</s
+pan >
+< span
+class
+= "k" >
+if<
+/span> <span class="p">(</s
+pan > < span
+class
+= "o" > ! < /span><span class="nx">rhtml</s
+pan > < span
+class
+= "p" >
+.<
+/span><span class="nx">test</s
+pan > < span
+class
+= "p" > ( < /span><span class="nx">elem</s
+pan > < span
+class
+= "p" >
+))<
+/span> <span class="p">{</s
+pan >
+< span
+class
+= "nx" > elem < /span> <span class="o">=</s
+pan > < span
+class
+= "nx" > context < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > createTextNode < /span><span class="p">(</s
+pan > < span
+class
+= "nx" > elem < /span><span class="p">);</s
+pan >
+< span
+class
+= "p" >
+}<
+/span> <span class="k">else</s
+pan > < span
+class
+= "p" > { < /span>
+
+      < /pre></
+div > < /td>           </
+tr > < tr
+id = "section-43" > < td
+class
+= "docs" > < div
+class
+= "pilwrap" > < a
+class
+= "pilcrow"
+href = "#section-43" >
+&#182;<
+/a>               </
+div > < p > Fix
+"XHTML" - style
+tags in all
+browsers < /p>             </
+td > < td
+class
+= "code" > < div
+class
+= "highlight" > < pre >
+      < span
+class
+= "nx" > elem < /span> <span class="o">=</s
+pan > < span
+class
+= "nx" > elem < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > replace < /span><span class="p">(</s
+pan > < span
+class
+= "nx" > rxhtmlTag < /span><span class="p">,</s
+pan > < span
+class
+= "s2" > & quot;
+&lt;
+$1 &gt; &lt; /$2&gt;&quot;</s
+pan > < span
+class
+= "p" >
+)
+;
+<
+/span>
+
+
+< /pre></
+div > < /td>           </
+tr > < tr
+id = "section-44" > < td
+class
+= "docs" > < div
+class
+= "pilwrap" > < a
+class
+= "pilcrow"
+href = "#section-44" >
+&#182;<
+/a>               </
+div > < p > Trim
+whitespace, otherwise
+indexOf
+won
+'t work as expected</p>             </td>             <td class="code">               <div class="highlight"><pre>
+< span
+class
+= "kd" >
+var <
+/span> <span class="nx">tag</s
+pan > < span
+class
+= "o" >= < /span> <span class="p">(</s
+pan > < span
+class
+= "nx" > rtagName < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > exec < /span><span class="p">(</s
+pan > < span
+class
+= "nx" > elem < /span><span class="p">)</s
+pan > < span
+class
+= "o" > ||
+<
+/span> <span class="p">[</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">]</s
+pan > < span
+class
+= "p" >
+)
+[ < /span><span class="mi">1</s
+pan > < span
+class
+= "p" >
+].<
+/span><span class="nx">toLowerCase</s
+pan > < span
+class
+= "p" > (),
+<
+/span>
+< span
+class
+= "nx" > wrap < /span> <span class="o">=</s
+pan > < span
+class
+= "nx" > wrapMap < /span><span class="p">[</span> <span class="nx">tag</span> <span class="p">]</s
+pan > < span
+class
+= "o" > ||
+<
+/span> <span class="nx">wrapMap</s
+pan > < span
+class
+= "p" >
+.<
+/span><span class="nx">_default</s
+pan > < span
+class
+= "p" >,
+<
+/span>
+< span
+class
+= "nx" > depth < /span> <span class="o">=</s
+pan > < span
+class
+= "nx" > wrap < /span><span class="p">[</span><span class="mi">0</span><span class="p">],</s
+pan >
+< span
+class
+= "nx" > div < /span> <span class="o">=</s
+pan > < span
+class
+= "nx" > context < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > createElement < /span><span class="p">(</s
+pan > < span
+class
+= "s2" > & quot;
+div & quot;
+<
+/span><span class="p">),</s
+pan >
+< span
+class
+= "nx" > safeChildNodes < /span> <span class="o">=</s
+pan > < span
+class
+= "nx" > safeFragment < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > childNodes < /span><span class="p">,</s
+pan >
+< span
+class
+= "nx" > remove < /span><span class="p">;</s
+pan >
+
+
+< /pre></
+div > < /td>           </
+tr > < tr
+id = "section-45" > < td
+class
+= "docs" > < div
+class
+= "pilwrap" > < a
+class
+= "pilcrow"
+href = "#section-45" >
+&#182;<
+/a>               </
+div > < p > Append
+wrapper
+element
+to
+unknown
+element
+safe
+doc
+fragment < /p>             </
+td > < td
+class
+= "code" > < div
+class
+= "highlight" > < pre >
+      < span
+class
+= "k" >
+if<
+/span> <span class="p">(</s
+pan > < span
+class
+= "nx" > context < /span> <span class="o">===</s
+pan > < span
+class
+= "nb" > document < /span><span class="p">)</s
+pan > < span
+class
+= "p" > { < /span>
+
+      < /pre></
+div > < /td>           </
+tr > < tr
+id = "section-46" > < td
+class
+= "docs" > < div
+class
+= "pilwrap" > < a
+class
+= "pilcrow"
+href = "#section-46" >
+&#182;<
+/a>               </
+div > < p > Use
+the
+fragment
+we
+'ve already created for this document</p>             </td>             <td class="code">               <div class="highlight"><pre>
+< span
+class
+= "nx" > safeFragment < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > appendChild < /span><span class="p">(</s
+pan > < span
+class
+= "nx" > div < /span><span class="p">);</s
+pan >
+< span
+class
+= "p" >
+}<
+/span> <span class="k">else</s
+pan > < span
+class
+= "p" > { < /span>
+
+      < /pre></
+div > < /td>           </
+tr > < tr
+id = "section-47" > < td
+class
+= "docs" > < div
+class
+= "pilwrap" > < a
+class
+= "pilcrow"
+href = "#section-47" >
+&#182;<
+/a>               </
+div > < p > Use
+a
+fragment
+created
+with the owner
+document < /p>             </
+td > < td
+class
+= "code" > < div
+class
+= "highlight" > < pre >
+      < span
+class
+= "nx" > createSafeFragment < /span><span class="p">(</s
+pan > < span
+class
+= "nx" > context < /span><span class="p">).</s
+pan > < span
+class
+= "nx" > appendChild < /span><span class="p">(</s
+pan > < span
+class
+= "nx" > div < /span><span class="p">);</s
+pan >
+< span
+class
+= "p" >
+}<
+/span>
+
+
+< /pre></
+div > < /td>           </
+tr > < tr
+id = "section-48" > < td
+class
+= "docs" > < div
+class
+= "pilwrap" > < a
+class
+= "pilcrow"
+href = "#section-48" >
+&#182;<
+/a>               </
+div > < p > Go
+to
+html
+and
+back, then
+peel
+off
+extra
+wrappers < /p>             </
+td > < td
+class
+= "code" > < div
+class
+= "highlight" > < pre >
+      < span
+class
+= "nx" > div < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > innerHTML < /span> <span class="o">=</s
+pan > < span
+class
+= "nx" > wrap < /span><span class="p">[</span><span class="mi">1</span><span class="p">]</s
+pan > < span
+class
+= "o" > + < /span> <span class="nx">elem</s
+pan > < span
+class
+= "o" > + < /span> <span class="nx">wrap</s
+pan > < span
+class
+= "p" > [ < /span><span class="mi">2</s
+pan > < span
+class
+= "p" >
+]
+;
+<
+/span>
+
+
+< /pre></
+div > < /td>           </
+tr > < tr
+id = "section-49" > < td
+class
+= "docs" > < div
+class
+= "pilwrap" > < a
+class
+= "pilcrow"
+href = "#section-49" >
+&#182;<
+/a>               </
+div > < p > Move
+to
+the
+right
+depth < /p>             </
+td > < td
+class
+= "code" > < div
+class
+= "highlight" > < pre >
+      < span
+class
+= "k" >
+while<
+/span> <span class="p">(</s
+pan > < span
+class
+= "nx" > depth < /span><span class="o">--</s
+pan > < span
+class
+= "p" >
+)<
+/span> <span class="p">{</s
+pan >
+< span
+class
+= "nx" > div < /span> <span class="o">=</s
+pan > < span
+class
+= "nx" > div < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > lastChild < /span><span class="p">;</s
+pan >
+< span
+class
+= "p" >
+}<
+/span>
+
+
+< /pre></
+div > < /td>           </
+tr > < tr
+id = "section-50" > < td
+class
+= "docs" > < div
+class
+= "pilwrap" > < a
+class
+= "pilcrow"
+href = "#section-50" >
+&#182;<
+/a>               </
+div > < p > Remove
+IE
+'s autoinserted <tbody> from table fragments</p>             </td>             <td class="code">               <div class="highlight"><pre>
+< span
+class
+= "k" >
+if<
+/span> <span class="p">(</s
+pan > < span
+class
+= "o" > ! < /span><span class="nx">jQuery</s
+pan > < span
+class
+= "p" >
+.<
+/span><span class="nx">support</s
+pan > < span
+class
+= "p" >
+.<
+/span><span class="nx">tbody</s
+pan > < span
+class
+= "p" >
+)<
+/span> <span class="p">{</s
+pan >
+
+
+< /pre></
+div > < /td>           </
+tr > < tr
+id = "section-51" > < td
+class
+= "docs" > < div
+class
+= "pilwrap" > < a
+class
+= "pilcrow"
+href = "#section-51" >
+&#182;<
+/a>               </
+div > < p > String
+was
+a < table >,
+<
+em > may < /em> have spurious <tbody></
+p > < /td>             <td class="code">               <div class="highlight"><pre>
+< span
+class
+= "kd" >
+var <
+/span> <span class="nx">hasBody</s
+pan > < span
+class
+= "o" >= < /span> <span class="nx">rtbody</s
+pan > < span
+class
+= "p" >
+.<
+/span><span class="nx">test</s
+pan > < span
+class
+= "p" > ( < /span><span class="nx">elem</s
+pan > < span
+class
+= "p" >
+),<
+/span>
+< span
+class
+= "nx" > tbody < /span> <span class="o">=</s
+pan > < span
+class
+= "nx" > tag < /span> <span class="o">===</s
+pan > < span
+class
+= "s2" > & quot;
+table & quot;
+<
+/span> <span class="o">&amp;&amp;</s
+pan > < span
+class
+= "o" > ! < /span><span class="nx">hasBody</s
+pan > < span
+class
+= "o" > ?
+<
+/span>
+< span
+class
+= "nx" > div < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > firstChild < /span> <span class="o">&amp;&amp;</s
+pan > < span
+class
+= "nx" > div < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > firstChild < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > childNodes < /span> <span class="o">:</s
+pan >
+
+
+< /pre></
+div > < /td>           </
+tr > < tr
+id = "section-52" > < td
+class
+= "docs" > < div
+class
+= "pilwrap" > < a
+class
+= "pilcrow"
+href = "#section-52" >
+&#182;<
+/a>               </
+div > < p > String
+was
+a
+bare < thead > or < tfoot > < /p>             </
+td > < td
+class
+= "code" > < div
+class
+= "highlight" > < pre >
+      < span
+class
+= "nx" > wrap < /span><span class="p">[</span><span class="mi">1</span><span class="p">]</s
+pan > < span
+class
+= "o" >= ==
+<
+/span> <span class="s2">&quot;&lt;table&gt;&quot;</s
+pan > < span
+class
+= "o" > &amp;&amp;
+<
+/span> <span class="o">!</s
+pan > < span
+class
+= "nx" > hasBody < /span> <span class="o">?</s
+pan >
+< span
+class
+= "nx" > div < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > childNodes < /span> <span class="o">:</s
+pan >
+< span
+class
+= "p" > [];
+<
+/span>
+
+< span
+class
+= "k" >
+for<
+/span> <span class="p">(</s
+pan > < span
+class
+= "nx" > j < /span> <span class="o">=</s
+pan > < span
+class
+= "nx" > tbody < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > length < /span> <span class="o">-</s
+pan > < span
+class
+= "mi" > 1 < /span><span class="p">;</s
+pan > < span
+class
+= "nx" > j < /span> <span class="o">&gt;=</s
+pan > < span
+class
+= "mi" > 0 < /span><span class="p">;</s
+pan > < span
+class
+= "o" > -- < /span><span class="nx">j</s
+pan > < span
+class
+= "p" >
+)<
+/span> <span class="p">{</s
+pan >
+< span
+class
+= "k" >
+if<
+/span> <span class="p">(</s
+pan > < span
+class
+= "nx" > jQuery < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > nodeName < /span><span class="p">(</s
+pan > < span
+class
+= "nx" > tbody < /span><span class="p">[</span> <span class="nx">j</span> <span class="p">],</s
+pan > < span
+class
+= "s2" > & quot;
+tbody & quot;
+<
+/span><span class="p">)</s
+pan > < span
+class
+= "o" > &amp;&amp;
+<
+/span> <span class="o">!</s
+pan > < span
+class
+= "nx" > tbody < /span><span class="p">[</span> <span class="nx">j</span> <span class="p">].</s
+pan > < span
+class
+= "nx" > childNodes < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > length < /span><span class="p">)</s
+pan > < span
+class
+= "p" > { < /span>
+      < span
+class
+= "nx" > tbody < /span><span class="p">[</span> <span class="nx">j</span> <span class="p">].</s
+pan > < span
+class
+= "nx" > parentNode < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > removeChild < /span><span class="p">(</s
+pan > < span
+class
+= "nx" > tbody < /span><span class="p">[</span> <span class="nx">j</span> <span class="p">]);</s
+pan >
+< span
+class
+= "p" >
+}<
+/span>
+< span
+class
+= "p" >
+}<
+/span>
+< span
+class
+= "p" >
+}<
+/span>
+
+
+< /pre></
+div > < /td>           </
+tr > < tr
+id = "section-53" > < td
+class
+= "docs" > < div
+class
+= "pilwrap" > < a
+class
+= "pilcrow"
+href = "#section-53" >
+&#182;<
+/a>               </
+div > < p > IE
+completely
+kills
+leading
+whitespace
+when
+innerHTML
+is
+used < /p>             </
+td > < td
+class
+= "code" > < div
+class
+= "highlight" > < pre >
+      < span
+class
+= "k" >
+if<
+/span> <span class="p">(</s
+pan > < span
+class
+= "o" > ! < /span><span class="nx">jQuery</s
+pan > < span
+class
+= "p" >
+.<
+/span><span class="nx">support</s
+pan > < span
+class
+= "p" >
+.<
+/span><span class="nx">leadingWhitespace</s
+pan > < span
+class
+= "o" > &amp;&amp;
+<
+/span> <span class="nx">rleadingWhitespace</s
+pan > < span
+class
+= "p" >
+.<
+/span><span class="nx">test</s
+pan > < span
+class
+= "p" > ( < /span><span class="nx">elem</s
+pan > < span
+class
+= "p" >
+))<
+/span> <span class="p">{</s
+pan >
+< span
+class
+= "nx" > div < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > insertBefore < /span><span class="p">(</s
+pan > < span
+class
+= "nx" > context < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > createTextNode < /span><span class="p">(</s
+pan > < span
+class
+= "nx" > rleadingWhitespace < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > exec < /span><span class="p">(</s
+pan > < span
+class
+= "nx" > elem < /span><span class="p">)[</span><span class="mi">0</span><span class="p">]),</s
+pan > < span
+class
+= "nx" > div < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > firstChild < /span><span class="p">);</s
+pan >
+< span
+class
+= "p" >
+}<
+/span>
+
+< span
+class
+= "nx" > elem < /span> <span class="o">=</s
+pan > < span
+class
+= "nx" > div < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > childNodes < /span><span class="p">;</s
+pan >
+
+
+< /pre></
+div > < /td>           </
+tr > < tr
+id = "section-54" > < td
+class
+= "docs" > < div
+class
+= "pilwrap" > < a
+class
+= "pilcrow"
+href = "#section-54" >
+&#182;<
+/a>               </
+div > < p > Clear
+elements
+from
+DocumentFragment(safeFragment
+or
+otherwise
+)
+to
+avoid
+hoarding
+elements.Fixes
+#
+11356 < /p>             </
+td > < td
+class
+= "code" > < div
+class
+= "highlight" > < pre >
+      < span
+class
+= "k" >
+if<
+/span> <span class="p">(</s
+pan > < span
+class
+= "nx" > div < /span><span class="p">)</s
+pan > < span
+class
+= "p" > { < /span>
+      < span
+class
+= "nx" > div < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > parentNode < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > removeChild < /span><span class="p">(</s
+pan > < span
+class
+= "nx" > div < /span><span class="p">);</s
+pan >
+
+
+< /pre></
+div > < /td>           </
+tr > < tr
+id = "section-55" > < td
+class
+= "docs" > < div
+class
+= "pilwrap" > < a
+class
+= "pilcrow"
+href = "#section-55" >
+&#182;<
+/a>               </
+div > < p > Guard
+against - 1
+index
+exceptions in FF3
+.6 < /p>             </
+td > < td
+class
+= "code" > < div
+class
+= "highlight" > < pre >
+      < span
+class
+= "k" >
+if<
+/span> <span class="p">(</s
+pan > < span
+class
+= "nx" > safeChildNodes < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > length < /span> <span class="o">&gt;</s
+pan > < span
+class
+= "mi" > 0 < /span><span class="p">)</s
+pan > < span
+class
+= "p" > { < /span>
+      < span
+class
+= "nx" > remove < /span> <span class="o">=</s
+pan > < span
+class
+= "nx" > safeChildNodes < /span><span class="p">[</span> <span class="nx">safeChildNodes</span><span class="p">.</span><span class="nx">length</span> <span class="o">-</span> <span class="mi">1</span> <span class="p">];</s
+pan >
+
+< span
+class
+= "k" >
+if<
+/span> <span class="p">(</s
+pan > < span
+class
+= "nx" > remove < /span> <span class="o">&amp;&amp;</s
+pan > < span
+class
+= "nx" > remove < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > parentNode < /span><span class="p">)</s
+pan > < span
+class
+= "p" > { < /span>
+      < span
+class
+= "nx" > remove < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > parentNode < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > removeChild < /span><span class="p">(</s
+pan > < span
+class
+= "nx" > remove < /span><span class="p">);</s
+pan >
+< span
+class
+= "p" >
+}<
+/span>
+< span
+class
+= "p" >
+}<
+/span>
+< span
+class
+= "p" >
+}<
+/span>
+< span
+class
+= "p" >
+}<
+/span>
+< span
+class
+= "p" >
+}<
+/span>
+
+
+< /pre></
+div > < /td>           </
+tr > < tr
+id = "section-56" > < td
+class
+= "docs" > < div
+class
+= "pilwrap" > < a
+class
+= "pilcrow"
+href = "#section-56" >
+&#182;<
+/a>               </
+div > < p > Resets
+defaultChecked
+for any radios
+and
+checkboxes
+about
+to
+be
+appended
+to
+the
+DOM in IE
+6 / 7(
+#
+8060
+)<
+/p>             </
+td > < td
+class
+= "code" > < div
+class
+= "highlight" > < pre >
+      < span
+class
+= "kd" >
+var <
+/span> <span class="nx">len</s
+pan > < span
+class
+= "p" >;
+<
+/span>
+< span
+class
+= "k" >
+if<
+/span> <span class="p">(</s
+pan > < span
+class
+= "o" > ! < /span><span class="nx">jQuery</s
+pan > < span
+class
+= "p" >
+.<
+/span><span class="nx">support</s
+pan > < span
+class
+= "p" >
+.<
+/span><span class="nx">appendChecked</s
+pan > < span
+class
+= "p" >
+)<
+/span> <span class="p">{</s
+pan >
+< span
+class
+= "k" >
+if<
+/span> <span class="p">(</s
+pan > < span
+class
+= "nx" > elem < /span><span class="p">[</span><span class="mi">0</span><span class="p">]</s
+pan > < span
+class
+= "o" > &amp;&amp;
+<
+/span> <span class="k">typeof</s
+pan > < span
+class
+= "p" > ( < /span><span class="nx">len</s
+pan > < span
+class
+= "o" >= < /span> <span class="nx">elem</s
+pan > < span
+class
+= "p" >
+.<
+/span><span class="nx">length</s
+pan > < span
+class
+= "p" >
+)<
+/span> <span class="o">===</s
+pan > < span
+class
+= "s2" > & quot;
+number & quot;
+<
+/span><span class="p">)</s
+pan > < span
+class
+= "p" > { < /span>
+      < span
+class
+= "k" >
+for<
+/span> <span class="p">(</s
+pan > < span
+class
+= "nx" > j < /span> <span class="o">=</s
+pan > < span
+class
+= "mi" > 0 < /span><span class="p">;</s
+pan > < span
+class
+= "nx" > j < /span> <span class="o">&lt;</s
+pan > < span
+class
+= "nx" > len < /span><span class="p">;</s
+pan > < span
+class
+= "nx" > j < /span><span class="o">++</s
+pan > < span
+class
+= "p" >
+)<
+/span> <span class="p">{</s
+pan >
+< span
+class
+= "nx" > findInputs < /span><span class="p">(</s
+pan > < span
+class
+= "nx" > elem < /span><span class="p">[</span><span class="nx">j</span><span class="p">]);</s
+pan >
+< span
+class
+= "p" >
+}<
+/span>
+< span
+class
+= "p" >
+}<
+/span> <span class="k">else</s
+pan > < span
+class
+= "p" > { < /span>
+      < span
+class
+= "nx" > findInputs < /span><span class="p">(</s
+pan > < span
+class
+= "nx" > elem < /span><span class="p">);</s
+pan >
+< span
+class
+= "p" >
+}<
+/span>
+< span
+class
+= "p" >
+}<
+/span>
+
+< span
+class
+= "k" >
+if<
+/span> <span class="p">(</s
+pan > < span
+class
+= "nx" > elem < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > nodeType < /span><span class="p">)</s
+pan > < span
+class
+= "p" > { < /span>
+      < span
+class
+= "nx" > ret < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > push < /span><span class="p">(</s
+pan > < span
+class
+= "nx" > elem < /span><span class="p">);</s
+pan >
+< span
+class
+= "p" >
+}<
+/span> <span class="k">else</s
+pan > < span
+class
+= "p" > { < /span>
+      < span
+class
+= "nx" > ret < /span> <span class="o">=</s
+pan > < span
+class
+= "nx" > jQuery < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > merge < /span><span class="p">(</s
+pan > < span
+class
+= "nx" > ret < /span><span class="p">,</s
+pan > < span
+class
+= "nx" > elem < /span><span class="p">);</s
+pan >
+< span
+class
+= "p" >
+}<
+/span>
+< span
+class
+= "p" >
+}<
+/span>
+
+< span
+class
+= "k" >
+if<
+/span> <span class="p">(</s
+pan > < span
+class
+= "nx" > fragment < /span><span class="p">)</s
+pan > < span
+class
+= "p" > { < /span>
+      < span
+class
+= "nx" > checkScriptType < /span> <span class="o">=</s
+pan > < span
+class
+= "kd" > function < /span><span class="p">(</s
+pan > < span
+class
+= "nx" > elem < /span><span class="p">)</s
+pan > < span
+class
+= "p" > { < /span>
+      < span
+class
+= "k" >
+return
+<
+/span> <span class="o">!</s
+pan > < span
+class
+= "nx" > elem < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > type < /span> <span class="o">||</s
+pan > < span
+class
+= "nx" > rscriptType < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > test < /span><span class="p">(</s
+pan > < span
+class
+= "nx" > elem < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > type < /span><span class="p">);</s
+pan >
+< span
+class
+= "p" >
+}
+;
+<
+/span>
+< span
+class
+= "k" >
+for<
+/span> <span class="p">(</s
+pan > < span
+class
+= "nx" > i < /span> <span class="o">=</s
+pan > < span
+class
+= "mi" > 0 < /span><span class="p">;</s
+pan > < span
+class
+= "nx" > ret < /span><span class="p">[</span><span class="nx">i</span><span class="p">];</s
+pan > < span
+class
+= "nx" > i < /span><span class="o">++</s
+pan > < span
+class
+= "p" >
+)<
+/span> <span class="p">{</s
+pan >
+< span
+class
+= "nx" > script < /span> <span class="o">=</s
+pan > < span
+class
+= "nx" > ret < /span><span class="p">[</span><span class="nx">i</span><span class="p">];</s
+pan >
+< span
+class
+= "k" >
+if<
+/span> <span class="p">(</s
+pan > < span
+class
+= "nx" > scripts < /span> <span class="o">&amp;&amp;</s
+pan > < span
+class
+= "nx" > jQuery < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > nodeName < /span><span class="p">(</s
+pan > < span
+class
+= "nx" > script < /span><span class="p">,</s
+pan > < span
+class
+= "s2" > & quot;
+script & quot;
+<
+/span><span class="p">)</s
+pan > < span
+class
+= "o" > &amp;&amp;
+<
+/span> <span class="p">(</s
+pan > < span
+class
+= "o" > ! < /span><span class="nx">script</s
+pan > < span
+class
+= "p" >
+.<
+/span><span class="nx">type</s
+pan > < span
+class
+= "o" > ||
+<
+/span> <span class="nx">rscriptType</s
+pan > < span
+class
+= "p" >
+.<
+/span><span class="nx">test</s
+pan > < span
+class
+= "p" > ( < /span><span class="nx">script</s
+pan > < span
+class
+= "p" >
+.<
+/span><span class="nx">type</s
+pan > < span
+class
+= "p" >
+)))<
+/span> <span class="p">{</s
+pan >
+< span
+class
+= "nx" > scripts < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > push < /span><span class="p">(</s
+pan > < span
+class
+= "nx" > script < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > parentNode < /span> <span class="o">?</s
+pan > < span
+class
+= "nx" > script < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > parentNode < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > removeChild < /span><span class="p">(</s
+pan > < span
+class
+= "nx" > script < /span><span class="p">)</s
+pan > < span
+class
+= "o" >
+:<
+/span> <span class="nx">script</s
+pan > < span
+class
+= "p" >
+)
+;
+<
+/span>
+
+< span
+class
+= "p" >
+}<
+/span> <span class="k">else</s
+pan > < span
+class
+= "p" > { < /span>
+      < span
+class
+= "k" >
+if<
+/span> <span class="p">(</s
+pan > < span
+class
+= "nx" > script < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > nodeType < /span> <span class="o">===</s
+pan > < span
+class
+= "mi" > 1 < /span><span class="p">)</s
+pan > < span
+class
+= "p" > { < /span>
+      < span
+class
+= "kd" >
+var <
+/span> <span class="nx">jsTags</s
+pan > < span
+class
+= "o" >= < /span> <span class="nx">jQuery</s
+pan > < span
+class
+= "p" >
+.<
+/span><span class="nx">grep</s
+pan > < span
+class
+= "p" > ( < /span><span class="nx">script</s
+pan > < span
+class
+= "p" >
+.<
+/span><span class="nx">getElementsByTagName</s
+pan > < span
+class
+= "p" > ( < /span><span class="s2">&quot;script&quot;</s
+pan > < span
+class
+= "p" >
+),<
+/span> <span class="nx">checkScriptType</s
+pan > < span
+class
+= "p" >
+)
+;
+<
+/span>
+
+< span
+class
+= "nx" > ret < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > splice < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > apply < /span><span class="p">(</s
+pan > < span
+class
+= "nx" > ret < /span><span class="p">,</s
+pan > < span
+class
+= "p" > [ < /span><span class="nx">i</s
+pan > < span
+class
+= "o" > + < /span> <span class="mi">1</s
+pan > < span
+class
+= "p" >,
+<
+/span> <span class="mi">0</s
+pan > < span
+class
+= "p" >
+].<
+/span><span class="nx">concat</s
+pan > < span
+class
+= "p" > ( < /span><span class="nx">jsTags</s
+pan > < span
+class
+= "p" >
+))
+;
+<
+/span>
+< span
+class
+= "p" >
+}<
+/span>
+< span
+class
+= "nx" > fragment < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > appendChild < /span><span class="p">(</s
+pan > < span
+class
+= "nx" > script < /span><span class="p">);</s
+pan >
+< span
+class
+= "p" >
+}<
+/span>
+< span
+class
+= "p" >
+}<
+/span>
+< span
+class
+= "p" >
+}<
+/span>
+
+< span
+class
+= "k" >
+return
+<
+/span> <span class="nx">ret</s
+pan > < span
+class
+= "p" >;
+<
+/span>
+< span
+class
+= "p" >
+},<
+/span>
+
+< span
+class
+= "nx" > cleanData < /span><span class="o">:</s
+pan > < span
+class
+= "kd" > function < /span><span class="p">(</s
+pan > < span
+class
+= "nx" > elems < /span><span class="p">)</s
+pan > < span
+class
+= "p" > { < /span>
+      < span
+class
+= "kd" >
+var <
+/span> <span class="nx">data</s
+pan > < span
+class
+= "p" >,
+<
+/span> <span class="nx">id</s
+pan > < span
+class
+= "p" >,
+<
+/span>
+< span
+class
+= "nx" > cache < /span> <span class="o">=</s
+pan > < span
+class
+= "nx" > jQuery < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > cache < /span><span class="p">,</s
+pan >
+< span
+class
+= "nx" > special < /span> <span class="o">=</s
+pan > < span
+class
+= "nx" > jQuery < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > event < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > special < /span><span class="p">,</s
+pan >
+< span
+class
+= "nx" > deleteExpando < /span> <span class="o">=</s
+pan > < span
+class
+= "nx" > jQuery < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > support < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > deleteExpando < /span><span class="p">;</s
+pan >
+
+< span
+class
+= "k" >
+for<
+/span> <span class="p">(</s
+pan > < span
+class
+= "kd" >
+var <
+/span> <span class="nx">i</s
+pan > < span
+class
+= "o" >= < /span> <span class="mi">0</s
+pan > < span
+class
+= "p" >,
+<
+/span> <span class="nx">elem</s
+pan > < span
+class
+= "p" >;
+<
+/span> <span class="p">(</s
+pan > < span
+class
+= "nx" > elem < /span> <span class="o">=</s
+pan > < span
+class
+= "nx" > elems < /span><span class="p">[</span><span class="nx">i</span><span class="p">])</s
+pan > < span
+class
+= "o" > !=
+<
+/span> <span class="kc">null</s
+pan > < span
+class
+= "p" >;
+<
+/span> <span class="nx">i</s
+pan > < span
+class
+= "o" > ++ < /span><span class="p">)</s
+pan > < span
+class
+= "p" > { < /span>
+      < span
+class
+= "k" >
+if<
+/span> <span class="p">(</s
+pan > < span
+class
+= "nx" > elem < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > nodeName < /span> <span class="o">&amp;&amp;</s
+pan > < span
+class
+= "nx" > jQuery < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > noData < /span><span class="p">[</span><span class="nx">elem</span><span class="p">.</span><span class="nx">nodeName</span><span class="p">.</span><span class="nx">toLowerCase</span><span class="p">()])</s
+pan > < span
+class
+= "p" > { < /span>
+      < span
+class
+= "k" >
+continue
+<
+/span><span class="p">;</s
+pan >
+< span
+class
+= "p" >
+}<
+/span>
+
+< span
+class
+= "nx" > id < /span> <span class="o">=</s
+pan > < span
+class
+= "nx" > elem < /span><span class="p">[</span> <span class="nx">jQuery</span><span class="p">.</span><span class="nx">expando</span> <span class="p">];</s
+pan >
+
+< span
+class
+= "k" >
+if<
+/span> <span class="p">(</s
+pan > < span
+class
+= "nx" > id < /span><span class="p">)</s
+pan > < span
+class
+= "p" > { < /span>
+      < span
+class
+= "nx" > data < /span> <span class="o">=</s
+pan > < span
+class
+= "nx" > cache < /span><span class="p">[</span> <span class="nx">id</span> <span class="p">];</s
+pan >
+
+< span
+class
+= "k" >
+if<
+/span> <span class="p">(</s
+pan > < span
+class
+= "nx" > data < /span> <span class="o">&amp;&amp;</s
+pan > < span
+class
+= "nx" > data < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > events < /span><span class="p">)</s
+pan > < span
+class
+= "p" > { < /span>
+      < span
+class
+= "k" >
+for<
+/span> <span class="p">(</s
+pan > < span
+class
+= "kd" >
+var <
+/span> <span class="nx">type</s
+pan > < span
+class
+= "k" >in < /span> <span class="nx">data</s
+pan > < span
+class
+= "p" >
+.<
+/span><span class="nx">events</s
+pan > < span
+class
+= "p" >
+)<
+/span> <span class="p">{</s
+pan >
+< span
+class
+= "k" >
+if<
+/span> <span class="p">(</s
+pan > < span
+class
+= "nx" > special < /span><span class="p">[</span> <span class="nx">type</span> <span class="p">])</s
+pan > < span
+class
+= "p" > { < /span>
+      < span
+class
+= "nx" > jQuery < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > event < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > remove < /span><span class="p">(</s
+pan > < span
+class
+= "nx" > elem < /span><span class="p">,</s
+pan > < span
+class
+= "nx" > type < /span><span class="p">);</s
+pan >
+
+
+< /pre></
+div > < /td>           </
+tr > < tr
+id = "section-57" > < td
+class
+= "docs" > < div
+class
+= "pilwrap" > < a
+class
+= "pilcrow"
+href = "#section-57" >
+&#182;<
+/a>               </
+div > < p > This
+is
+a
+shortcut
+to
+avoid
+jQuery.event.remove
+'s overhead</p>             </td>             <td class="code">               <div class="highlight"><pre>
+< span
+class
+= "p" >
+}<
+/span> <span class="k">else</s
+pan > < span
+class
+= "p" > { < /span>
+      < span
+class
+= "nx" > jQuery < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > removeEvent < /span><span class="p">(</s
+pan > < span
+class
+= "nx" > elem < /span><span class="p">,</s
+pan > < span
+class
+= "nx" > type < /span><span class="p">,</s
+pan > < span
+class
+= "nx" > data < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > handle < /span><span class="p">);</s
+pan >
+< span
+class
+= "p" >
+}<
+/span>
+< span
+class
+= "p" >
+}<
+/span>
+
+
+< /pre></
+div > < /td>           </
+tr > < tr
+id = "section-58" > < td
+class
+= "docs" > < div
+class
+= "pilwrap" > < a
+class
+= "pilcrow"
+href = "#section-58" >
+&#182;<
+/a>               </
+div > < p > Null
+the
+DOM
+reference
+to
+avoid
+IE6 / 7 / 8
+leak(
+#
+7054
+)<
+/p>             </
+td > < td
+class
+= "code" > < div
+class
+= "highlight" > < pre >
+      < span
+class
+= "k" >
+if<
+/span> <span class="p">(</s
+pan > < span
+class
+= "nx" > data < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > handle < /span><span class="p">)</s
+pan > < span
+class
+= "p" > { < /span>
+      < span
+class
+= "nx" > data < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > handle < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > elem < /span> <span class="o">=</s
+pan > < span
+class
+= "kc" > null < /span><span class="p">;</s
+pan >
+< span
+class
+= "p" >
+}<
+/span>
+< span
+class
+= "p" >
+}<
+/span>
+
+< span
+class
+= "k" >
+if<
+/span> <span class="p">(</s
+pan > < span
+class
+= "nx" > deleteExpando < /span><span class="p">)</s
+pan > < span
+class
+= "p" > { < /span>
+      < span
+class
+= "k" > delete < /span> <span class="nx">elem</s
+pan > < span
+class
+= "p" > [ < /span> <span class="nx">jQuery</s
+pan > < span
+class
+= "p" >
+.<
+/span><span class="nx">expando</s
+pan > < span
+class
+= "p" >
+]
+;
+<
+/span>
+
+< span
+class
+= "p" >
+}<
+/span> <span class="k">else</s
+pan > < span
+class
+= "k" >
+if<
+/span> <span class="p">(</s
+pan > < span
+class
+= "nx" > elem < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > removeAttribute < /span><span class="p">)</s
+pan > < span
+class
+= "p" > { < /span>
+      < span
+class
+= "nx" > elem < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > removeAttribute < /span><span class="p">(</s
+pan > < span
+class
+= "nx" > jQuery < /span><span class="p">.</s
+pan > < span
+class
+= "nx" > expando < /span><span class="p">);</s
+pan >
+< span
+class
+= "p" >
+}<
+/span>
+
+< span
+class
+= "k" > delete < /span> <span class="nx">cache</s
+pan > < span
+class
+= "p" > [ < /span> <span class="nx">id</s
+pan > < span
+class
+= "p" >
+]
+;
+<
+/span>
+< span
+class
+= "p" >
+}<
+/span>
+< span
+class
+= "p" >
+}<
+/span>
+< span
+class
+= "p" >
+}<
+/span>
+< span
+class
+= "p" >
+})
+;
+<
+/span>
+
+< span
+class
+= "p" >
+})
+( < /span><span class="nx">jQuery</s
+pan > < span
+class
+= "p" >
+)
+;
+<
+/span>
+
+< /pre></
+div > < /td>           </
+tr > < /tbody>     </
+table > < /div> </
+body > < /html> 

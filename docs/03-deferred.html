@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html>
+<head><title>03-deferred.js</title>
+   <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+   <link rel="stylesheet" media="all" href="docco.css"/>
+</head>
+<body>
+<div id="container">
+   <div id="background"></div>
+   <table cellpadding="0" cellspacing="0">
+      <thead>
+      <tr>
+         <th class="docs"><h1> 03-deferred.js </h1></th>
+         <th class="code"></th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr id="section-1">
+         <td class="docs">
+            <div class="pilwrap"><a class="pilcrow" href="#section-1">&#182;</a></div>
+            <p><strong>jQuery Annotated Source</strong>.</p>
+
+            <p><a href="/jquery-annotated-source/">Home</a> | <a href="02-callsbacks.html">Previous Chapter</a> |
+               <a href="04-support.html">Next Chapter</a></p></td>
+         <td class="code">
+            <div class="highlight">
+               <pre></pre>
+            </div>
+         </td>
+      </tr>
+      <tr id="section-2">
+         <td class="docs">
+            <div class="pilwrap"><a class="pilcrow" href="#section-2">&#182;</a></div>
+            <h2>Chapter 3: Deferred</h2></td>
+         <td class="code">
+            <div class="highlight"><pre>
+
+<span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">jQuery</span><span class="p">)</span> <span class="p">{</span>
+
+   <span class="kd">var</span> <span class="c1">// Static reference to slice</span>
+         <span class="nx">sliceDeferred</span> <span class="o">=</span> <span class="p">[].</span><span class="nx">slice</span><span class="p">;</span>
+
+   <span class="nx">jQuery</span><span class="p">.</span><span class="nx">extend</span><span class="p">({</span>
+
+      <span class="nx">Deferred</span><span class="o">:</span><span class="kd">function</span><span class="p">(</span><span class="nx">func</span><span class="p">)</span> <span class="p">{</span>
+         <span class="kd">var</span> <span class="nx">doneList</span> <span class="o">=</span> <span class="nx">jQuery</span><span class="p">.</span><span class="nx">Callbacks</span><span class="p">(</span><span class="s2">&quot;once memory&quot;</span><span class="p">),</span>
+               <span class="nx">failList</span> <span class="o">=</span> <span class="nx">jQuery</span><span class="p">.</span><span class="nx">Callbacks</span><span class="p">(</span><span class="s2">&quot;once memory&quot;</span><span class="p">),</span>
+               <span class="nx">progressList</span> <span class="o">=</span> <span class="nx">jQuery</span><span class="p">.</span><span class="nx">Callbacks</span><span class="p">(</span><span class="s2">&quot;memory&quot;</span><span class="p">),</span>
+               <span class="nx">state</span> <span class="o">=</span> <span class="s2">&quot;pending&quot;</span><span class="p">,</span>
+               <span class="nx">lists</span> <span class="o">=</span> <span class="p">{</span>
+                  <span class="nx">resolve</span><span class="o">:</span><span class="nx">doneList</span><span class="p">,</span>
+                  <span class="nx">reject</span><span class="o">:</span> <span class="nx">failList</span><span class="p">,</span>
+                  <span class="nx">notify</span><span class="o">:</span> <span class="nx">progressList</span>
+               <span class="p">},</span>
+               <span class="nx">promise</span> <span class="o">=</span> <span class="p">{</span>
+                  <span class="nx">done</span><span class="o">:</span>    <span class="nx">doneList</span><span class="p">.</span><span class="nx">add</span><span class="p">,</span>
+                  <span class="nx">fail</span><span class="o">:</span>    <span class="nx">failList</span><span class="p">.</span><span class="nx">add</span><span class="p">,</span>
+                  <span class="nx">progress</span><span class="o">:</span><span class="nx">progressList</span><span class="p">.</span><span class="nx">add</span><span class="p">,</span>
+
+                  <span class="nx">state</span><span class="o">:</span>     <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+                     <span class="k">return</span> <span class="nx">state</span><span class="p">;</span>
+                  <span class="p">},</span>
+
+
+</pre>
+            </div>
+         </td>
+      </tr>
+      <tr id="section-3">
+         <td class="docs">
+            <div class="pilwrap"><a class="pilcrow" href="#section-3">&#182;</a></div>
+            <p>Deprecated</p></td>
+         <td class="code">
+            <div class="highlight"><pre>
+                  <span class="nx">isResolved</span><span class="o">:</span><span class="nx">doneList</span><span class="p">.</span><span class="nx">fired</span><span class="p">,</span>
+                  <span class="nx">isRejected</span><span class="o">:</span><span class="nx">failList</span><span class="p">.</span><span class="nx">fired</span><span class="p">,</span>
+
+                  <span class="nx">then</span><span class="o">:</span>   <span class="kd">function</span><span class="p">(</span><span class="nx">doneCallbacks</span><span class="p">,</span> <span class="nx">failCallbacks</span><span class="p">,</span> <span class="nx">progressCallbacks</span><span class="p">)</span> <span class="p">{</span>
+                     <span class="nx">deferred</span><span class="p">.</span><span class="nx">done</span><span class="p">(</span><span class="nx">doneCallbacks</span><span class="p">).</span><span class="nx">fail</span><span class="p">(</span><span class="nx">failCallbacks</span><span class="p">).</span><span class="nx">progress</span><span class="p">(</span><span class="nx">progressCallbacks</span><span class="p">);</span>
+                     <span class="k">return</span> <span class="k">this</span><span class="p">;</span>
+                  <span class="p">},</span>
+                  <span class="nx">always</span><span class="o">:</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+                     <span class="nx">deferred</span><span class="p">.</span><span class="nx">done</span><span class="p">.</span><span class="nx">apply</span><span class="p">(</span><span class="nx">deferred</span><span class="p">,</span> <span class="nx">arguments</span><span class="p">).</span><span class="nx">fail</span><span class="p">.</span><span class="nx">apply</span><span class="p">(</span><span class="nx">deferred</span><span class="p">,</span> <span class="nx">arguments</span><span class="p">);</span>
+                     <span class="k">return</span> <span class="k">this</span><span class="p">;</span>
+                  <span class="p">},</span>
+                  <span class="nx">pipe</span><span class="o">:</span>   <span class="kd">function</span><span class="p">(</span><span class="nx">fnDone</span><span class="p">,</span> <span class="nx">fnFail</span><span class="p">,</span> <span class="nx">fnProgress</span><span class="p">)</span> <span class="p">{</span>
+                     <span class="k">return</span> <span class="nx">jQuery</span><span class="p">.</span><span class="nx">Deferred</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">newDefer</span><span class="p">)</span> <span class="p">{</span>
+                        <span class="nx">jQuery</span><span class="p">.</span><span class="nx">each</span><span class="p">({</span>
+                           <span class="nx">done</span><span class="o">:</span>    <span class="p">[</span> <span class="nx">fnDone</span><span class="p">,</span> <span class="s2">&quot;resolve&quot;</span> <span class="p">],</span>
+                           <span class="nx">fail</span><span class="o">:</span>    <span class="p">[</span> <span class="nx">fnFail</span><span class="p">,</span> <span class="s2">&quot;reject&quot;</span> <span class="p">],</span>
+                           <span class="nx">progress</span><span class="o">:</span><span class="p">[</span> <span class="nx">fnProgress</span><span class="p">,</span> <span class="s2">&quot;notify&quot;</span> <span class="p">]</span>
+                        <span class="p">},</span> <span class="kd">function</span><span class="p">(</span><span class="nx">handler</span><span class="p">,</span> <span class="nx">data</span><span class="p">)</span> <span class="p">{</span>
+                           <span class="kd">var</span> <span class="nx">fn</span> <span class="o">=</span> <span class="nx">data</span><span class="p">[</span> <span class="mi">0</span> <span class="p">],</span>
+                                 <span class="nx">action</span> <span class="o">=</span> <span class="nx">data</span><span class="p">[</span> <span class="mi">1</span> <span class="p">],</span>
+                                 <span class="nx">returned</span><span class="p">;</span>
+                           <span class="k">if</span> <span class="p">(</span><span class="nx">jQuery</span><span class="p">.</span><span class="nx">isFunction</span><span class="p">(</span><span class="nx">fn</span><span class="p">))</span> <span class="p">{</span>
+                              <span class="nx">deferred</span><span class="p">[</span> <span class="nx">handler</span> <span class="p">](</span><span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+                                 <span class="nx">returned</span> <span class="o">=</span> <span class="nx">fn</span><span class="p">.</span><span class="nx">apply</span><span class="p">(</span><span class="k">this</span><span class="p">,</span> <span class="nx">arguments</span><span class="p">);</span>
+                                 <span class="k">if</span> <span class="p">(</span><span class="nx">returned</span> <span class="o">&amp;&amp;</span> <span class="nx">jQuery</span><span class="p">.</span><span class="nx">isFunction</span><span class="p">(</span><span class="nx">returned</span><span class="p">.</span><span class="nx">promise</span><span class="p">))</span> <span class="p">{</span>
+                                    <span class="nx">returned</span><span class="p">.</span><span class="nx">promise</span><span class="p">().</span><span class="nx">then</span><span class="p">(</span><span class="nx">newDefer</span><span class="p">.</span><span class="nx">resolve</span><span class="p">,</span> <span class="nx">newDefer</span><span class="p">.</span><span class="nx">reject</span><span class="p">,</span> <span class="nx">newDefer</span><span class="p">.</span><span class="nx">notify</span><span class="p">);</span>
+                                 <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+                                    <span class="nx">newDefer</span><span class="p">[</span> <span class="nx">action</span> <span class="o">+</span> <span class="s2">&quot;With&quot;</span> <span class="p">](</span><span class="k">this</span> <span class="o">===</span> <span class="nx">deferred</span> <span class="o">?</span> <span class="nx">newDefer</span> <span class="o">:</span> <span class="k">this</span><span class="p">,</span> <span class="p">[</span> <span class="nx">returned</span> <span class="p">]);</span>
+                                 <span class="p">}</span>
+                              <span class="p">});</span>
+                           <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+                              <span class="nx">deferred</span><span class="p">[</span> <span class="nx">handler</span> <span class="p">](</span><span class="nx">newDefer</span><span class="p">[</span> <span class="nx">action</span> <span class="p">]);</span>
+                           <span class="p">}</span>
+                        <span class="p">});</span>
+                     <span class="p">}).</span><span class="nx">promise</span><span class="p">();</span>
+                  <span class="p">},</span>
+
+</pre>
+            </div>
+         </td>
+      </tr>
+      <tr id="section-4">
+         <td class="docs">
+            <div class="pilwrap"><a class="pilcrow" href="#section-4">&#182;</a></div>
+            <p>Get a promise for this deferred
+               If obj is provided, the promise aspect is added to the object</p></td>
+         <td class="code">
+            <div class="highlight"><pre>
+                  <span class="nx">promise</span><span class="o">:</span><span class="kd">function</span><span class="p">(</span><span class="nx">obj</span><span class="p">)</span> <span class="p">{</span>
+                     <span class="k">if</span> <span class="p">(</span><span class="nx">obj</span> <span class="o">==</span> <span class="kc">null</span><span class="p">)</span> <span class="p">{</span>
+                        <span class="nx">obj</span> <span class="o">=</span> <span class="nx">promise</span><span class="p">;</span>
+                     <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+                        <span class="k">for</span> <span class="p">(</span><span class="kd">var</span> <span class="nx">key</span> <span class="k">in</span> <span class="nx">promise</span><span class="p">)</span> <span class="p">{</span>
+                           <span class="nx">obj</span><span class="p">[</span> <span class="nx">key</span> <span class="p">]</span> <span class="o">=</span> <span class="nx">promise</span><span class="p">[</span> <span class="nx">key</span> <span class="p">];</span>
+                        <span class="p">}</span>
+                     <span class="p">}</span>
+                     <span class="k">return</span> <span class="nx">obj</span><span class="p">;</span>
+                  <span class="p">}</span>
+               <span class="p">},</span>
+               <span class="nx">deferred</span> <span class="o">=</span> <span class="nx">promise</span><span class="p">.</span><span class="nx">promise</span><span class="p">({}),</span>
+               <span class="nx">key</span><span class="p">;</span>
+
+         <span class="k">for</span> <span class="p">(</span><span class="nx">key</span> <span class="k">in</span> <span class="nx">lists</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nx">deferred</span><span class="p">[</span> <span class="nx">key</span> <span class="p">]</span> <span class="o">=</span> <span class="nx">lists</span><span class="p">[</span> <span class="nx">key</span> <span class="p">].</span><span class="nx">fire</span><span class="p">;</span>
+            <span class="nx">deferred</span><span class="p">[</span> <span class="nx">key</span> <span class="o">+</span> <span class="s2">&quot;With&quot;</span> <span class="p">]</span> <span class="o">=</span> <span class="nx">lists</span><span class="p">[</span> <span class="nx">key</span> <span class="p">].</span><span class="nx">fireWith</span><span class="p">;</span>
+         <span class="p">}</span>
+
+
+</pre>
+            </div>
+         </td>
+      </tr>
+      <tr id="section-5">
+         <td class="docs">
+            <div class="pilwrap"><a class="pilcrow" href="#section-5">&#182;</a></div>
+            <p>Handle state</p></td>
+         <td class="code">
+            <div class="highlight"><pre>
+         <span class="nx">deferred</span><span class="p">.</span><span class="nx">done</span><span class="p">(</span><span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+            <span class="nx">state</span> <span class="o">=</span> <span class="s2">&quot;resolved&quot;</span><span class="p">;</span>
+         <span class="p">},</span> <span class="nx">failList</span><span class="p">.</span><span class="nx">disable</span><span class="p">,</span> <span class="nx">progressList</span><span class="p">.</span><span class="nx">lock</span><span class="p">).</span><span class="nx">fail</span><span class="p">(</span><span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+                  <span class="nx">state</span> <span class="o">=</span> <span class="s2">&quot;rejected&quot;</span><span class="p">;</span>
+               <span class="p">},</span> <span class="nx">doneList</span><span class="p">.</span><span class="nx">disable</span><span class="p">,</span> <span class="nx">progressList</span><span class="p">.</span><span class="nx">lock</span><span class="p">);</span>
+
+
+</pre>
+            </div>
+         </td>
+      </tr>
+      <tr id="section-6">
+         <td class="docs">
+            <div class="pilwrap"><a class="pilcrow" href="#section-6">&#182;</a></div>
+            <p>Call given func if any</p></td>
+         <td class="code">
+            <div class="highlight"><pre>
+         <span class="k">if</span> <span class="p">(</span><span class="nx">func</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nx">func</span><span class="p">.</span><span class="nx">call</span><span class="p">(</span><span class="nx">deferred</span><span class="p">,</span> <span class="nx">deferred</span><span class="p">);</span>
+         <span class="p">}</span>
+
+
+</pre>
+            </div>
+         </td>
+      </tr>
+      <tr id="section-7">
+         <td class="docs">
+            <div class="pilwrap"><a class="pilcrow" href="#section-7">&#182;</a></div>
+            <p>All done!</p></td>
+         <td class="code">
+            <div class="highlight"><pre>
+         <span class="k">return</span> <span class="nx">deferred</span><span class="p">;</span>
+      <span class="p">},</span>
+
+
+</pre>
+            </div>
+         </td>
+      </tr>
+      <tr id="section-8">
+         <td class="docs">
+            <div class="pilwrap"><a class="pilcrow" href="#section-8">&#182;</a></div>
+            <p>Deferred helper</p></td>
+         <td class="code">
+            <div class="highlight"><pre>
+      <span class="nx">when</span><span class="o">:</span>    <span class="kd">function</span><span class="p">(</span><span class="nx">firstParam</span><span class="p">)</span> <span class="p">{</span>
+         <span class="kd">var</span> <span class="nx">args</span> <span class="o">=</span> <span class="nx">sliceDeferred</span><span class="p">.</span><span class="nx">call</span><span class="p">(</span><span class="nx">arguments</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
+               <span class="nx">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+               <span class="nx">length</span> <span class="o">=</span> <span class="nx">args</span><span class="p">.</span><span class="nx">length</span><span class="p">,</span>
+               <span class="nx">pValues</span> <span class="o">=</span> <span class="k">new</span> <span class="nb">Array</span><span class="p">(</span><span class="nx">length</span><span class="p">),</span>
+               <span class="nx">count</span> <span class="o">=</span> <span class="nx">length</span><span class="p">,</span>
+               <span class="nx">pCount</span> <span class="o">=</span> <span class="nx">length</span><span class="p">,</span>
+               <span class="nx">deferred</span> <span class="o">=</span> <span class="nx">length</span> <span class="o">&lt;=</span> <span class="mi">1</span> <span class="o">&amp;&amp;</span> <span class="nx">firstParam</span> <span class="o">&amp;&amp;</span> <span class="nx">jQuery</span><span class="p">.</span><span class="nx">isFunction</span><span class="p">(</span><span class="nx">firstParam</span><span class="p">.</span><span class="nx">promise</span><span class="p">)</span> <span class="o">?</span>
+                     <span class="nx">firstParam</span> <span class="o">:</span>
+                     <span class="nx">jQuery</span><span class="p">.</span><span class="nx">Deferred</span><span class="p">(),</span>
+               <span class="nx">promise</span> <span class="o">=</span> <span class="nx">deferred</span><span class="p">.</span><span class="nx">promise</span><span class="p">();</span>
+
+         <span class="kd">function</span> <span class="nx">resolveFunc</span><span class="p">(</span><span class="nx">i</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="kd">function</span><span class="p">(</span><span class="nx">value</span><span class="p">)</span> <span class="p">{</span>
+               <span class="nx">args</span><span class="p">[</span> <span class="nx">i</span> <span class="p">]</span> <span class="o">=</span> <span class="nx">arguments</span><span class="p">.</span><span class="nx">length</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="o">?</span> <span class="nx">sliceDeferred</span><span class="p">.</span><span class="nx">call</span><span class="p">(</span><span class="nx">arguments</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="o">:</span> <span class="nx">value</span><span class="p">;</span>
+               <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="p">(</span> <span class="o">--</span><span class="nx">count</span> <span class="p">))</span> <span class="p">{</span>
+                  <span class="nx">deferred</span><span class="p">.</span><span class="nx">resolveWith</span><span class="p">(</span><span class="nx">deferred</span><span class="p">,</span> <span class="nx">args</span><span class="p">);</span>
+               <span class="p">}</span>
+            <span class="p">};</span>
+         <span class="p">}</span>
+
+         <span class="kd">function</span> <span class="nx">progressFunc</span><span class="p">(</span><span class="nx">i</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="kd">function</span><span class="p">(</span><span class="nx">value</span><span class="p">)</span> <span class="p">{</span>
+               <span class="nx">pValues</span><span class="p">[</span> <span class="nx">i</span> <span class="p">]</span> <span class="o">=</span> <span class="nx">arguments</span><span class="p">.</span><span class="nx">length</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="o">?</span> <span class="nx">sliceDeferred</span><span class="p">.</span><span class="nx">call</span><span class="p">(</span><span class="nx">arguments</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="o">:</span> <span class="nx">value</span><span class="p">;</span>
+               <span class="nx">deferred</span><span class="p">.</span><span class="nx">notifyWith</span><span class="p">(</span><span class="nx">promise</span><span class="p">,</span> <span class="nx">pValues</span><span class="p">);</span>
+            <span class="p">};</span>
+         <span class="p">}</span>
+
+         <span class="k">if</span> <span class="p">(</span><span class="nx">length</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">for</span> <span class="p">(;</span> <span class="nx">i</span> <span class="o">&lt;</span> <span class="nx">length</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+               <span class="k">if</span> <span class="p">(</span><span class="nx">args</span><span class="p">[</span> <span class="nx">i</span> <span class="p">]</span> <span class="o">&amp;&amp;</span> <span class="nx">args</span><span class="p">[</span> <span class="nx">i</span> <span class="p">].</span><span class="nx">promise</span> <span class="o">&amp;&amp;</span> <span class="nx">jQuery</span><span class="p">.</span><span class="nx">isFunction</span><span class="p">(</span><span class="nx">args</span><span class="p">[</span> <span class="nx">i</span> <span class="p">].</span><span class="nx">promise</span><span class="p">))</span> <span class="p">{</span>
+                  <span class="nx">args</span><span class="p">[</span> <span class="nx">i</span> <span class="p">].</span><span class="nx">promise</span><span class="p">().</span><span class="nx">then</span><span class="p">(</span><span class="nx">resolveFunc</span><span class="p">(</span><span class="nx">i</span><span class="p">),</span> <span class="nx">deferred</span><span class="p">.</span><span class="nx">reject</span><span class="p">,</span> <span class="nx">progressFunc</span><span class="p">(</span><span class="nx">i</span><span class="p">));</span>
+               <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+                  <span class="o">--</span><span class="nx">count</span><span class="p">;</span>
+               <span class="p">}</span>
+            <span class="p">}</span>
+            <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">count</span><span class="p">)</span> <span class="p">{</span>
+               <span class="nx">deferred</span><span class="p">.</span><span class="nx">resolveWith</span><span class="p">(</span><span class="nx">deferred</span><span class="p">,</span> <span class="nx">args</span><span class="p">);</span>
+            <span class="p">}</span>
+         <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="nx">deferred</span> <span class="o">!==</span> <span class="nx">firstParam</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nx">deferred</span><span class="p">.</span><span class="nx">resolveWith</span><span class="p">(</span><span class="nx">deferred</span><span class="p">,</span> <span class="nx">length</span> <span class="o">?</span> <span class="p">[</span> <span class="nx">firstParam</span> <span class="p">]</span> <span class="o">:</span> <span class="p">[]);</span>
+         <span class="p">}</span>
+         <span class="k">return</span> <span class="nx">promise</span><span class="p">;</span>
+      <span class="p">}</span>
+   <span class="p">});</span>
+
+<span class="p">})(</span><span class="nx">jQuery</span><span class="p">);</span>
+
+</pre>
+            </div>
+         </td>
+      </tr>
+      </tbody>
+   </table>
+</div>
+</body>
+</html>

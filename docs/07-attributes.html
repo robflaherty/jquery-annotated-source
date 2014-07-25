@@ -1,0 +1,1195 @@
+<!DOCTYPE html>
+<html>
+<head><title>07-attributes.js</title>
+   <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+   <link rel="stylesheet" media="all" href="docco.css"/>
+</head>
+<body>
+<div id="container">
+<div id="background"></div>
+<table cellpadding="0" cellspacing="0">
+<thead>
+<tr>
+   <th class="docs"><h1> 07-attributes.js </h1></th>
+   <th class="code"></th>
+</tr>
+</thead>
+<tbody>
+<tr id="section-1">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-1">&#182;</a></div>
+      <p><strong>jQuery Annotated Source</strong>.</p>
+
+      <p><a href="/jquery-annotated-source/">Home</a> | <a href="06-queue.html">Previous Chapter</a> |
+         <a href="08-event.html">Next Chapter</a></p></td>
+   <td class="code">
+      <div class="highlight">
+         <pre></pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-2">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-2">&#182;</a></div>
+      <h2>Chapter 7: Attributes</h2></td>
+   <td class="code">
+      <div class="highlight"><pre>
+
+<span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">jQuery</span><span class="p">)</span> <span class="p">{</span>
+
+   <span class="kd">var</span> <span class="nx">rclass</span> <span class="o">=</span> <span class="sr">/[\n\t\r]/g</span><span class="p">,</span>
+         <span class="nx">rspace</span> <span class="o">=</span> <span class="sr">/\s+/</span><span class="p">,</span>
+         <span class="nx">rreturn</span> <span class="o">=</span> <span class="sr">/\r/g</span><span class="p">,</span>
+         <span class="nx">rtype</span> <span class="o">=</span> <span class="sr">/^(?:button|input)$/i</span><span class="p">,</span>
+         <span class="nx">rfocusable</span> <span class="o">=</span> <span class="sr">/^(?:button|input|object|select|textarea)$/i</span><span class="p">,</span>
+         <span class="nx">rclickable</span> <span class="o">=</span> <span class="sr">/^a(?:rea)?$/i</span><span class="p">,</span>
+         <span class="nx">rboolean</span> <span class="o">=</span> <span class="sr">/^(?:autofocus|autoplay|async|checked|controls|defer|disabled|hidden|loop|multiple|open|readonly|required|scoped|selected)$/i</span><span class="p">,</span>
+         <span class="nx">getSetAttribute</span> <span class="o">=</span> <span class="nx">jQuery</span><span class="p">.</span><span class="nx">support</span><span class="p">.</span><span class="nx">getSetAttribute</span><span class="p">,</span>
+         <span class="nx">nodeHook</span><span class="p">,</span> <span class="nx">boolHook</span><span class="p">,</span> <span class="nx">fixSpecified</span><span class="p">;</span>
+
+   <span class="nx">jQuery</span><span class="p">.</span><span class="nx">fn</span><span class="p">.</span><span class="nx">extend</span><span class="p">({</span>
+      <span class="nx">attr</span><span class="o">:</span><span class="kd">function</span><span class="p">(</span><span class="nx">name</span><span class="p">,</span> <span class="nx">value</span><span class="p">)</span> <span class="p">{</span>
+         <span class="k">return</span> <span class="nx">jQuery</span><span class="p">.</span><span class="nx">access</span><span class="p">(</span><span class="k">this</span><span class="p">,</span> <span class="nx">jQuery</span><span class="p">.</span><span class="nx">attr</span><span class="p">,</span> <span class="nx">name</span><span class="p">,</span> <span class="nx">value</span><span class="p">,</span> <span class="nx">arguments</span><span class="p">.</span><span class="nx">length</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">);</span>
+      <span class="p">},</span>
+
+      <span class="nx">removeAttr</span><span class="o">:</span><span class="kd">function</span><span class="p">(</span><span class="nx">name</span><span class="p">)</span> <span class="p">{</span>
+         <span class="k">return</span> <span class="k">this</span><span class="p">.</span><span class="nx">each</span><span class="p">(</span><span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+            <span class="nx">jQuery</span><span class="p">.</span><span class="nx">removeAttr</span><span class="p">(</span><span class="k">this</span><span class="p">,</span> <span class="nx">name</span><span class="p">);</span>
+         <span class="p">});</span>
+      <span class="p">},</span>
+
+      <span class="nx">prop</span><span class="o">:</span><span class="kd">function</span><span class="p">(</span><span class="nx">name</span><span class="p">,</span> <span class="nx">value</span><span class="p">)</span> <span class="p">{</span>
+         <span class="k">return</span> <span class="nx">jQuery</span><span class="p">.</span><span class="nx">access</span><span class="p">(</span><span class="k">this</span><span class="p">,</span> <span class="nx">jQuery</span><span class="p">.</span><span class="nx">prop</span><span class="p">,</span> <span class="nx">name</span><span class="p">,</span> <span class="nx">value</span><span class="p">,</span> <span class="nx">arguments</span><span class="p">.</span><span class="nx">length</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">);</span>
+      <span class="p">},</span>
+
+      <span class="nx">removeProp</span><span class="o">:</span><span class="kd">function</span><span class="p">(</span><span class="nx">name</span><span class="p">)</span> <span class="p">{</span>
+         <span class="nx">name</span> <span class="o">=</span> <span class="nx">jQuery</span><span class="p">.</span><span class="nx">propFix</span><span class="p">[</span> <span class="nx">name</span> <span class="p">]</span> <span class="o">||</span> <span class="nx">name</span><span class="p">;</span>
+         <span class="k">return</span> <span class="k">this</span><span class="p">.</span><span class="nx">each</span><span class="p">(</span><span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-3">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-3">&#182;</a></div>
+      <p>try/catch handles cases where IE balks (such as removing a property on window)</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+            <span class="k">try</span> <span class="p">{</span>
+               <span class="k">this</span><span class="p">[</span> <span class="nx">name</span> <span class="p">]</span> <span class="o">=</span> <span class="kc">undefined</span><span class="p">;</span>
+               <span class="k">delete</span> <span class="k">this</span><span class="p">[</span> <span class="nx">name</span> <span class="p">];</span>
+            <span class="p">}</span> <span class="k">catch</span> <span class="p">(</span><span class="nx">e</span><span class="p">)</span> <span class="p">{</span>
+            <span class="p">}</span>
+         <span class="p">});</span>
+      <span class="p">},</span>
+
+      <span class="nx">addClass</span><span class="o">:</span><span class="kd">function</span><span class="p">(</span><span class="nx">value</span><span class="p">)</span> <span class="p">{</span>
+         <span class="kd">var</span> <span class="nx">classNames</span><span class="p">,</span> <span class="nx">i</span><span class="p">,</span> <span class="nx">l</span><span class="p">,</span> <span class="nx">elem</span><span class="p">,</span>
+               <span class="nx">setClass</span><span class="p">,</span> <span class="nx">c</span><span class="p">,</span> <span class="nx">cl</span><span class="p">;</span>
+
+         <span class="k">if</span> <span class="p">(</span><span class="nx">jQuery</span><span class="p">.</span><span class="nx">isFunction</span><span class="p">(</span><span class="nx">value</span><span class="p">))</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="k">this</span><span class="p">.</span><span class="nx">each</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">j</span><span class="p">)</span> <span class="p">{</span>
+               <span class="nx">jQuery</span><span class="p">(</span><span class="k">this</span><span class="p">).</span><span class="nx">addClass</span><span class="p">(</span><span class="nx">value</span><span class="p">.</span><span class="nx">call</span><span class="p">(</span><span class="k">this</span><span class="p">,</span> <span class="nx">j</span><span class="p">,</span> <span class="k">this</span><span class="p">.</span><span class="nx">className</span><span class="p">));</span>
+            <span class="p">});</span>
+         <span class="p">}</span>
+
+         <span class="k">if</span> <span class="p">(</span><span class="nx">value</span> <span class="o">&amp;&amp;</span> <span class="k">typeof</span> <span class="nx">value</span> <span class="o">===</span> <span class="s2">&quot;string&quot;</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nx">classNames</span> <span class="o">=</span> <span class="nx">value</span><span class="p">.</span><span class="nx">split</span><span class="p">(</span><span class="nx">rspace</span><span class="p">);</span>
+
+            <span class="k">for</span> <span class="p">(</span><span class="nx">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="nx">l</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">length</span><span class="p">;</span> <span class="nx">i</span> <span class="o">&lt;</span> <span class="nx">l</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+               <span class="nx">elem</span> <span class="o">=</span> <span class="k">this</span><span class="p">[</span> <span class="nx">i</span> <span class="p">];</span>
+
+               <span class="k">if</span> <span class="p">(</span><span class="nx">elem</span><span class="p">.</span><span class="nx">nodeType</span> <span class="o">===</span> <span class="mi">1</span><span class="p">)</span> <span class="p">{</span>
+                  <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">elem</span><span class="p">.</span><span class="nx">className</span> <span class="o">&amp;&amp;</span> <span class="nx">classNames</span><span class="p">.</span><span class="nx">length</span> <span class="o">===</span> <span class="mi">1</span><span class="p">)</span> <span class="p">{</span>
+                     <span class="nx">elem</span><span class="p">.</span><span class="nx">className</span> <span class="o">=</span> <span class="nx">value</span><span class="p">;</span>
+
+                  <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+                     <span class="nx">setClass</span> <span class="o">=</span> <span class="s2">&quot; &quot;</span> <span class="o">+</span> <span class="nx">elem</span><span class="p">.</span><span class="nx">className</span> <span class="o">+</span> <span class="s2">&quot; &quot;</span><span class="p">;</span>
+
+                     <span class="k">for</span> <span class="p">(</span><span class="nx">c</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="nx">cl</span> <span class="o">=</span> <span class="nx">classNames</span><span class="p">.</span><span class="nx">length</span><span class="p">;</span> <span class="nx">c</span> <span class="o">&lt;</span> <span class="nx">cl</span><span class="p">;</span> <span class="nx">c</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+                        <span class="k">if</span> <span class="p">(</span><span class="o">!~</span><span class="nx">setClass</span><span class="p">.</span><span class="nx">indexOf</span><span class="p">(</span><span class="s2">&quot; &quot;</span> <span class="o">+</span> <span class="nx">classNames</span><span class="p">[</span> <span class="nx">c</span> <span class="p">]</span> <span class="o">+</span> <span class="s2">&quot; &quot;</span><span class="p">))</span> <span class="p">{</span>
+                           <span class="nx">setClass</span> <span class="o">+=</span> <span class="nx">classNames</span><span class="p">[</span> <span class="nx">c</span> <span class="p">]</span> <span class="o">+</span> <span class="s2">&quot; &quot;</span><span class="p">;</span>
+                        <span class="p">}</span>
+                     <span class="p">}</span>
+                     <span class="nx">elem</span><span class="p">.</span><span class="nx">className</span> <span class="o">=</span> <span class="nx">jQuery</span><span class="p">.</span><span class="nx">trim</span><span class="p">(</span><span class="nx">setClass</span><span class="p">);</span>
+                  <span class="p">}</span>
+               <span class="p">}</span>
+            <span class="p">}</span>
+         <span class="p">}</span>
+
+         <span class="k">return</span> <span class="k">this</span><span class="p">;</span>
+      <span class="p">},</span>
+
+      <span class="nx">removeClass</span><span class="o">:</span><span class="kd">function</span><span class="p">(</span><span class="nx">value</span><span class="p">)</span> <span class="p">{</span>
+         <span class="kd">var</span> <span class="nx">classNames</span><span class="p">,</span> <span class="nx">i</span><span class="p">,</span> <span class="nx">l</span><span class="p">,</span> <span class="nx">elem</span><span class="p">,</span> <span class="nx">className</span><span class="p">,</span> <span class="nx">c</span><span class="p">,</span> <span class="nx">cl</span><span class="p">;</span>
+
+         <span class="k">if</span> <span class="p">(</span><span class="nx">jQuery</span><span class="p">.</span><span class="nx">isFunction</span><span class="p">(</span><span class="nx">value</span><span class="p">))</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="k">this</span><span class="p">.</span><span class="nx">each</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">j</span><span class="p">)</span> <span class="p">{</span>
+               <span class="nx">jQuery</span><span class="p">(</span><span class="k">this</span><span class="p">).</span><span class="nx">removeClass</span><span class="p">(</span><span class="nx">value</span><span class="p">.</span><span class="nx">call</span><span class="p">(</span><span class="k">this</span><span class="p">,</span> <span class="nx">j</span><span class="p">,</span> <span class="k">this</span><span class="p">.</span><span class="nx">className</span><span class="p">));</span>
+            <span class="p">});</span>
+         <span class="p">}</span>
+
+         <span class="k">if</span> <span class="p">((</span><span class="nx">value</span> <span class="o">&amp;&amp;</span> <span class="k">typeof</span> <span class="nx">value</span> <span class="o">===</span> <span class="s2">&quot;string&quot;</span><span class="p">)</span> <span class="o">||</span> <span class="nx">value</span> <span class="o">===</span> <span class="kc">undefined</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nx">classNames</span> <span class="o">=</span> <span class="p">(</span> <span class="nx">value</span> <span class="o">||</span> <span class="s2">&quot;&quot;</span> <span class="p">).</span><span class="nx">split</span><span class="p">(</span><span class="nx">rspace</span><span class="p">);</span>
+
+            <span class="k">for</span> <span class="p">(</span><span class="nx">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="nx">l</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">length</span><span class="p">;</span> <span class="nx">i</span> <span class="o">&lt;</span> <span class="nx">l</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+               <span class="nx">elem</span> <span class="o">=</span> <span class="k">this</span><span class="p">[</span> <span class="nx">i</span> <span class="p">];</span>
+
+               <span class="k">if</span> <span class="p">(</span><span class="nx">elem</span><span class="p">.</span><span class="nx">nodeType</span> <span class="o">===</span> <span class="mi">1</span> <span class="o">&amp;&amp;</span> <span class="nx">elem</span><span class="p">.</span><span class="nx">className</span><span class="p">)</span> <span class="p">{</span>
+                  <span class="k">if</span> <span class="p">(</span><span class="nx">value</span><span class="p">)</span> <span class="p">{</span>
+                     <span class="nx">className</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot; &quot;</span> <span class="o">+</span> <span class="nx">elem</span><span class="p">.</span><span class="nx">className</span> <span class="o">+</span> <span class="s2">&quot; &quot;</span><span class="p">).</span><span class="nx">replace</span><span class="p">(</span><span class="nx">rclass</span><span class="p">,</span> <span class="s2">&quot; &quot;</span><span class="p">);</span>
+                     <span class="k">for</span> <span class="p">(</span><span class="nx">c</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="nx">cl</span> <span class="o">=</span> <span class="nx">classNames</span><span class="p">.</span><span class="nx">length</span><span class="p">;</span> <span class="nx">c</span> <span class="o">&lt;</span> <span class="nx">cl</span><span class="p">;</span> <span class="nx">c</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+                        <span class="nx">className</span> <span class="o">=</span> <span class="nx">className</span><span class="p">.</span><span class="nx">replace</span><span class="p">(</span><span class="s2">&quot; &quot;</span> <span class="o">+</span> <span class="nx">classNames</span><span class="p">[</span> <span class="nx">c</span> <span class="p">]</span> <span class="o">+</span> <span class="s2">&quot; &quot;</span><span class="p">,</span> <span class="s2">&quot; &quot;</span><span class="p">);</span>
+                     <span class="p">}</span>
+                     <span class="nx">elem</span><span class="p">.</span><span class="nx">className</span> <span class="o">=</span> <span class="nx">jQuery</span><span class="p">.</span><span class="nx">trim</span><span class="p">(</span><span class="nx">className</span><span class="p">);</span>
+
+                  <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+                     <span class="nx">elem</span><span class="p">.</span><span class="nx">className</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">;</span>
+                  <span class="p">}</span>
+               <span class="p">}</span>
+            <span class="p">}</span>
+         <span class="p">}</span>
+
+         <span class="k">return</span> <span class="k">this</span><span class="p">;</span>
+      <span class="p">},</span>
+
+      <span class="nx">toggleClass</span><span class="o">:</span><span class="kd">function</span><span class="p">(</span><span class="nx">value</span><span class="p">,</span> <span class="nx">stateVal</span><span class="p">)</span> <span class="p">{</span>
+         <span class="kd">var</span> <span class="nx">type</span> <span class="o">=</span> <span class="k">typeof</span> <span class="nx">value</span><span class="p">,</span>
+               <span class="nx">isBool</span> <span class="o">=</span> <span class="k">typeof</span> <span class="nx">stateVal</span> <span class="o">===</span> <span class="s2">&quot;boolean&quot;</span><span class="p">;</span>
+
+         <span class="k">if</span> <span class="p">(</span><span class="nx">jQuery</span><span class="p">.</span><span class="nx">isFunction</span><span class="p">(</span><span class="nx">value</span><span class="p">))</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="k">this</span><span class="p">.</span><span class="nx">each</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">i</span><span class="p">)</span> <span class="p">{</span>
+               <span class="nx">jQuery</span><span class="p">(</span><span class="k">this</span><span class="p">).</span><span class="nx">toggleClass</span><span class="p">(</span><span class="nx">value</span><span class="p">.</span><span class="nx">call</span><span class="p">(</span><span class="k">this</span><span class="p">,</span> <span class="nx">i</span><span class="p">,</span> <span class="k">this</span><span class="p">.</span><span class="nx">className</span><span class="p">,</span> <span class="nx">stateVal</span><span class="p">),</span> <span class="nx">stateVal</span><span class="p">);</span>
+            <span class="p">});</span>
+         <span class="p">}</span>
+
+         <span class="k">return</span> <span class="k">this</span><span class="p">.</span><span class="nx">each</span><span class="p">(</span><span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nx">type</span> <span class="o">===</span> <span class="s2">&quot;string&quot;</span><span class="p">)</span> <span class="p">{</span>
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-4">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-4">&#182;</a></div>
+      <p>toggle individual class names</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+               <span class="kd">var</span> <span class="nx">className</span><span class="p">,</span>
+                     <span class="nx">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+                     <span class="nx">self</span> <span class="o">=</span> <span class="nx">jQuery</span><span class="p">(</span><span class="k">this</span><span class="p">),</span>
+                     <span class="nx">state</span> <span class="o">=</span> <span class="nx">stateVal</span><span class="p">,</span>
+                     <span class="nx">classNames</span> <span class="o">=</span> <span class="nx">value</span><span class="p">.</span><span class="nx">split</span><span class="p">(</span><span class="nx">rspace</span><span class="p">);</span>
+
+               <span class="k">while</span> <span class="p">((</span><span class="nx">className</span> <span class="o">=</span> <span class="nx">classNames</span><span class="p">[</span> <span class="nx">i</span><span class="o">++</span> <span class="p">]))</span> <span class="p">{</span>
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-5">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-5">&#182;</a></div>
+      <p>check each className given, space seperated list</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+                  <span class="nx">state</span> <span class="o">=</span> <span class="nx">isBool</span> <span class="o">?</span> <span class="nx">state</span> <span class="o">:</span> <span class="o">!</span><span class="nx">self</span><span class="p">.</span><span class="nx">hasClass</span><span class="p">(</span><span class="nx">className</span><span class="p">);</span>
+                  <span class="nx">self</span><span class="p">[</span> <span class="nx">state</span> <span class="o">?</span> <span class="s2">&quot;addClass&quot;</span> <span class="o">:</span> <span class="s2">&quot;removeClass&quot;</span> <span class="p">](</span><span class="nx">className</span><span class="p">);</span>
+               <span class="p">}</span>
+
+            <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="nx">type</span> <span class="o">===</span> <span class="s2">&quot;undefined&quot;</span> <span class="o">||</span> <span class="nx">type</span> <span class="o">===</span> <span class="s2">&quot;boolean&quot;</span><span class="p">)</span> <span class="p">{</span>
+               <span class="k">if</span> <span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">className</span><span class="p">)</span> <span class="p">{</span>
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-6">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-6">&#182;</a></div>
+      <p>store className if set</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+                  <span class="nx">jQuery</span><span class="p">.</span><span class="nx">_data</span><span class="p">(</span><span class="k">this</span><span class="p">,</span> <span class="s2">&quot;__className__&quot;</span><span class="p">,</span> <span class="k">this</span><span class="p">.</span><span class="nx">className</span><span class="p">);</span>
+               <span class="p">}</span>
+
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-7">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-7">&#182;</a></div>
+      <p>toggle whole className</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+               <span class="k">this</span><span class="p">.</span><span class="nx">className</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">className</span> <span class="o">||</span> <span class="nx">value</span> <span class="o">===</span> <span class="kc">false</span> <span class="o">?</span> <span class="s2">&quot;&quot;</span> <span class="o">:</span> <span class="nx">jQuery</span><span class="p">.</span><span class="nx">_data</span><span class="p">(</span><span class="k">this</span><span class="p">,</span> <span class="s2">&quot;__className__&quot;</span><span class="p">)</span> <span class="o">||</span> <span class="s2">&quot;&quot;</span><span class="p">;</span>
+            <span class="p">}</span>
+         <span class="p">});</span>
+      <span class="p">},</span>
+
+      <span class="nx">hasClass</span><span class="o">:</span><span class="kd">function</span><span class="p">(</span><span class="nx">selector</span><span class="p">)</span> <span class="p">{</span>
+         <span class="kd">var</span> <span class="nx">className</span> <span class="o">=</span> <span class="s2">&quot; &quot;</span> <span class="o">+</span> <span class="nx">selector</span> <span class="o">+</span> <span class="s2">&quot; &quot;</span><span class="p">,</span>
+               <span class="nx">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+               <span class="nx">l</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">length</span><span class="p">;</span>
+         <span class="k">for</span> <span class="p">(;</span> <span class="nx">i</span> <span class="o">&lt;</span> <span class="nx">l</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">if</span> <span class="p">(</span><span class="k">this</span><span class="p">[</span><span class="nx">i</span><span class="p">].</span><span class="nx">nodeType</span> <span class="o">===</span> <span class="mi">1</span> <span class="o">&amp;&amp;</span> <span class="p">(</span><span class="s2">&quot; &quot;</span> <span class="o">+</span> <span class="k">this</span><span class="p">[</span><span class="nx">i</span><span class="p">].</span><span class="nx">className</span> <span class="o">+</span> <span class="s2">&quot; &quot;</span><span class="p">).</span><span class="nx">replace</span><span class="p">(</span><span class="nx">rclass</span><span class="p">,</span> <span class="s2">&quot; &quot;</span><span class="p">).</span><span class="nx">indexOf</span><span class="p">(</span><span class="nx">className</span><span class="p">)</span> <span class="o">&gt;</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="p">{</span>
+               <span class="k">return</span> <span class="kc">true</span><span class="p">;</span>
+            <span class="p">}</span>
+         <span class="p">}</span>
+
+         <span class="k">return</span> <span class="kc">false</span><span class="p">;</span>
+      <span class="p">},</span>
+
+      <span class="nx">val</span><span class="o">:</span><span class="kd">function</span><span class="p">(</span><span class="nx">value</span><span class="p">)</span> <span class="p">{</span>
+         <span class="kd">var</span> <span class="nx">hooks</span><span class="p">,</span> <span class="nx">ret</span><span class="p">,</span> <span class="nx">isFunction</span><span class="p">,</span>
+               <span class="nx">elem</span> <span class="o">=</span> <span class="k">this</span><span class="p">[</span><span class="mi">0</span><span class="p">];</span>
+
+         <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">arguments</span><span class="p">.</span><span class="nx">length</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nx">elem</span><span class="p">)</span> <span class="p">{</span>
+               <span class="nx">hooks</span> <span class="o">=</span> <span class="nx">jQuery</span><span class="p">.</span><span class="nx">valHooks</span><span class="p">[</span> <span class="nx">elem</span><span class="p">.</span><span class="nx">type</span> <span class="p">]</span> <span class="o">||</span> <span class="nx">jQuery</span><span class="p">.</span><span class="nx">valHooks</span><span class="p">[</span> <span class="nx">elem</span><span class="p">.</span><span class="nx">nodeName</span><span class="p">.</span><span class="nx">toLowerCase</span><span class="p">()</span> <span class="p">];</span>
+
+               <span class="k">if</span> <span class="p">(</span><span class="nx">hooks</span> <span class="o">&amp;&amp;</span> <span class="s2">&quot;get&quot;</span> <span class="k">in</span> <span class="nx">hooks</span> <span class="o">&amp;&amp;</span> <span class="p">(</span><span class="nx">ret</span> <span class="o">=</span> <span class="nx">hooks</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="nx">elem</span><span class="p">,</span> <span class="s2">&quot;value&quot;</span><span class="p">))</span> <span class="o">!==</span> <span class="kc">undefined</span><span class="p">)</span> <span class="p">{</span>
+                  <span class="k">return</span> <span class="nx">ret</span><span class="p">;</span>
+               <span class="p">}</span>
+
+               <span class="nx">ret</span> <span class="o">=</span> <span class="nx">elem</span><span class="p">.</span><span class="nx">value</span><span class="p">;</span>
+
+               <span class="k">return</span> <span class="k">typeof</span> <span class="nx">ret</span> <span class="o">===</span> <span class="s2">&quot;string&quot;</span> <span class="o">?</span>
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-8">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-8">&#182;</a></div>
+      <p>handle most common string cases</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+                     <span class="nx">ret</span><span class="p">.</span><span class="nx">replace</span><span class="p">(</span><span class="nx">rreturn</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span> <span class="o">:</span>
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-9">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-9">&#182;</a></div>
+      <p>handle cases where value is null/undef or number</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+                     <span class="nx">ret</span> <span class="o">==</span> <span class="kc">null</span> <span class="o">?</span> <span class="s2">&quot;&quot;</span> <span class="o">:</span> <span class="nx">ret</span><span class="p">;</span>
+            <span class="p">}</span>
+
+            <span class="k">return</span><span class="p">;</span>
+         <span class="p">}</span>
+
+         <span class="nx">isFunction</span> <span class="o">=</span> <span class="nx">jQuery</span><span class="p">.</span><span class="nx">isFunction</span><span class="p">(</span><span class="nx">value</span><span class="p">);</span>
+
+         <span class="k">return</span> <span class="k">this</span><span class="p">.</span><span class="nx">each</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">i</span><span class="p">)</span> <span class="p">{</span>
+            <span class="kd">var</span> <span class="nx">self</span> <span class="o">=</span> <span class="nx">jQuery</span><span class="p">(</span><span class="k">this</span><span class="p">),</span> <span class="nx">val</span><span class="p">;</span>
+
+            <span class="k">if</span> <span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">nodeType</span> <span class="o">!==</span> <span class="mi">1</span><span class="p">)</span> <span class="p">{</span>
+               <span class="k">return</span><span class="p">;</span>
+            <span class="p">}</span>
+
+            <span class="k">if</span> <span class="p">(</span><span class="nx">isFunction</span><span class="p">)</span> <span class="p">{</span>
+               <span class="nx">val</span> <span class="o">=</span> <span class="nx">value</span><span class="p">.</span><span class="nx">call</span><span class="p">(</span><span class="k">this</span><span class="p">,</span> <span class="nx">i</span><span class="p">,</span> <span class="nx">self</span><span class="p">.</span><span class="nx">val</span><span class="p">());</span>
+            <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+               <span class="nx">val</span> <span class="o">=</span> <span class="nx">value</span><span class="p">;</span>
+            <span class="p">}</span>
+
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-10">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-10">&#182;</a></div>
+      <p>Treat null/undefined as ""; convert numbers to string</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+            <span class="k">if</span> <span class="p">(</span><span class="nx">val</span> <span class="o">==</span> <span class="kc">null</span><span class="p">)</span> <span class="p">{</span>
+               <span class="nx">val</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">;</span>
+            <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="k">typeof</span> <span class="nx">val</span> <span class="o">===</span> <span class="s2">&quot;number&quot;</span><span class="p">)</span> <span class="p">{</span>
+               <span class="nx">val</span> <span class="o">+=</span> <span class="s2">&quot;&quot;</span><span class="p">;</span>
+            <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="nx">jQuery</span><span class="p">.</span><span class="nx">isArray</span><span class="p">(</span><span class="nx">val</span><span class="p">))</span> <span class="p">{</span>
+               <span class="nx">val</span> <span class="o">=</span> <span class="nx">jQuery</span><span class="p">.</span><span class="nx">map</span><span class="p">(</span><span class="nx">val</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">value</span><span class="p">)</span> <span class="p">{</span>
+                  <span class="k">return</span> <span class="nx">value</span> <span class="o">==</span> <span class="kc">null</span> <span class="o">?</span> <span class="s2">&quot;&quot;</span> <span class="o">:</span> <span class="nx">value</span> <span class="o">+</span> <span class="s2">&quot;&quot;</span><span class="p">;</span>
+               <span class="p">});</span>
+            <span class="p">}</span>
+
+            <span class="nx">hooks</span> <span class="o">=</span> <span class="nx">jQuery</span><span class="p">.</span><span class="nx">valHooks</span><span class="p">[</span> <span class="k">this</span><span class="p">.</span><span class="nx">type</span> <span class="p">]</span> <span class="o">||</span> <span class="nx">jQuery</span><span class="p">.</span><span class="nx">valHooks</span><span class="p">[</span> <span class="k">this</span><span class="p">.</span><span class="nx">nodeName</span><span class="p">.</span><span class="nx">toLowerCase</span><span class="p">()</span> <span class="p">];</span>
+
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-11">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-11">&#182;</a></div>
+      <p>If set returns undefined, fall back to normal setting</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+            <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">hooks</span> <span class="o">||</span> <span class="o">!</span><span class="p">(</span><span class="s2">&quot;set&quot;</span> <span class="k">in</span> <span class="nx">hooks</span><span class="p">)</span> <span class="o">||</span> <span class="nx">hooks</span><span class="p">.</span><span class="nx">set</span><span class="p">(</span><span class="k">this</span><span class="p">,</span> <span class="nx">val</span><span class="p">,</span> <span class="s2">&quot;value&quot;</span><span class="p">)</span> <span class="o">===</span> <span class="kc">undefined</span><span class="p">)</span> <span class="p">{</span>
+               <span class="k">this</span><span class="p">.</span><span class="nx">value</span> <span class="o">=</span> <span class="nx">val</span><span class="p">;</span>
+            <span class="p">}</span>
+         <span class="p">});</span>
+      <span class="p">}</span>
+   <span class="p">});</span>
+
+   <span class="nx">jQuery</span><span class="p">.</span><span class="nx">extend</span><span class="p">({</span>
+      <span class="nx">valHooks</span><span class="o">:</span><span class="p">{</span>
+         <span class="nx">option</span><span class="o">:</span><span class="p">{</span>
+            <span class="nx">get</span><span class="o">:</span><span class="kd">function</span><span class="p">(</span><span class="nx">elem</span><span class="p">)</span> <span class="p">{</span>
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-12">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-12">&#182;</a></div>
+      <p>attributes.value is undefined in Blackberry 4.7 but
+         uses .value. See #6932</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+               <span class="kd">var</span> <span class="nx">val</span> <span class="o">=</span> <span class="nx">elem</span><span class="p">.</span><span class="nx">attributes</span><span class="p">.</span><span class="nx">value</span><span class="p">;</span>
+               <span class="k">return</span> <span class="o">!</span><span class="nx">val</span> <span class="o">||</span> <span class="nx">val</span><span class="p">.</span><span class="nx">specified</span> <span class="o">?</span> <span class="nx">elem</span><span class="p">.</span><span class="nx">value</span> <span class="o">:</span> <span class="nx">elem</span><span class="p">.</span><span class="nx">text</span><span class="p">;</span>
+            <span class="p">}</span>
+         <span class="p">},</span>
+         <span class="nx">select</span><span class="o">:</span><span class="p">{</span>
+            <span class="nx">get</span><span class="o">:</span><span class="kd">function</span><span class="p">(</span><span class="nx">elem</span><span class="p">)</span> <span class="p">{</span>
+               <span class="kd">var</span> <span class="nx">value</span><span class="p">,</span> <span class="nx">i</span><span class="p">,</span> <span class="nx">max</span><span class="p">,</span> <span class="nx">option</span><span class="p">,</span>
+                     <span class="nx">index</span> <span class="o">=</span> <span class="nx">elem</span><span class="p">.</span><span class="nx">selectedIndex</span><span class="p">,</span>
+                     <span class="nx">values</span> <span class="o">=</span> <span class="p">[],</span>
+                     <span class="nx">options</span> <span class="o">=</span> <span class="nx">elem</span><span class="p">.</span><span class="nx">options</span><span class="p">,</span>
+                     <span class="nx">one</span> <span class="o">=</span> <span class="nx">elem</span><span class="p">.</span><span class="nx">type</span> <span class="o">===</span> <span class="s2">&quot;select-one&quot;</span><span class="p">;</span>
+
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-13">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-13">&#182;</a></div>
+      <p>Nothing was selected</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+               <span class="k">if</span> <span class="p">(</span><span class="nx">index</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+                  <span class="k">return</span> <span class="kc">null</span><span class="p">;</span>
+               <span class="p">}</span>
+
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-14">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-14">&#182;</a></div>
+      <p>Loop through all the selected options</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+               <span class="nx">i</span> <span class="o">=</span> <span class="nx">one</span> <span class="o">?</span> <span class="nx">index</span> <span class="o">:</span> <span class="mi">0</span><span class="p">;</span>
+               <span class="nx">max</span> <span class="o">=</span> <span class="nx">one</span> <span class="o">?</span> <span class="nx">index</span> <span class="o">+</span> <span class="mi">1</span> <span class="o">:</span> <span class="nx">options</span><span class="p">.</span><span class="nx">length</span><span class="p">;</span>
+               <span class="k">for</span> <span class="p">(;</span> <span class="nx">i</span> <span class="o">&lt;</span> <span class="nx">max</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+                  <span class="nx">option</span> <span class="o">=</span> <span class="nx">options</span><span class="p">[</span> <span class="nx">i</span> <span class="p">];</span>
+
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-15">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-15">&#182;</a></div>
+      <p>Don't return options that are disabled or in a disabled optgroup</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+                  <span class="k">if</span> <span class="p">(</span><span class="nx">option</span><span class="p">.</span><span class="nx">selected</span> <span class="o">&amp;&amp;</span> <span class="p">(</span><span class="nx">jQuery</span><span class="p">.</span><span class="nx">support</span><span class="p">.</span><span class="nx">optDisabled</span> <span class="o">?</span> <span class="o">!</span><span class="nx">option</span><span class="p">.</span><span class="nx">disabled</span> <span class="o">:</span> <span class="nx">option</span><span class="p">.</span><span class="nx">getAttribute</span><span class="p">(</span><span class="s2">&quot;disabled&quot;</span><span class="p">)</span> <span class="o">===</span> <span class="kc">null</span><span class="p">)</span> <span class="o">&amp;&amp;</span>
+                        <span class="p">(</span><span class="o">!</span><span class="nx">option</span><span class="p">.</span><span class="nx">parentNode</span><span class="p">.</span><span class="nx">disabled</span> <span class="o">||</span> <span class="o">!</span><span class="nx">jQuery</span><span class="p">.</span><span class="nx">nodeName</span><span class="p">(</span><span class="nx">option</span><span class="p">.</span><span class="nx">parentNode</span><span class="p">,</span> <span class="s2">&quot;optgroup&quot;</span><span class="p">)))</span> <span class="p">{</span>
+
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-16">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-16">&#182;</a></div>
+      <p>Get the specific value for the option</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+                     <span class="nx">value</span> <span class="o">=</span> <span class="nx">jQuery</span><span class="p">(</span><span class="nx">option</span><span class="p">).</span><span class="nx">val</span><span class="p">();</span>
+
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-17">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-17">&#182;</a></div>
+      <p>We don't need an array for one selects</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+                     <span class="k">if</span> <span class="p">(</span><span class="nx">one</span><span class="p">)</span> <span class="p">{</span>
+                        <span class="k">return</span> <span class="nx">value</span><span class="p">;</span>
+                     <span class="p">}</span>
+
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-18">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-18">&#182;</a></div>
+      <p>Multi-Selects return an array</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+                     <span class="nx">values</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="nx">value</span><span class="p">);</span>
+                  <span class="p">}</span>
+               <span class="p">}</span>
+
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-19">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-19">&#182;</a></div>
+      <p>Fixes Bug #2551 -- select.val() broken in IE after form.reset()</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+               <span class="k">if</span> <span class="p">(</span><span class="nx">one</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="nx">values</span><span class="p">.</span><span class="nx">length</span> <span class="o">&amp;&amp;</span> <span class="nx">options</span><span class="p">.</span><span class="nx">length</span><span class="p">)</span> <span class="p">{</span>
+                  <span class="k">return</span> <span class="nx">jQuery</span><span class="p">(</span><span class="nx">options</span><span class="p">[</span> <span class="nx">index</span> <span class="p">]).</span><span class="nx">val</span><span class="p">();</span>
+               <span class="p">}</span>
+
+               <span class="k">return</span> <span class="nx">values</span><span class="p">;</span>
+            <span class="p">},</span>
+
+            <span class="nx">set</span><span class="o">:</span><span class="kd">function</span><span class="p">(</span><span class="nx">elem</span><span class="p">,</span> <span class="nx">value</span><span class="p">)</span> <span class="p">{</span>
+               <span class="kd">var</span> <span class="nx">values</span> <span class="o">=</span> <span class="nx">jQuery</span><span class="p">.</span><span class="nx">makeArray</span><span class="p">(</span><span class="nx">value</span><span class="p">);</span>
+
+               <span class="nx">jQuery</span><span class="p">(</span><span class="nx">elem</span><span class="p">).</span><span class="nx">find</span><span class="p">(</span><span class="s2">&quot;option&quot;</span><span class="p">).</span><span class="nx">each</span><span class="p">(</span><span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+                  <span class="k">this</span><span class="p">.</span><span class="nx">selected</span> <span class="o">=</span> <span class="nx">jQuery</span><span class="p">.</span><span class="nx">inArray</span><span class="p">(</span><span class="nx">jQuery</span><span class="p">(</span><span class="k">this</span><span class="p">).</span><span class="nx">val</span><span class="p">(),</span> <span class="nx">values</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">;</span>
+               <span class="p">});</span>
+
+               <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">values</span><span class="p">.</span><span class="nx">length</span><span class="p">)</span> <span class="p">{</span>
+                  <span class="nx">elem</span><span class="p">.</span><span class="nx">selectedIndex</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">;</span>
+               <span class="p">}</span>
+               <span class="k">return</span> <span class="nx">values</span><span class="p">;</span>
+            <span class="p">}</span>
+         <span class="p">}</span>
+      <span class="p">},</span>
+
+      <span class="nx">attrFn</span><span class="o">:</span><span class="p">{</span>
+         <span class="nx">val</span><span class="o">:</span>   <span class="kc">true</span><span class="p">,</span>
+         <span class="nx">css</span><span class="o">:</span>   <span class="kc">true</span><span class="p">,</span>
+         <span class="nx">html</span><span class="o">:</span>  <span class="kc">true</span><span class="p">,</span>
+         <span class="nx">text</span><span class="o">:</span>  <span class="kc">true</span><span class="p">,</span>
+         <span class="nx">data</span><span class="o">:</span>  <span class="kc">true</span><span class="p">,</span>
+         <span class="nx">width</span><span class="o">:</span> <span class="kc">true</span><span class="p">,</span>
+         <span class="nx">height</span><span class="o">:</span><span class="kc">true</span><span class="p">,</span>
+         <span class="nx">offset</span><span class="o">:</span><span class="kc">true</span>
+      <span class="p">},</span>
+
+      <span class="nx">attr</span><span class="o">:</span><span class="kd">function</span><span class="p">(</span><span class="nx">elem</span><span class="p">,</span> <span class="nx">name</span><span class="p">,</span> <span class="nx">value</span><span class="p">,</span> <span class="nx">pass</span><span class="p">)</span> <span class="p">{</span>
+         <span class="kd">var</span> <span class="nx">ret</span><span class="p">,</span> <span class="nx">hooks</span><span class="p">,</span> <span class="nx">notxml</span><span class="p">,</span>
+               <span class="nx">nType</span> <span class="o">=</span> <span class="nx">elem</span><span class="p">.</span><span class="nx">nodeType</span><span class="p">;</span>
+
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-20">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-20">&#182;</a></div>
+      <p>don't get/set attributes on text, comment and attribute nodes</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+         <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">elem</span> <span class="o">||</span> <span class="nx">nType</span> <span class="o">===</span> <span class="mi">3</span> <span class="o">||</span> <span class="nx">nType</span> <span class="o">===</span> <span class="mi">8</span> <span class="o">||</span> <span class="nx">nType</span> <span class="o">===</span> <span class="mi">2</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">return</span><span class="p">;</span>
+         <span class="p">}</span>
+
+         <span class="k">if</span> <span class="p">(</span><span class="nx">pass</span> <span class="o">&amp;&amp;</span> <span class="nx">name</span> <span class="k">in</span> <span class="nx">jQuery</span><span class="p">.</span><span class="nx">attrFn</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="nx">jQuery</span><span class="p">(</span><span class="nx">elem</span><span class="p">)[</span> <span class="nx">name</span> <span class="p">](</span><span class="nx">value</span><span class="p">);</span>
+         <span class="p">}</span>
+
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-21">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-21">&#182;</a></div>
+      <p>Fallback to prop when attributes are not supported</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+         <span class="k">if</span> <span class="p">(</span><span class="k">typeof</span> <span class="nx">elem</span><span class="p">.</span><span class="nx">getAttribute</span> <span class="o">===</span> <span class="s2">&quot;undefined&quot;</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="nx">jQuery</span><span class="p">.</span><span class="nx">prop</span><span class="p">(</span><span class="nx">elem</span><span class="p">,</span> <span class="nx">name</span><span class="p">,</span> <span class="nx">value</span><span class="p">);</span>
+         <span class="p">}</span>
+
+         <span class="nx">notxml</span> <span class="o">=</span> <span class="nx">nType</span> <span class="o">!==</span> <span class="mi">1</span> <span class="o">||</span> <span class="o">!</span><span class="nx">jQuery</span><span class="p">.</span><span class="nx">isXMLDoc</span><span class="p">(</span><span class="nx">elem</span><span class="p">);</span>
+
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-22">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-22">&#182;</a></div>
+      <p>All attributes are lowercase
+         Grab necessary hook if one is defined</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+         <span class="k">if</span> <span class="p">(</span><span class="nx">notxml</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nx">name</span> <span class="o">=</span> <span class="nx">name</span><span class="p">.</span><span class="nx">toLowerCase</span><span class="p">();</span>
+            <span class="nx">hooks</span> <span class="o">=</span> <span class="nx">jQuery</span><span class="p">.</span><span class="nx">attrHooks</span><span class="p">[</span> <span class="nx">name</span> <span class="p">]</span> <span class="o">||</span> <span class="p">(</span> <span class="nx">rboolean</span><span class="p">.</span><span class="nx">test</span><span class="p">(</span><span class="nx">name</span><span class="p">)</span> <span class="o">?</span> <span class="nx">boolHook</span> <span class="o">:</span> <span class="nx">nodeHook</span> <span class="p">);</span>
+         <span class="p">}</span>
+
+         <span class="k">if</span> <span class="p">(</span><span class="nx">value</span> <span class="o">!==</span> <span class="kc">undefined</span><span class="p">)</span> <span class="p">{</span>
+
+            <span class="k">if</span> <span class="p">(</span><span class="nx">value</span> <span class="o">===</span> <span class="kc">null</span><span class="p">)</span> <span class="p">{</span>
+               <span class="nx">jQuery</span><span class="p">.</span><span class="nx">removeAttr</span><span class="p">(</span><span class="nx">elem</span><span class="p">,</span> <span class="nx">name</span><span class="p">);</span>
+               <span class="k">return</span><span class="p">;</span>
+
+            <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="nx">hooks</span> <span class="o">&amp;&amp;</span> <span class="s2">&quot;set&quot;</span> <span class="k">in</span> <span class="nx">hooks</span> <span class="o">&amp;&amp;</span> <span class="nx">notxml</span> <span class="o">&amp;&amp;</span> <span class="p">(</span><span class="nx">ret</span> <span class="o">=</span> <span class="nx">hooks</span><span class="p">.</span><span class="nx">set</span><span class="p">(</span><span class="nx">elem</span><span class="p">,</span> <span class="nx">value</span><span class="p">,</span> <span class="nx">name</span><span class="p">))</span> <span class="o">!==</span> <span class="kc">undefined</span><span class="p">)</span> <span class="p">{</span>
+               <span class="k">return</span> <span class="nx">ret</span><span class="p">;</span>
+
+            <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+               <span class="nx">elem</span><span class="p">.</span><span class="nx">setAttribute</span><span class="p">(</span><span class="nx">name</span><span class="p">,</span> <span class="s2">&quot;&quot;</span> <span class="o">+</span> <span class="nx">value</span><span class="p">);</span>
+               <span class="k">return</span> <span class="nx">value</span><span class="p">;</span>
+            <span class="p">}</span>
+
+         <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="nx">hooks</span> <span class="o">&amp;&amp;</span> <span class="s2">&quot;get&quot;</span> <span class="k">in</span> <span class="nx">hooks</span> <span class="o">&amp;&amp;</span> <span class="nx">notxml</span> <span class="o">&amp;&amp;</span> <span class="p">(</span><span class="nx">ret</span> <span class="o">=</span> <span class="nx">hooks</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="nx">elem</span><span class="p">,</span> <span class="nx">name</span><span class="p">))</span> <span class="o">!==</span> <span class="kc">null</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="nx">ret</span><span class="p">;</span>
+
+         <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+
+            <span class="nx">ret</span> <span class="o">=</span> <span class="nx">elem</span><span class="p">.</span><span class="nx">getAttribute</span><span class="p">(</span><span class="nx">name</span><span class="p">);</span>
+
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-23">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-23">&#182;</a></div>
+      <p>Non-existent attributes return null, we normalize to undefined</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+            <span class="k">return</span> <span class="nx">ret</span> <span class="o">===</span> <span class="kc">null</span> <span class="o">?</span>
+                  <span class="kc">undefined</span> <span class="o">:</span>
+                  <span class="nx">ret</span><span class="p">;</span>
+         <span class="p">}</span>
+      <span class="p">},</span>
+
+      <span class="nx">removeAttr</span><span class="o">:</span><span class="kd">function</span><span class="p">(</span><span class="nx">elem</span><span class="p">,</span> <span class="nx">value</span><span class="p">)</span> <span class="p">{</span>
+         <span class="kd">var</span> <span class="nx">propName</span><span class="p">,</span> <span class="nx">attrNames</span><span class="p">,</span> <span class="nx">name</span><span class="p">,</span> <span class="nx">l</span><span class="p">,</span> <span class="nx">isBool</span><span class="p">,</span>
+               <span class="nx">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+
+         <span class="k">if</span> <span class="p">(</span><span class="nx">value</span> <span class="o">&amp;&amp;</span> <span class="nx">elem</span><span class="p">.</span><span class="nx">nodeType</span> <span class="o">===</span> <span class="mi">1</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nx">attrNames</span> <span class="o">=</span> <span class="nx">value</span><span class="p">.</span><span class="nx">toLowerCase</span><span class="p">().</span><span class="nx">split</span><span class="p">(</span><span class="nx">rspace</span><span class="p">);</span>
+            <span class="nx">l</span> <span class="o">=</span> <span class="nx">attrNames</span><span class="p">.</span><span class="nx">length</span><span class="p">;</span>
+
+            <span class="k">for</span> <span class="p">(;</span> <span class="nx">i</span> <span class="o">&lt;</span> <span class="nx">l</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+               <span class="nx">name</span> <span class="o">=</span> <span class="nx">attrNames</span><span class="p">[</span> <span class="nx">i</span> <span class="p">];</span>
+
+               <span class="k">if</span> <span class="p">(</span><span class="nx">name</span><span class="p">)</span> <span class="p">{</span>
+                  <span class="nx">propName</span> <span class="o">=</span> <span class="nx">jQuery</span><span class="p">.</span><span class="nx">propFix</span><span class="p">[</span> <span class="nx">name</span> <span class="p">]</span> <span class="o">||</span> <span class="nx">name</span><span class="p">;</span>
+                  <span class="nx">isBool</span> <span class="o">=</span> <span class="nx">rboolean</span><span class="p">.</span><span class="nx">test</span><span class="p">(</span><span class="nx">name</span><span class="p">);</span>
+
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-24">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-24">&#182;</a></div>
+      <p>See #9699 for explanation of this approach (setting first, then removal)
+         Do not do this for boolean attributes (see #10870)</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+                  <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">isBool</span><span class="p">)</span> <span class="p">{</span>
+                     <span class="nx">jQuery</span><span class="p">.</span><span class="nx">attr</span><span class="p">(</span><span class="nx">elem</span><span class="p">,</span> <span class="nx">name</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">);</span>
+                  <span class="p">}</span>
+                  <span class="nx">elem</span><span class="p">.</span><span class="nx">removeAttribute</span><span class="p">(</span><span class="nx">getSetAttribute</span> <span class="o">?</span> <span class="nx">name</span> <span class="o">:</span> <span class="nx">propName</span><span class="p">);</span>
+
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-25">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-25">&#182;</a></div>
+      <p>Set corresponding property to false for boolean attributes</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+                  <span class="k">if</span> <span class="p">(</span><span class="nx">isBool</span> <span class="o">&amp;&amp;</span> <span class="nx">propName</span> <span class="k">in</span> <span class="nx">elem</span><span class="p">)</span> <span class="p">{</span>
+                     <span class="nx">elem</span><span class="p">[</span> <span class="nx">propName</span> <span class="p">]</span> <span class="o">=</span> <span class="kc">false</span><span class="p">;</span>
+                  <span class="p">}</span>
+               <span class="p">}</span>
+            <span class="p">}</span>
+         <span class="p">}</span>
+      <span class="p">},</span>
+
+      <span class="nx">attrHooks</span><span class="o">:</span><span class="p">{</span>
+         <span class="nx">type</span><span class="o">:</span> <span class="p">{</span>
+            <span class="nx">set</span><span class="o">:</span><span class="kd">function</span><span class="p">(</span><span class="nx">elem</span><span class="p">,</span> <span class="nx">value</span><span class="p">)</span> <span class="p">{</span>
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-26">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-26">&#182;</a></div>
+      <p>We can't allow the type property to be changed (since it causes problems in IE)</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+               <span class="k">if</span> <span class="p">(</span><span class="nx">rtype</span><span class="p">.</span><span class="nx">test</span><span class="p">(</span><span class="nx">elem</span><span class="p">.</span><span class="nx">nodeName</span><span class="p">)</span> <span class="o">&amp;&amp;</span> <span class="nx">elem</span><span class="p">.</span><span class="nx">parentNode</span><span class="p">)</span> <span class="p">{</span>
+                  <span class="nx">jQuery</span><span class="p">.</span><span class="nx">error</span><span class="p">(</span><span class="s2">&quot;type property can&#39;t be changed&quot;</span><span class="p">);</span>
+               <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">jQuery</span><span class="p">.</span><span class="nx">support</span><span class="p">.</span><span class="nx">radioValue</span> <span class="o">&amp;&amp;</span> <span class="nx">value</span> <span class="o">===</span> <span class="s2">&quot;radio&quot;</span> <span class="o">&amp;&amp;</span> <span class="nx">jQuery</span><span class="p">.</span><span class="nx">nodeName</span><span class="p">(</span><span class="nx">elem</span><span class="p">,</span> <span class="s2">&quot;input&quot;</span><span class="p">))</span> <span class="p">{</span>
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-27">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-27">&#182;</a></div>
+      <p>Setting the type on a radio button after the value resets the value in IE6-9
+         Reset value to it's default in case type is set after value
+         This is for element creation</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+                  <span class="kd">var</span> <span class="nx">val</span> <span class="o">=</span> <span class="nx">elem</span><span class="p">.</span><span class="nx">value</span><span class="p">;</span>
+                  <span class="nx">elem</span><span class="p">.</span><span class="nx">setAttribute</span><span class="p">(</span><span class="s2">&quot;type&quot;</span><span class="p">,</span> <span class="nx">value</span><span class="p">);</span>
+                  <span class="k">if</span> <span class="p">(</span><span class="nx">val</span><span class="p">)</span> <span class="p">{</span>
+                     <span class="nx">elem</span><span class="p">.</span><span class="nx">value</span> <span class="o">=</span> <span class="nx">val</span><span class="p">;</span>
+                  <span class="p">}</span>
+                  <span class="k">return</span> <span class="nx">value</span><span class="p">;</span>
+               <span class="p">}</span>
+            <span class="p">}</span>
+         <span class="p">},</span>
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-28">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-28">&#182;</a></div>
+      <p>Use the value property for back compat
+         Use the nodeHook for button elements in IE6/7 (#1954)</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+         <span class="nx">value</span><span class="o">:</span><span class="p">{</span>
+            <span class="nx">get</span><span class="o">:</span><span class="kd">function</span><span class="p">(</span><span class="nx">elem</span><span class="p">,</span> <span class="nx">name</span><span class="p">)</span> <span class="p">{</span>
+               <span class="k">if</span> <span class="p">(</span><span class="nx">nodeHook</span> <span class="o">&amp;&amp;</span> <span class="nx">jQuery</span><span class="p">.</span><span class="nx">nodeName</span><span class="p">(</span><span class="nx">elem</span><span class="p">,</span> <span class="s2">&quot;button&quot;</span><span class="p">))</span> <span class="p">{</span>
+                  <span class="k">return</span> <span class="nx">nodeHook</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="nx">elem</span><span class="p">,</span> <span class="nx">name</span><span class="p">);</span>
+               <span class="p">}</span>
+               <span class="k">return</span> <span class="nx">name</span> <span class="k">in</span> <span class="nx">elem</span> <span class="o">?</span>
+                     <span class="nx">elem</span><span class="p">.</span><span class="nx">value</span> <span class="o">:</span>
+                     <span class="kc">null</span><span class="p">;</span>
+            <span class="p">},</span>
+            <span class="nx">set</span><span class="o">:</span><span class="kd">function</span><span class="p">(</span><span class="nx">elem</span><span class="p">,</span> <span class="nx">value</span><span class="p">,</span> <span class="nx">name</span><span class="p">)</span> <span class="p">{</span>
+               <span class="k">if</span> <span class="p">(</span><span class="nx">nodeHook</span> <span class="o">&amp;&amp;</span> <span class="nx">jQuery</span><span class="p">.</span><span class="nx">nodeName</span><span class="p">(</span><span class="nx">elem</span><span class="p">,</span> <span class="s2">&quot;button&quot;</span><span class="p">))</span> <span class="p">{</span>
+                  <span class="k">return</span> <span class="nx">nodeHook</span><span class="p">.</span><span class="nx">set</span><span class="p">(</span><span class="nx">elem</span><span class="p">,</span> <span class="nx">value</span><span class="p">,</span> <span class="nx">name</span><span class="p">);</span>
+               <span class="p">}</span>
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-29">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-29">&#182;</a></div>
+      <p>Does not return so that setAttribute is also used</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+               <span class="nx">elem</span><span class="p">.</span><span class="nx">value</span> <span class="o">=</span> <span class="nx">value</span><span class="p">;</span>
+            <span class="p">}</span>
+         <span class="p">}</span>
+      <span class="p">},</span>
+
+      <span class="nx">propFix</span><span class="o">:</span><span class="p">{</span>
+         <span class="nx">tabindex</span><span class="o">:</span>       <span class="s2">&quot;tabIndex&quot;</span><span class="p">,</span>
+         <span class="nx">readonly</span><span class="o">:</span>       <span class="s2">&quot;readOnly&quot;</span><span class="p">,</span>
+         <span class="s2">&quot;for&quot;</span><span class="o">:</span>          <span class="s2">&quot;htmlFor&quot;</span><span class="p">,</span>
+         <span class="s2">&quot;class&quot;</span><span class="o">:</span>        <span class="s2">&quot;className&quot;</span><span class="p">,</span>
+         <span class="nx">maxlength</span><span class="o">:</span>      <span class="s2">&quot;maxLength&quot;</span><span class="p">,</span>
+         <span class="nx">cellspacing</span><span class="o">:</span>    <span class="s2">&quot;cellSpacing&quot;</span><span class="p">,</span>
+         <span class="nx">cellpadding</span><span class="o">:</span>    <span class="s2">&quot;cellPadding&quot;</span><span class="p">,</span>
+         <span class="nx">rowspan</span><span class="o">:</span>        <span class="s2">&quot;rowSpan&quot;</span><span class="p">,</span>
+         <span class="nx">colspan</span><span class="o">:</span>        <span class="s2">&quot;colSpan&quot;</span><span class="p">,</span>
+         <span class="nx">usemap</span><span class="o">:</span>         <span class="s2">&quot;useMap&quot;</span><span class="p">,</span>
+         <span class="nx">frameborder</span><span class="o">:</span>    <span class="s2">&quot;frameBorder&quot;</span><span class="p">,</span>
+         <span class="nx">contenteditable</span><span class="o">:</span><span class="s2">&quot;contentEditable&quot;</span>
+      <span class="p">},</span>
+
+      <span class="nx">prop</span><span class="o">:</span><span class="kd">function</span><span class="p">(</span><span class="nx">elem</span><span class="p">,</span> <span class="nx">name</span><span class="p">,</span> <span class="nx">value</span><span class="p">)</span> <span class="p">{</span>
+         <span class="kd">var</span> <span class="nx">ret</span><span class="p">,</span> <span class="nx">hooks</span><span class="p">,</span> <span class="nx">notxml</span><span class="p">,</span>
+               <span class="nx">nType</span> <span class="o">=</span> <span class="nx">elem</span><span class="p">.</span><span class="nx">nodeType</span><span class="p">;</span>
+
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-30">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-30">&#182;</a></div>
+      <p>don't get/set properties on text, comment and attribute nodes</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+         <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">elem</span> <span class="o">||</span> <span class="nx">nType</span> <span class="o">===</span> <span class="mi">3</span> <span class="o">||</span> <span class="nx">nType</span> <span class="o">===</span> <span class="mi">8</span> <span class="o">||</span> <span class="nx">nType</span> <span class="o">===</span> <span class="mi">2</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">return</span><span class="p">;</span>
+         <span class="p">}</span>
+
+         <span class="nx">notxml</span> <span class="o">=</span> <span class="nx">nType</span> <span class="o">!==</span> <span class="mi">1</span> <span class="o">||</span> <span class="o">!</span><span class="nx">jQuery</span><span class="p">.</span><span class="nx">isXMLDoc</span><span class="p">(</span><span class="nx">elem</span><span class="p">);</span>
+
+         <span class="k">if</span> <span class="p">(</span><span class="nx">notxml</span><span class="p">)</span> <span class="p">{</span>
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-31">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-31">&#182;</a></div>
+      <p>Fix name and attach hooks</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+            <span class="nx">name</span> <span class="o">=</span> <span class="nx">jQuery</span><span class="p">.</span><span class="nx">propFix</span><span class="p">[</span> <span class="nx">name</span> <span class="p">]</span> <span class="o">||</span> <span class="nx">name</span><span class="p">;</span>
+            <span class="nx">hooks</span> <span class="o">=</span> <span class="nx">jQuery</span><span class="p">.</span><span class="nx">propHooks</span><span class="p">[</span> <span class="nx">name</span> <span class="p">];</span>
+         <span class="p">}</span>
+
+         <span class="k">if</span> <span class="p">(</span><span class="nx">value</span> <span class="o">!==</span> <span class="kc">undefined</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nx">hooks</span> <span class="o">&amp;&amp;</span> <span class="s2">&quot;set&quot;</span> <span class="k">in</span> <span class="nx">hooks</span> <span class="o">&amp;&amp;</span> <span class="p">(</span><span class="nx">ret</span> <span class="o">=</span> <span class="nx">hooks</span><span class="p">.</span><span class="nx">set</span><span class="p">(</span><span class="nx">elem</span><span class="p">,</span> <span class="nx">value</span><span class="p">,</span> <span class="nx">name</span><span class="p">))</span> <span class="o">!==</span> <span class="kc">undefined</span><span class="p">)</span> <span class="p">{</span>
+               <span class="k">return</span> <span class="nx">ret</span><span class="p">;</span>
+
+            <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+               <span class="k">return</span> <span class="p">(</span> <span class="nx">elem</span><span class="p">[</span> <span class="nx">name</span> <span class="p">]</span> <span class="o">=</span> <span class="nx">value</span> <span class="p">);</span>
+            <span class="p">}</span>
+
+         <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nx">hooks</span> <span class="o">&amp;&amp;</span> <span class="s2">&quot;get&quot;</span> <span class="k">in</span> <span class="nx">hooks</span> <span class="o">&amp;&amp;</span> <span class="p">(</span><span class="nx">ret</span> <span class="o">=</span> <span class="nx">hooks</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="nx">elem</span><span class="p">,</span> <span class="nx">name</span><span class="p">))</span> <span class="o">!==</span> <span class="kc">null</span><span class="p">)</span> <span class="p">{</span>
+               <span class="k">return</span> <span class="nx">ret</span><span class="p">;</span>
+
+            <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+               <span class="k">return</span> <span class="nx">elem</span><span class="p">[</span> <span class="nx">name</span> <span class="p">];</span>
+            <span class="p">}</span>
+         <span class="p">}</span>
+      <span class="p">},</span>
+
+      <span class="nx">propHooks</span><span class="o">:</span><span class="p">{</span>
+         <span class="nx">tabIndex</span><span class="o">:</span><span class="p">{</span>
+            <span class="nx">get</span><span class="o">:</span><span class="kd">function</span><span class="p">(</span><span class="nx">elem</span><span class="p">)</span> <span class="p">{</span>
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-32">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-32">&#182;</a></div>
+      <p>elem.tabIndex doesn't always return the correct value when it hasn't been explicitly set
+         http://fluidproject.org/blog/2008/01/09/getting-setting-and-removing-tabindex-values-with-javascript/</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+               <span class="kd">var</span> <span class="nx">attributeNode</span> <span class="o">=</span> <span class="nx">elem</span><span class="p">.</span><span class="nx">getAttributeNode</span><span class="p">(</span><span class="s2">&quot;tabindex&quot;</span><span class="p">);</span>
+
+               <span class="k">return</span> <span class="nx">attributeNode</span> <span class="o">&amp;&amp;</span> <span class="nx">attributeNode</span><span class="p">.</span><span class="nx">specified</span> <span class="o">?</span>
+                     <span class="nb">parseInt</span><span class="p">(</span><span class="nx">attributeNode</span><span class="p">.</span><span class="nx">value</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span> <span class="o">:</span>
+                     <span class="nx">rfocusable</span><span class="p">.</span><span class="nx">test</span><span class="p">(</span><span class="nx">elem</span><span class="p">.</span><span class="nx">nodeName</span><span class="p">)</span> <span class="o">||</span> <span class="nx">rclickable</span><span class="p">.</span><span class="nx">test</span><span class="p">(</span><span class="nx">elem</span><span class="p">.</span><span class="nx">nodeName</span><span class="p">)</span> <span class="o">&amp;&amp;</span> <span class="nx">elem</span><span class="p">.</span><span class="nx">href</span> <span class="o">?</span>
+                           <span class="mi">0</span> <span class="o">:</span>
+                           <span class="kc">undefined</span><span class="p">;</span>
+            <span class="p">}</span>
+         <span class="p">}</span>
+      <span class="p">}</span>
+   <span class="p">});</span>
+
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-33">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-33">&#182;</a></div>
+      <p>Add the tabIndex propHook to attrHooks for back-compat (different case is intentional)</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+   <span class="nx">jQuery</span><span class="p">.</span><span class="nx">attrHooks</span><span class="p">.</span><span class="nx">tabindex</span> <span class="o">=</span> <span class="nx">jQuery</span><span class="p">.</span><span class="nx">propHooks</span><span class="p">.</span><span class="nx">tabIndex</span><span class="p">;</span>
+
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-34">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-34">&#182;</a></div>
+      <p>Hook for boolean attributes</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+   <span class="nx">boolHook</span> <span class="o">=</span> <span class="p">{</span>
+      <span class="nx">get</span><span class="o">:</span><span class="kd">function</span><span class="p">(</span><span class="nx">elem</span><span class="p">,</span> <span class="nx">name</span><span class="p">)</span> <span class="p">{</span>
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-35">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-35">&#182;</a></div>
+      <p>Align boolean attributes with corresponding properties
+         Fall back to attribute presence where some booleans are not supported</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+         <span class="kd">var</span> <span class="nx">attrNode</span><span class="p">,</span>
+               <span class="nx">property</span> <span class="o">=</span> <span class="nx">jQuery</span><span class="p">.</span><span class="nx">prop</span><span class="p">(</span><span class="nx">elem</span><span class="p">,</span> <span class="nx">name</span><span class="p">);</span>
+         <span class="k">return</span> <span class="nx">property</span> <span class="o">===</span> <span class="kc">true</span> <span class="o">||</span> <span class="k">typeof</span> <span class="nx">property</span> <span class="o">!==</span> <span class="s2">&quot;boolean&quot;</span> <span class="o">&amp;&amp;</span> <span class="p">(</span> <span class="nx">attrNode</span> <span class="o">=</span> <span class="nx">elem</span><span class="p">.</span><span class="nx">getAttributeNode</span><span class="p">(</span><span class="nx">name</span><span class="p">)</span> <span class="p">)</span> <span class="o">&amp;&amp;</span> <span class="nx">attrNode</span><span class="p">.</span><span class="nx">nodeValue</span> <span class="o">!==</span> <span class="kc">false</span> <span class="o">?</span>
+               <span class="nx">name</span><span class="p">.</span><span class="nx">toLowerCase</span><span class="p">()</span> <span class="o">:</span>
+               <span class="kc">undefined</span><span class="p">;</span>
+      <span class="p">},</span>
+      <span class="nx">set</span><span class="o">:</span><span class="kd">function</span><span class="p">(</span><span class="nx">elem</span><span class="p">,</span> <span class="nx">value</span><span class="p">,</span> <span class="nx">name</span><span class="p">)</span> <span class="p">{</span>
+         <span class="kd">var</span> <span class="nx">propName</span><span class="p">;</span>
+         <span class="k">if</span> <span class="p">(</span><span class="nx">value</span> <span class="o">===</span> <span class="kc">false</span><span class="p">)</span> <span class="p">{</span>
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-36">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-36">&#182;</a></div>
+      <p>Remove boolean attributes when set to false</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+            <span class="nx">jQuery</span><span class="p">.</span><span class="nx">removeAttr</span><span class="p">(</span><span class="nx">elem</span><span class="p">,</span> <span class="nx">name</span><span class="p">);</span>
+         <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-37">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-37">&#182;</a></div>
+      <p>value is true since we know at this point it's type boolean and not false
+         Set boolean attributes to the same name and set the DOM property</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+            <span class="nx">propName</span> <span class="o">=</span> <span class="nx">jQuery</span><span class="p">.</span><span class="nx">propFix</span><span class="p">[</span> <span class="nx">name</span> <span class="p">]</span> <span class="o">||</span> <span class="nx">name</span><span class="p">;</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nx">propName</span> <span class="k">in</span> <span class="nx">elem</span><span class="p">)</span> <span class="p">{</span>
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-38">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-38">&#182;</a></div>
+      <p>Only set the IDL specifically if it already exists on the element</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+               <span class="nx">elem</span><span class="p">[</span> <span class="nx">propName</span> <span class="p">]</span> <span class="o">=</span> <span class="kc">true</span><span class="p">;</span>
+            <span class="p">}</span>
+
+            <span class="nx">elem</span><span class="p">.</span><span class="nx">setAttribute</span><span class="p">(</span><span class="nx">name</span><span class="p">,</span> <span class="nx">name</span><span class="p">.</span><span class="nx">toLowerCase</span><span class="p">());</span>
+         <span class="p">}</span>
+         <span class="k">return</span> <span class="nx">name</span><span class="p">;</span>
+      <span class="p">}</span>
+   <span class="p">};</span>
+
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-39">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-39">&#182;</a></div>
+      <p>IE6/7 do not support getting/setting some attributes with get/setAttribute</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+   <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">getSetAttribute</span><span class="p">)</span> <span class="p">{</span>
+
+      <span class="nx">fixSpecified</span> <span class="o">=</span> <span class="p">{</span>
+         <span class="nx">name</span><span class="o">:</span>  <span class="kc">true</span><span class="p">,</span>
+         <span class="nx">id</span><span class="o">:</span>    <span class="kc">true</span><span class="p">,</span>
+         <span class="nx">coords</span><span class="o">:</span><span class="kc">true</span>
+      <span class="p">};</span>
+
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-40">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-40">&#182;</a></div>
+      <p>Use this for any attribute in IE6/7
+         This fixes almost every IE6/7 issue</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+      <span class="nx">nodeHook</span> <span class="o">=</span> <span class="nx">jQuery</span><span class="p">.</span><span class="nx">valHooks</span><span class="p">.</span><span class="nx">button</span> <span class="o">=</span> <span class="p">{</span>
+         <span class="nx">get</span><span class="o">:</span><span class="kd">function</span><span class="p">(</span><span class="nx">elem</span><span class="p">,</span> <span class="nx">name</span><span class="p">)</span> <span class="p">{</span>
+            <span class="kd">var</span> <span class="nx">ret</span><span class="p">;</span>
+            <span class="nx">ret</span> <span class="o">=</span> <span class="nx">elem</span><span class="p">.</span><span class="nx">getAttributeNode</span><span class="p">(</span><span class="nx">name</span><span class="p">);</span>
+            <span class="k">return</span> <span class="nx">ret</span> <span class="o">&amp;&amp;</span> <span class="p">(</span> <span class="nx">fixSpecified</span><span class="p">[</span> <span class="nx">name</span> <span class="p">]</span> <span class="o">?</span> <span class="nx">ret</span><span class="p">.</span><span class="nx">nodeValue</span> <span class="o">!==</span> <span class="s2">&quot;&quot;</span> <span class="o">:</span> <span class="nx">ret</span><span class="p">.</span><span class="nx">specified</span> <span class="p">)</span> <span class="o">?</span>
+                  <span class="nx">ret</span><span class="p">.</span><span class="nx">nodeValue</span> <span class="o">:</span>
+                  <span class="kc">undefined</span><span class="p">;</span>
+         <span class="p">},</span>
+         <span class="nx">set</span><span class="o">:</span><span class="kd">function</span><span class="p">(</span><span class="nx">elem</span><span class="p">,</span> <span class="nx">value</span><span class="p">,</span> <span class="nx">name</span><span class="p">)</span> <span class="p">{</span>
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-41">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-41">&#182;</a></div>
+      <p>Set the existing or create a new attribute node</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+            <span class="kd">var</span> <span class="nx">ret</span> <span class="o">=</span> <span class="nx">elem</span><span class="p">.</span><span class="nx">getAttributeNode</span><span class="p">(</span><span class="nx">name</span><span class="p">);</span>
+            <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">ret</span><span class="p">)</span> <span class="p">{</span>
+               <span class="nx">ret</span> <span class="o">=</span> <span class="nb">document</span><span class="p">.</span><span class="nx">createAttribute</span><span class="p">(</span><span class="nx">name</span><span class="p">);</span>
+               <span class="nx">elem</span><span class="p">.</span><span class="nx">setAttributeNode</span><span class="p">(</span><span class="nx">ret</span><span class="p">);</span>
+            <span class="p">}</span>
+            <span class="k">return</span> <span class="p">(</span> <span class="nx">ret</span><span class="p">.</span><span class="nx">nodeValue</span> <span class="o">=</span> <span class="nx">value</span> <span class="o">+</span> <span class="s2">&quot;&quot;</span> <span class="p">);</span>
+         <span class="p">}</span>
+      <span class="p">};</span>
+
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-42">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-42">&#182;</a></div>
+      <p>Apply the nodeHook to tabindex</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+      <span class="nx">jQuery</span><span class="p">.</span><span class="nx">attrHooks</span><span class="p">.</span><span class="nx">tabindex</span><span class="p">.</span><span class="nx">set</span> <span class="o">=</span> <span class="nx">nodeHook</span><span class="p">.</span><span class="nx">set</span><span class="p">;</span>
+
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-43">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-43">&#182;</a></div>
+      <p>Set width and height to auto instead of 0 on empty string( Bug #8150 )
+         This is for removals</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+      <span class="nx">jQuery</span><span class="p">.</span><span class="nx">each</span><span class="p">([</span> <span class="s2">&quot;width&quot;</span><span class="p">,</span> <span class="s2">&quot;height&quot;</span> <span class="p">],</span> <span class="kd">function</span><span class="p">(</span><span class="nx">i</span><span class="p">,</span> <span class="nx">name</span><span class="p">)</span> <span class="p">{</span>
+         <span class="nx">jQuery</span><span class="p">.</span><span class="nx">attrHooks</span><span class="p">[</span> <span class="nx">name</span> <span class="p">]</span> <span class="o">=</span> <span class="nx">jQuery</span><span class="p">.</span><span class="nx">extend</span><span class="p">(</span><span class="nx">jQuery</span><span class="p">.</span><span class="nx">attrHooks</span><span class="p">[</span> <span class="nx">name</span> <span class="p">],</span> <span class="p">{</span>
+            <span class="nx">set</span><span class="o">:</span><span class="kd">function</span><span class="p">(</span><span class="nx">elem</span><span class="p">,</span> <span class="nx">value</span><span class="p">)</span> <span class="p">{</span>
+               <span class="k">if</span> <span class="p">(</span><span class="nx">value</span> <span class="o">===</span> <span class="s2">&quot;&quot;</span><span class="p">)</span> <span class="p">{</span>
+                  <span class="nx">elem</span><span class="p">.</span><span class="nx">setAttribute</span><span class="p">(</span><span class="nx">name</span><span class="p">,</span> <span class="s2">&quot;auto&quot;</span><span class="p">);</span>
+                  <span class="k">return</span> <span class="nx">value</span><span class="p">;</span>
+               <span class="p">}</span>
+            <span class="p">}</span>
+         <span class="p">});</span>
+      <span class="p">});</span>
+
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-44">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-44">&#182;</a></div>
+      <p>Set contenteditable to false on removals(#10429)
+         Setting to empty string throws an error as an invalid value</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+      <span class="nx">jQuery</span><span class="p">.</span><span class="nx">attrHooks</span><span class="p">.</span><span class="nx">contenteditable</span> <span class="o">=</span> <span class="p">{</span>
+         <span class="nx">get</span><span class="o">:</span><span class="nx">nodeHook</span><span class="p">.</span><span class="nx">get</span><span class="p">,</span>
+         <span class="nx">set</span><span class="o">:</span><span class="kd">function</span><span class="p">(</span><span class="nx">elem</span><span class="p">,</span> <span class="nx">value</span><span class="p">,</span> <span class="nx">name</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nx">value</span> <span class="o">===</span> <span class="s2">&quot;&quot;</span><span class="p">)</span> <span class="p">{</span>
+               <span class="nx">value</span> <span class="o">=</span> <span class="s2">&quot;false&quot;</span><span class="p">;</span>
+            <span class="p">}</span>
+            <span class="nx">nodeHook</span><span class="p">.</span><span class="nx">set</span><span class="p">(</span><span class="nx">elem</span><span class="p">,</span> <span class="nx">value</span><span class="p">,</span> <span class="nx">name</span><span class="p">);</span>
+         <span class="p">}</span>
+      <span class="p">};</span>
+   <span class="p">}</span>
+
+
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-45">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-45">&#182;</a></div>
+      <p>Some attributes require a special call on IE</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+   <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">jQuery</span><span class="p">.</span><span class="nx">support</span><span class="p">.</span><span class="nx">hrefNormalized</span><span class="p">)</span> <span class="p">{</span>
+      <span class="nx">jQuery</span><span class="p">.</span><span class="nx">each</span><span class="p">([</span> <span class="s2">&quot;href&quot;</span><span class="p">,</span> <span class="s2">&quot;src&quot;</span><span class="p">,</span> <span class="s2">&quot;width&quot;</span><span class="p">,</span> <span class="s2">&quot;height&quot;</span> <span class="p">],</span> <span class="kd">function</span><span class="p">(</span><span class="nx">i</span><span class="p">,</span> <span class="nx">name</span><span class="p">)</span> <span class="p">{</span>
+         <span class="nx">jQuery</span><span class="p">.</span><span class="nx">attrHooks</span><span class="p">[</span> <span class="nx">name</span> <span class="p">]</span> <span class="o">=</span> <span class="nx">jQuery</span><span class="p">.</span><span class="nx">extend</span><span class="p">(</span><span class="nx">jQuery</span><span class="p">.</span><span class="nx">attrHooks</span><span class="p">[</span> <span class="nx">name</span> <span class="p">],</span> <span class="p">{</span>
+            <span class="nx">get</span><span class="o">:</span><span class="kd">function</span><span class="p">(</span><span class="nx">elem</span><span class="p">)</span> <span class="p">{</span>
+               <span class="kd">var</span> <span class="nx">ret</span> <span class="o">=</span> <span class="nx">elem</span><span class="p">.</span><span class="nx">getAttribute</span><span class="p">(</span><span class="nx">name</span><span class="p">,</span> <span class="mi">2</span><span class="p">);</span>
+               <span class="k">return</span> <span class="nx">ret</span> <span class="o">===</span> <span class="kc">null</span> <span class="o">?</span> <span class="kc">undefined</span> <span class="o">:</span> <span class="nx">ret</span><span class="p">;</span>
+            <span class="p">}</span>
+         <span class="p">});</span>
+      <span class="p">});</span>
+   <span class="p">}</span>
+
+   <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">jQuery</span><span class="p">.</span><span class="nx">support</span><span class="p">.</span><span class="nx">style</span><span class="p">)</span> <span class="p">{</span>
+      <span class="nx">jQuery</span><span class="p">.</span><span class="nx">attrHooks</span><span class="p">.</span><span class="nx">style</span> <span class="o">=</span> <span class="p">{</span>
+         <span class="nx">get</span><span class="o">:</span><span class="kd">function</span><span class="p">(</span><span class="nx">elem</span><span class="p">)</span> <span class="p">{</span>
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-46">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-46">&#182;</a></div>
+      <p>Return undefined in the case of empty string
+         Normalize to lowercase since IE uppercases css property names</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+            <span class="k">return</span> <span class="nx">elem</span><span class="p">.</span><span class="nx">style</span><span class="p">.</span><span class="nx">cssText</span><span class="p">.</span><span class="nx">toLowerCase</span><span class="p">()</span> <span class="o">||</span> <span class="kc">undefined</span><span class="p">;</span>
+         <span class="p">},</span>
+         <span class="nx">set</span><span class="o">:</span><span class="kd">function</span><span class="p">(</span><span class="nx">elem</span><span class="p">,</span> <span class="nx">value</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="p">(</span> <span class="nx">elem</span><span class="p">.</span><span class="nx">style</span><span class="p">.</span><span class="nx">cssText</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span> <span class="o">+</span> <span class="nx">value</span> <span class="p">);</span>
+         <span class="p">}</span>
+      <span class="p">};</span>
+   <span class="p">}</span>
+
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-47">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-47">&#182;</a></div>
+      <p>Safari mis-reports the default selected property of an option
+         Accessing the parent's selectedIndex property fixes it</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+   <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">jQuery</span><span class="p">.</span><span class="nx">support</span><span class="p">.</span><span class="nx">optSelected</span><span class="p">)</span> <span class="p">{</span>
+      <span class="nx">jQuery</span><span class="p">.</span><span class="nx">propHooks</span><span class="p">.</span><span class="nx">selected</span> <span class="o">=</span> <span class="nx">jQuery</span><span class="p">.</span><span class="nx">extend</span><span class="p">(</span><span class="nx">jQuery</span><span class="p">.</span><span class="nx">propHooks</span><span class="p">.</span><span class="nx">selected</span><span class="p">,</span> <span class="p">{</span>
+         <span class="nx">get</span><span class="o">:</span><span class="kd">function</span><span class="p">(</span><span class="nx">elem</span><span class="p">)</span> <span class="p">{</span>
+            <span class="kd">var</span> <span class="nx">parent</span> <span class="o">=</span> <span class="nx">elem</span><span class="p">.</span><span class="nx">parentNode</span><span class="p">;</span>
+
+            <span class="k">if</span> <span class="p">(</span><span class="nx">parent</span><span class="p">)</span> <span class="p">{</span>
+               <span class="nx">parent</span><span class="p">.</span><span class="nx">selectedIndex</span><span class="p">;</span>
+
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-48">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-48">&#182;</a></div>
+      <p>Make sure that it also works with optgroups, see #5701</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+               <span class="k">if</span> <span class="p">(</span><span class="nx">parent</span><span class="p">.</span><span class="nx">parentNode</span><span class="p">)</span> <span class="p">{</span>
+                  <span class="nx">parent</span><span class="p">.</span><span class="nx">parentNode</span><span class="p">.</span><span class="nx">selectedIndex</span><span class="p">;</span>
+               <span class="p">}</span>
+            <span class="p">}</span>
+            <span class="k">return</span> <span class="kc">null</span><span class="p">;</span>
+         <span class="p">}</span>
+      <span class="p">});</span>
+   <span class="p">}</span>
+
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-49">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-49">&#182;</a></div>
+      <p>IE6/7 call enctype encoding</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+   <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">jQuery</span><span class="p">.</span><span class="nx">support</span><span class="p">.</span><span class="nx">enctype</span><span class="p">)</span> <span class="p">{</span>
+      <span class="nx">jQuery</span><span class="p">.</span><span class="nx">propFix</span><span class="p">.</span><span class="nx">enctype</span> <span class="o">=</span> <span class="s2">&quot;encoding&quot;</span><span class="p">;</span>
+   <span class="p">}</span>
+
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-50">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-50">&#182;</a></div>
+      <p>Radios and checkboxes getter/setter</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+   <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">jQuery</span><span class="p">.</span><span class="nx">support</span><span class="p">.</span><span class="nx">checkOn</span><span class="p">)</span> <span class="p">{</span>
+      <span class="nx">jQuery</span><span class="p">.</span><span class="nx">each</span><span class="p">([</span> <span class="s2">&quot;radio&quot;</span><span class="p">,</span> <span class="s2">&quot;checkbox&quot;</span> <span class="p">],</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+         <span class="nx">jQuery</span><span class="p">.</span><span class="nx">valHooks</span><span class="p">[</span> <span class="k">this</span> <span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="nx">get</span><span class="o">:</span><span class="kd">function</span><span class="p">(</span><span class="nx">elem</span><span class="p">)</span> <span class="p">{</span>
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-51">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-51">&#182;</a></div>
+      <p>Handle the case where in Webkit "" is returned instead of "on" if a value isn't specified</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+               <span class="k">return</span> <span class="nx">elem</span><span class="p">.</span><span class="nx">getAttribute</span><span class="p">(</span><span class="s2">&quot;value&quot;</span><span class="p">)</span> <span class="o">===</span> <span class="kc">null</span> <span class="o">?</span> <span class="s2">&quot;on&quot;</span> <span class="o">:</span> <span class="nx">elem</span><span class="p">.</span><span class="nx">value</span><span class="p">;</span>
+            <span class="p">}</span>
+         <span class="p">};</span>
+      <span class="p">});</span>
+   <span class="p">}</span>
+   <span class="nx">jQuery</span><span class="p">.</span><span class="nx">each</span><span class="p">([</span> <span class="s2">&quot;radio&quot;</span><span class="p">,</span> <span class="s2">&quot;checkbox&quot;</span> <span class="p">],</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+      <span class="nx">jQuery</span><span class="p">.</span><span class="nx">valHooks</span><span class="p">[</span> <span class="k">this</span> <span class="p">]</span> <span class="o">=</span> <span class="nx">jQuery</span><span class="p">.</span><span class="nx">extend</span><span class="p">(</span><span class="nx">jQuery</span><span class="p">.</span><span class="nx">valHooks</span><span class="p">[</span> <span class="k">this</span> <span class="p">],</span> <span class="p">{</span>
+         <span class="nx">set</span><span class="o">:</span><span class="kd">function</span><span class="p">(</span><span class="nx">elem</span><span class="p">,</span> <span class="nx">value</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nx">jQuery</span><span class="p">.</span><span class="nx">isArray</span><span class="p">(</span><span class="nx">value</span><span class="p">))</span> <span class="p">{</span>
+               <span class="k">return</span> <span class="p">(</span> <span class="nx">elem</span><span class="p">.</span><span class="nx">checked</span> <span class="o">=</span> <span class="nx">jQuery</span><span class="p">.</span><span class="nx">inArray</span><span class="p">(</span><span class="nx">jQuery</span><span class="p">(</span><span class="nx">elem</span><span class="p">).</span><span class="nx">val</span><span class="p">(),</span> <span class="nx">value</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">0</span> <span class="p">);</span>
+            <span class="p">}</span>
+         <span class="p">}</span>
+      <span class="p">});</span>
+   <span class="p">});</span>
+
+<span class="p">})(</span><span class="nx">jQuery</span><span class="p">);</span>
+
+</pre>
+      </div>
+   </td>
+</tr>
+</tbody>
+</table>
+</div>
+</body>
+</html>

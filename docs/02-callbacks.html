@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html>
+<head><title>02-callbacks.js</title>
+   <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+   <link rel="stylesheet" media="all" href="docco.css"/>
+</head>
+<body>
+<div id="container">
+<div id="background"></div>
+<table cellpadding="0" cellspacing="0">
+<thead>
+<tr>
+   <th class="docs"><h1> 02-callbacks.js </h1></th>
+   <th class="code"></th>
+</tr>
+</thead>
+<tbody>
+<tr id="section-1">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-1">&#182;</a></div>
+      <p><strong>jQuery Annotated Source</strong>.</p>
+
+      <p><a href="/jquery-annotated-source/">Home</a> | <a href="01-core.html">Previous Chapter</a> |
+         <a href="03-deferred.html">Next Chapter</a></p></td>
+   <td class="code">
+      <div class="highlight">
+         <pre></pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-2">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-2">&#182;</a></div>
+      <h2>Chapter 2: Callbacks</h2></td>
+   <td class="code">
+      <div class="highlight"><pre>
+
+<span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">jQuery</span><span class="p">)</span> <span class="p">{</span>
+
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-3">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-3">&#182;</a></div>
+      <p>String to Object flags format cache</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+   <span class="kd">var</span> <span class="nx">flagsCache</span> <span class="o">=</span> <span class="p">{};</span>
+
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-4">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-4">&#182;</a></div>
+      <p>Convert String-formatted flags into Object-formatted ones and store in cache</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+   <span class="kd">function</span> <span class="nx">createFlags</span><span class="p">(</span><span class="nx">flags</span><span class="p">)</span> <span class="p">{</span>
+      <span class="kd">var</span> <span class="nx">object</span> <span class="o">=</span> <span class="nx">flagsCache</span><span class="p">[</span> <span class="nx">flags</span> <span class="p">]</span> <span class="o">=</span> <span class="p">{},</span>
+            <span class="nx">i</span><span class="p">,</span> <span class="nx">length</span><span class="p">;</span>
+      <span class="nx">flags</span> <span class="o">=</span> <span class="nx">flags</span><span class="p">.</span><span class="nx">split</span><span class="p">(</span><span class="sr">/\s+/</span><span class="p">);</span>
+      <span class="k">for</span> <span class="p">(</span><span class="nx">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="nx">length</span> <span class="o">=</span> <span class="nx">flags</span><span class="p">.</span><span class="nx">length</span><span class="p">;</span> <span class="nx">i</span> <span class="o">&lt;</span> <span class="nx">length</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+         <span class="nx">object</span><span class="p">[</span> <span class="nx">flags</span><span class="p">[</span><span class="nx">i</span><span class="p">]</span> <span class="p">]</span> <span class="o">=</span> <span class="kc">true</span><span class="p">;</span>
+      <span class="p">}</span>
+      <span class="k">return</span> <span class="nx">object</span><span class="p">;</span>
+   <span class="p">}</span>
+
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-5">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-5">&#182;</a></div>
+      <p><strong>Create a callback list using the following parameters:</strong></p>
+
+      <p>flags: an optional list of space-separated flags that will change how the callback list behaves</p>
+
+      <p>By default a callback list will act like an event callback list and can be "fired" multiple times.</p>
+
+      <p><strong>Possible flags:</strong></p>
+
+      <p>once: will ensure the callback list can only be fired once (like a Deferred)</p>
+
+      <p>memory: will keep track of previous values and will call any callback added after the list has been fired right
+         away with the latest "memorized" values (like a Deferred)</p>
+
+      <p>unique: will ensure a callback can only be added once (no duplicate in the list)</p>
+
+      <p>stopOnFalse: interrupt callings when a callback returns false</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+
+   <span class="nx">jQuery</span><span class="p">.</span><span class="nx">Callbacks</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">flags</span><span class="p">)</span> <span class="p">{</span>
+
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-6">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-6">&#182;</a></div>
+      <p>Convert flags from String-formatted to Object-formatted
+         (we check in cache first)</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+      <span class="nx">flags</span> <span class="o">=</span> <span class="nx">flags</span> <span class="o">?</span> <span class="p">(</span> <span class="nx">flagsCache</span><span class="p">[</span> <span class="nx">flags</span> <span class="p">]</span> <span class="o">||</span> <span class="nx">createFlags</span><span class="p">(</span><span class="nx">flags</span><span class="p">)</span> <span class="p">)</span> <span class="o">:</span> <span class="p">{};</span>
+
+      <span class="kd">var</span> <span class="c1">// Actual callback list</span>
+            <span class="nx">list</span> <span class="o">=</span> <span class="p">[],</span>
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-7">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-7">&#182;</a></div>
+      <p>Stack of fire calls for repeatable lists</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+            <span class="nx">stack</span> <span class="o">=</span> <span class="p">[],</span>
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-8">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-8">&#182;</a></div>
+      <p>Last fire value (for non-forgettable lists)</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+            <span class="nx">memory</span><span class="p">,</span>
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-9">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-9">&#182;</a></div>
+      <p>Flag to know if list was already fired</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+            <span class="nx">fired</span><span class="p">,</span>
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-10">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-10">&#182;</a></div>
+      <p>Flag to know if list is currently firing</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+            <span class="nx">firing</span><span class="p">,</span>
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-11">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-11">&#182;</a></div>
+      <p>First callback to fire (used internally by add and fireWith)</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+            <span class="nx">firingStart</span><span class="p">,</span>
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-12">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-12">&#182;</a></div>
+      <p>End of the loop when firing</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+            <span class="nx">firingLength</span><span class="p">,</span>
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-13">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-13">&#182;</a></div>
+      <p>Index of currently firing callback (modified by remove if needed)</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+            <span class="nx">firingIndex</span><span class="p">,</span>
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-14">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-14">&#182;</a></div>
+      <p>Add one or several callbacks to the list</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+            <span class="nx">add</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">args</span><span class="p">)</span> <span class="p">{</span>
+               <span class="kd">var</span> <span class="nx">i</span><span class="p">,</span>
+                     <span class="nx">length</span><span class="p">,</span>
+                     <span class="nx">elem</span><span class="p">,</span>
+                     <span class="nx">type</span><span class="p">,</span>
+                     <span class="nx">actual</span><span class="p">;</span>
+               <span class="k">for</span> <span class="p">(</span><span class="nx">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="nx">length</span> <span class="o">=</span> <span class="nx">args</span><span class="p">.</span><span class="nx">length</span><span class="p">;</span> <span class="nx">i</span> <span class="o">&lt;</span> <span class="nx">length</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+                  <span class="nx">elem</span> <span class="o">=</span> <span class="nx">args</span><span class="p">[</span> <span class="nx">i</span> <span class="p">];</span>
+                  <span class="nx">type</span> <span class="o">=</span> <span class="nx">jQuery</span><span class="p">.</span><span class="nx">type</span><span class="p">(</span><span class="nx">elem</span><span class="p">);</span>
+                  <span class="k">if</span> <span class="p">(</span><span class="nx">type</span> <span class="o">===</span> <span class="s2">&quot;array&quot;</span><span class="p">)</span> <span class="p">{</span>
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-15">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-15">&#182;</a></div>
+      <p>Inspect recursively</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+                     <span class="nx">add</span><span class="p">(</span><span class="nx">elem</span><span class="p">);</span>
+                  <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="nx">type</span> <span class="o">===</span> <span class="s2">&quot;function&quot;</span><span class="p">)</span> <span class="p">{</span>
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-16">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-16">&#182;</a></div>
+      <p>Add if not in unique mode and callback is not in</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+                     <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">flags</span><span class="p">.</span><span class="nx">unique</span> <span class="o">||</span> <span class="o">!</span><span class="nx">self</span><span class="p">.</span><span class="nx">has</span><span class="p">(</span><span class="nx">elem</span><span class="p">))</span> <span class="p">{</span>
+                        <span class="nx">list</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="nx">elem</span><span class="p">);</span>
+                     <span class="p">}</span>
+                  <span class="p">}</span>
+               <span class="p">}</span>
+            <span class="p">},</span>
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-17">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-17">&#182;</a></div>
+      <p>Fire callbacks</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+            <span class="nx">fire</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">context</span><span class="p">,</span> <span class="nx">args</span><span class="p">)</span> <span class="p">{</span>
+               <span class="nx">args</span> <span class="o">=</span> <span class="nx">args</span> <span class="o">||</span> <span class="p">[];</span>
+               <span class="nx">memory</span> <span class="o">=</span> <span class="o">!</span><span class="nx">flags</span><span class="p">.</span><span class="nx">memory</span> <span class="o">||</span> <span class="p">[</span> <span class="nx">context</span><span class="p">,</span> <span class="nx">args</span> <span class="p">];</span>
+               <span class="nx">fired</span> <span class="o">=</span> <span class="kc">true</span><span class="p">;</span>
+               <span class="nx">firing</span> <span class="o">=</span> <span class="kc">true</span><span class="p">;</span>
+               <span class="nx">firingIndex</span> <span class="o">=</span> <span class="nx">firingStart</span> <span class="o">||</span> <span class="mi">0</span><span class="p">;</span>
+               <span class="nx">firingStart</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+               <span class="nx">firingLength</span> <span class="o">=</span> <span class="nx">list</span><span class="p">.</span><span class="nx">length</span><span class="p">;</span>
+               <span class="k">for</span> <span class="p">(;</span> <span class="nx">list</span> <span class="o">&amp;&amp;</span> <span class="nx">firingIndex</span> <span class="o">&lt;</span> <span class="nx">firingLength</span><span class="p">;</span> <span class="nx">firingIndex</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+                  <span class="k">if</span> <span class="p">(</span><span class="nx">list</span><span class="p">[</span> <span class="nx">firingIndex</span> <span class="p">].</span><span class="nx">apply</span><span class="p">(</span><span class="nx">context</span><span class="p">,</span> <span class="nx">args</span><span class="p">)</span> <span class="o">===</span> <span class="kc">false</span> <span class="o">&amp;&amp;</span> <span class="nx">flags</span><span class="p">.</span><span class="nx">stopOnFalse</span><span class="p">)</span> <span class="p">{</span>
+                     <span class="nx">memory</span> <span class="o">=</span> <span class="kc">true</span><span class="p">;</span> <span class="c1">// Mark as halted</span>
+                     <span class="k">break</span><span class="p">;</span>
+                  <span class="p">}</span>
+               <span class="p">}</span>
+               <span class="nx">firing</span> <span class="o">=</span> <span class="kc">false</span><span class="p">;</span>
+               <span class="k">if</span> <span class="p">(</span><span class="nx">list</span><span class="p">)</span> <span class="p">{</span>
+                  <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">flags</span><span class="p">.</span><span class="nx">once</span><span class="p">)</span> <span class="p">{</span>
+                     <span class="k">if</span> <span class="p">(</span><span class="nx">stack</span> <span class="o">&amp;&amp;</span> <span class="nx">stack</span><span class="p">.</span><span class="nx">length</span><span class="p">)</span> <span class="p">{</span>
+                        <span class="nx">memory</span> <span class="o">=</span> <span class="nx">stack</span><span class="p">.</span><span class="nx">shift</span><span class="p">();</span>
+                        <span class="nx">self</span><span class="p">.</span><span class="nx">fireWith</span><span class="p">(</span><span class="nx">memory</span><span class="p">[</span> <span class="mi">0</span> <span class="p">],</span> <span class="nx">memory</span><span class="p">[</span> <span class="mi">1</span> <span class="p">]);</span>
+                     <span class="p">}</span>
+                  <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="nx">memory</span> <span class="o">===</span> <span class="kc">true</span><span class="p">)</span> <span class="p">{</span>
+                     <span class="nx">self</span><span class="p">.</span><span class="nx">disable</span><span class="p">();</span>
+                  <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+                     <span class="nx">list</span> <span class="o">=</span> <span class="p">[];</span>
+                  <span class="p">}</span>
+               <span class="p">}</span>
+            <span class="p">},</span>
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-18">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-18">&#182;</a></div>
+      <p>Actual Callbacks object</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+            <span class="nx">self</span> <span class="o">=</span> <span class="p">{</span>
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-19">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-19">&#182;</a></div>
+      <p>Add a callback or a collection of callbacks to the list</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+               <span class="nx">add</span><span class="o">:</span>     <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+                  <span class="k">if</span> <span class="p">(</span><span class="nx">list</span><span class="p">)</span> <span class="p">{</span>
+                     <span class="kd">var</span> <span class="nx">length</span> <span class="o">=</span> <span class="nx">list</span><span class="p">.</span><span class="nx">length</span><span class="p">;</span>
+                     <span class="nx">add</span><span class="p">(</span><span class="nx">arguments</span><span class="p">);</span>
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-20">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-20">&#182;</a></div>
+      <p>Do we need to add the callbacks to the
+         current firing batch?</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+                     <span class="k">if</span> <span class="p">(</span><span class="nx">firing</span><span class="p">)</span> <span class="p">{</span>
+                        <span class="nx">firingLength</span> <span class="o">=</span> <span class="nx">list</span><span class="p">.</span><span class="nx">length</span><span class="p">;</span>
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-21">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-21">&#182;</a></div>
+      <p>With memory, if we're not firing then
+         we should call right away, unless previous
+         firing was halted (stopOnFalse)</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+                     <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="nx">memory</span> <span class="o">&amp;&amp;</span> <span class="nx">memory</span> <span class="o">!==</span> <span class="kc">true</span><span class="p">)</span> <span class="p">{</span>
+                        <span class="nx">firingStart</span> <span class="o">=</span> <span class="nx">length</span><span class="p">;</span>
+                        <span class="nx">fire</span><span class="p">(</span><span class="nx">memory</span><span class="p">[</span> <span class="mi">0</span> <span class="p">],</span> <span class="nx">memory</span><span class="p">[</span> <span class="mi">1</span> <span class="p">]);</span>
+                     <span class="p">}</span>
+                  <span class="p">}</span>
+                  <span class="k">return</span> <span class="k">this</span><span class="p">;</span>
+               <span class="p">},</span>
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-22">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-22">&#182;</a></div>
+      <p>Remove a callback from the list</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+               <span class="nx">remove</span><span class="o">:</span>  <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+                  <span class="k">if</span> <span class="p">(</span><span class="nx">list</span><span class="p">)</span> <span class="p">{</span>
+                     <span class="kd">var</span> <span class="nx">args</span> <span class="o">=</span> <span class="nx">arguments</span><span class="p">,</span>
+                           <span class="nx">argIndex</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+                           <span class="nx">argLength</span> <span class="o">=</span> <span class="nx">args</span><span class="p">.</span><span class="nx">length</span><span class="p">;</span>
+                     <span class="k">for</span> <span class="p">(;</span> <span class="nx">argIndex</span> <span class="o">&lt;</span> <span class="nx">argLength</span><span class="p">;</span> <span class="nx">argIndex</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+                        <span class="k">for</span> <span class="p">(</span><span class="kd">var</span> <span class="nx">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">i</span> <span class="o">&lt;</span> <span class="nx">list</span><span class="p">.</span><span class="nx">length</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+                           <span class="k">if</span> <span class="p">(</span><span class="nx">args</span><span class="p">[</span> <span class="nx">argIndex</span> <span class="p">]</span> <span class="o">===</span> <span class="nx">list</span><span class="p">[</span> <span class="nx">i</span> <span class="p">])</span> <span class="p">{</span>
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-23">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-23">&#182;</a></div>
+      <p>Handle firingIndex and firingLength</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+                              <span class="k">if</span> <span class="p">(</span><span class="nx">firing</span><span class="p">)</span> <span class="p">{</span>
+                                 <span class="k">if</span> <span class="p">(</span><span class="nx">i</span> <span class="o">&lt;=</span> <span class="nx">firingLength</span><span class="p">)</span> <span class="p">{</span>
+                                    <span class="nx">firingLength</span><span class="o">--</span><span class="p">;</span>
+                                    <span class="k">if</span> <span class="p">(</span><span class="nx">i</span> <span class="o">&lt;=</span> <span class="nx">firingIndex</span><span class="p">)</span> <span class="p">{</span>
+                                       <span class="nx">firingIndex</span><span class="o">--</span><span class="p">;</span>
+                                    <span class="p">}</span>
+                                 <span class="p">}</span>
+                              <span class="p">}</span>
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-24">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-24">&#182;</a></div>
+      <p>Remove the element</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+                              <span class="nx">list</span><span class="p">.</span><span class="nx">splice</span><span class="p">(</span><span class="nx">i</span><span class="o">--</span><span class="p">,</span> <span class="mi">1</span><span class="p">);</span>
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-25">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-25">&#182;</a></div>
+      <p>If we have some unicity property then
+         we only need to do this once</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+                              <span class="k">if</span> <span class="p">(</span><span class="nx">flags</span><span class="p">.</span><span class="nx">unique</span><span class="p">)</span> <span class="p">{</span>
+                                 <span class="k">break</span><span class="p">;</span>
+                              <span class="p">}</span>
+                           <span class="p">}</span>
+                        <span class="p">}</span>
+                     <span class="p">}</span>
+                  <span class="p">}</span>
+                  <span class="k">return</span> <span class="k">this</span><span class="p">;</span>
+               <span class="p">},</span>
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-26">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-26">&#182;</a></div>
+      <p>Control if a given callback is in the list</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+               <span class="nx">has</span><span class="o">:</span>     <span class="kd">function</span><span class="p">(</span><span class="nx">fn</span><span class="p">)</span> <span class="p">{</span>
+                  <span class="k">if</span> <span class="p">(</span><span class="nx">list</span><span class="p">)</span> <span class="p">{</span>
+                     <span class="kd">var</span> <span class="nx">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+                           <span class="nx">length</span> <span class="o">=</span> <span class="nx">list</span><span class="p">.</span><span class="nx">length</span><span class="p">;</span>
+                     <span class="k">for</span> <span class="p">(;</span> <span class="nx">i</span> <span class="o">&lt;</span> <span class="nx">length</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+                        <span class="k">if</span> <span class="p">(</span><span class="nx">fn</span> <span class="o">===</span> <span class="nx">list</span><span class="p">[</span> <span class="nx">i</span> <span class="p">])</span> <span class="p">{</span>
+                           <span class="k">return</span> <span class="kc">true</span><span class="p">;</span>
+                        <span class="p">}</span>
+                     <span class="p">}</span>
+                  <span class="p">}</span>
+                  <span class="k">return</span> <span class="kc">false</span><span class="p">;</span>
+               <span class="p">},</span>
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-27">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-27">&#182;</a></div>
+      <p>Remove all callbacks from the list</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+               <span class="nx">empty</span><span class="o">:</span>   <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+                  <span class="nx">list</span> <span class="o">=</span> <span class="p">[];</span>
+                  <span class="k">return</span> <span class="k">this</span><span class="p">;</span>
+               <span class="p">},</span>
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-28">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-28">&#182;</a></div>
+      <p>Have the list do nothing anymore</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+               <span class="nx">disable</span><span class="o">:</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+                  <span class="nx">list</span> <span class="o">=</span> <span class="nx">stack</span> <span class="o">=</span> <span class="nx">memory</span> <span class="o">=</span> <span class="kc">undefined</span><span class="p">;</span>
+                  <span class="k">return</span> <span class="k">this</span><span class="p">;</span>
+               <span class="p">},</span>
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-29">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-29">&#182;</a></div>
+      <p>Is it disabled?</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+               <span class="nx">disabled</span><span class="o">:</span><span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+                  <span class="k">return</span> <span class="o">!</span><span class="nx">list</span><span class="p">;</span>
+               <span class="p">},</span>
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-30">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-30">&#182;</a></div>
+      <p>Lock the list in its current state</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+               <span class="nx">lock</span><span class="o">:</span>    <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+                  <span class="nx">stack</span> <span class="o">=</span> <span class="kc">undefined</span><span class="p">;</span>
+                  <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">memory</span> <span class="o">||</span> <span class="nx">memory</span> <span class="o">===</span> <span class="kc">true</span><span class="p">)</span> <span class="p">{</span>
+                     <span class="nx">self</span><span class="p">.</span><span class="nx">disable</span><span class="p">();</span>
+                  <span class="p">}</span>
+                  <span class="k">return</span> <span class="k">this</span><span class="p">;</span>
+               <span class="p">},</span>
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-31">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-31">&#182;</a></div>
+      <p>Is it locked?</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+               <span class="nx">locked</span><span class="o">:</span>  <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+                  <span class="k">return</span> <span class="o">!</span><span class="nx">stack</span><span class="p">;</span>
+               <span class="p">},</span>
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-32">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-32">&#182;</a></div>
+      <p>Call all callbacks with the given context and arguments</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+               <span class="nx">fireWith</span><span class="o">:</span><span class="kd">function</span><span class="p">(</span><span class="nx">context</span><span class="p">,</span> <span class="nx">args</span><span class="p">)</span> <span class="p">{</span>
+                  <span class="k">if</span> <span class="p">(</span><span class="nx">stack</span><span class="p">)</span> <span class="p">{</span>
+                     <span class="k">if</span> <span class="p">(</span><span class="nx">firing</span><span class="p">)</span> <span class="p">{</span>
+                        <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">flags</span><span class="p">.</span><span class="nx">once</span><span class="p">)</span> <span class="p">{</span>
+                           <span class="nx">stack</span><span class="p">.</span><span class="nx">push</span><span class="p">([</span> <span class="nx">context</span><span class="p">,</span> <span class="nx">args</span> <span class="p">]);</span>
+                        <span class="p">}</span>
+                     <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="p">(</span> <span class="nx">flags</span><span class="p">.</span><span class="nx">once</span> <span class="o">&amp;&amp;</span> <span class="nx">memory</span> <span class="p">))</span> <span class="p">{</span>
+                        <span class="nx">fire</span><span class="p">(</span><span class="nx">context</span><span class="p">,</span> <span class="nx">args</span><span class="p">);</span>
+                     <span class="p">}</span>
+                  <span class="p">}</span>
+                  <span class="k">return</span> <span class="k">this</span><span class="p">;</span>
+               <span class="p">},</span>
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-33">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-33">&#182;</a></div>
+      <p>Call all the callbacks with the given arguments</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+               <span class="nx">fire</span><span class="o">:</span>    <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+                  <span class="nx">self</span><span class="p">.</span><span class="nx">fireWith</span><span class="p">(</span><span class="k">this</span><span class="p">,</span> <span class="nx">arguments</span><span class="p">);</span>
+                  <span class="k">return</span> <span class="k">this</span><span class="p">;</span>
+               <span class="p">},</span>
+
+</pre>
+      </div>
+   </td>
+</tr>
+<tr id="section-34">
+   <td class="docs">
+      <div class="pilwrap"><a class="pilcrow" href="#section-34">&#182;</a></div>
+      <p>To know if the callbacks have already been called at least once</p></td>
+   <td class="code">
+      <div class="highlight"><pre>
+               <span class="nx">fired</span><span class="o">:</span>   <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+                  <span class="k">return</span> <span class="o">!!</span><span class="nx">fired</span><span class="p">;</span>
+               <span class="p">}</span>
+            <span class="p">};</span>
+
+      <span class="k">return</span> <span class="nx">self</span><span class="p">;</span>
+   <span class="p">};</span>
+
+<span class="p">})(</span><span class="nx">jQuery</span><span class="p">);</span>
+
+</pre>
+      </div>
+   </td>
+</tr>
+</tbody>
+</table>
+</div>
+</body>
+</html>
