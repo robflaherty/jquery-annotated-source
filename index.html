@@ -18,10 +18,10 @@
     a { color: #5e9cd3; text-decoration: none; }
     a:hover { color: #2567a1; }
   </style>
-  
+
 <script type="text/javascript" src="http://use.typekit.com/hrj4atz.js"></script>
 <script type="text/javascript">try{Typekit.load();}catch(e){}</script>
-       
+
 <script>
   var _gaq = _gaq || [];
   _gaq.push(['_setAccount', 'UA-1413210-11']);
@@ -32,19 +32,45 @@
     ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
     var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
   })();
-</script>  
-  
+</script>
+
+<style>
+.header {
+  transition: all 0.5s ease;
+  text-decoration: none;
+}
+
+.header:hover{
+  color: tomato;
+}
+
+.foot {
+  background-color: #1e1e1e;
+  color: white;
+  text-align: center;
+  opacity: 0.9;
+  text-decoration: none;
+  transition: all 0.5s ease;
+}
+
+.foot:hover{
+  color:skyblue;
+}
+</style>
+
 </head>
 
 <body>
   <a href="http://github.com/robflaherty/jquery-annotated-source"><img style="position: absolute; top: 0; right: 0; border: 0;" src="http://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub" /></a>
 
   <div id="container">
-    <h1>jQuery Annotated Source</h1>
-    
+    <a class="header" href="index.html" target="_self">
+      <h1 class="header">jQuery Annotated Source</h1>
+    </a>
+
     <p>Read the jQuery source like a book like a boss.</p>
     <p>Make it better by <a href="http://github.com/robflaherty/jquery-annotated-source">contributing on GitHub</a>.</p>
-    
+
     <h2>Chapters</h2>
     <ul>
       <li><a href="/jquery-annotated-source/docs/01-core.html">Core</a></li>
@@ -63,8 +89,10 @@
       <li><a href="/jquery-annotated-source/docs/14-offset.html">Offset</a></li>
       <li><a href="/jquery-annotated-source/docs/15-dimensions.html">Dimensions</a></li>
     </ul>
-    <p>~<a href="http://www.twitter.com/robflaherty">@robflaherty</a></p>
+    <footer class="foot">
+      <p>~<a class="foot" href="http://www.twitter.com/robflaherty">@robflaherty</a></p>
+    </footer>
 
-  </div>  
+  </div>
 </body>
 </html>
