@@ -1,5 +1,5 @@
 # jQuery Annotated Source
-*Please Note: This project was released in 2011 when 1.6.2 was the latest jQuery version. It is no longer maintained.*
+**Please Note: This project was released in 2011 when 1.6.2 was the latest jQuery version. It is no longer maintained.**
 
 Jumping in to the source code of a popular library and seeing **how the sausage is made** is a great way to level-up on your journey to JavaScript badassery. But reading through 10K lines of highly refined code can be a daunting task.
 
